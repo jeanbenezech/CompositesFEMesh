@@ -11,15 +11,9 @@ class sub():
 		self.Ori = 0
 
 
-	# def init(self, x, y, o):
-	# 	self.L = x
-	# 	self.T = y
-	# 	self.Ori = o
-	# 	self.shape= 'notdefined' # 'curved' or 'straight'
-
-
 class parameters():
 	def __init__(self,
+				 Shape=None,
 				 resin=None,
 				 CZ=None,
 				 recombine=None,
@@ -51,8 +45,6 @@ class parameters():
 		read_parameters(self)
 
 		self.refOriPoint= []
-
-		# TODO : make a function for that
 		self.substr = []
 
 		substr = sub()
@@ -67,29 +59,20 @@ class parameters():
 		substr2.Ori = 90 * np.pi/180.
 		substr2.shape='curved'
 
-		# substr3 = sub()
-		# substr3.L = 2*self.X
-		# substr3.T = 0
-		# substr3.Ori = -90 * np.pi/180.
-		# substr3.shape='curved'
-
 		substr4 = sub()
 		substr4.L = self.X
 		substr4.T = 0
 		substr4.Ori = 0 * np.pi/180.
 		substr4.shape='straight'
 
-
-		self.substr.append(substr)
-		self.substr.append(substr2)
-		self.substr.append(substr4)
-		self.substr.append(substr2)
-		self.substr.append(substr)
-		# self.substr.append(substr3)
-		# self.substr.append(substr4)
-		# self.substr.append(substr3)
-		# self.substr.append(substr)
-
+		if self.Shape==0: # Csection
+			self.substr.append(substr)
+			self.substr.append(substr2)
+			self.substr.append(substr4)
+			self.substr.append(substr2)
+			self.substr.append(substr)
+		elif self.Shape==1: # Flat laminate
+			self.substr.append(substr4)
 
 		if self.resin:
 			if self.CZ: # 1 ply = 1 comp layer + 2 resin elastic layer + 1 CZ (-3 at the end because no resin at the top)
@@ -126,6 +109,7 @@ def read():
 def read_parameters(param):
 	dico = read()
 
+	param.Shape = int(dico['Shape'])
 	param.resin = int(dico['Resin_betw_plies'])
 	param.recombine = int(dico['recombine'])
 	param.CZ = int(dico['cohezive_elements'])

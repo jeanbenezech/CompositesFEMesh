@@ -34,7 +34,7 @@ class GridTransformation{
 	void initialise(Mesh& m, Parameters& param);
 	void ramp(Vector3f& point);
 	void setWrinklesParameter(Parameters& param);
-	void Y_alligned_wrinkles(Vector3f& point);
+	void OneDir_wrinkles(Vector3f& point, int dim);
 	void wrinkles(Vector3f& point);
 
 	private:
@@ -149,21 +149,18 @@ void GridTransformation::setWrinklesParameter(Parameters& param) {
 	damping = {param.wrinkleDamp(0)/ref_lenght, param.wrinkleDamp(1)/(ymax-ymin), param.wrinkleDamp(2)/(zmax-zmin)}; // the more damping is big the small is the wrinkle in that direction
 }
 
-void GridTransformation::Y_alligned_wrinkles(Vector3f& point){
+void GridTransformation::OneDir_wrinkles(Vector3f& point, int dim){
 
 	Vector3f init = point;
 
-	/* Define defect function */
-	// if(init[2] < defect_location[2]-2.0*defect_size || \
-	//    init[2] > defect_location[2]+2.0*defect_size ) {   //Place defect only in a section of the part
-	// 	return;
-	// }
+	float xref = defect_location[0];
+	float yref = defect_location[1];
+	float zref = defect_location[2] + (ymid - init[1])*tan(wrinkleOri*M_PI/180.0);
 
-	point[0] += defect_size \
-		* 1./pow(cosh(damping[0] * M_PI * (init[0] - defect_location[0])),2.)\
-		* 1./pow(cosh(damping[1] * M_PI * (init[1] - defect_location[1])),2.)\
-		* 1./pow(cosh(damping[2] * M_PI * (init[2] - defect_location[2])),2.);
-
+	point[dim] += defect_size \
+		* 1./pow(cosh(damping[0] * M_PI * (init[0] - xref)),2.)\
+		* 1./pow(cosh(damping[1] * M_PI * (init[1] - yref)),2.)\
+		* 1./pow(cosh(damping[2] * M_PI * (init[2] - zref)),2.);
 
 	return;
 }
@@ -302,12 +299,37 @@ void localCoorSyst(Mesh& m) {
 	}
 }
 
+void globalCoorSyst(Mesh& m) {
+
+	for(auto& elem : m.Elements){
+		for(int l=0; l < elem.nb; ++l) {
+
+			elem.U(0,l) = 1.0;
+			elem.U(1,l) = 0.0;
+			elem.U(2,l) = 0.0;
+
+			elem.V(0,l) = 0.0;
+			elem.V(1,l) = 1.0;
+			elem.V(2,l) = 0.0;
+
+			elem.W(0,l) = 0.0;
+			elem.W(1,l) = 0.0;
+			elem.W(2,l) = 1.0;
+
+		}
+	}
+}
+
 void GeometricTransformation(Mesh& m, Parameters& param) {
 
 	if(param.add_ramp==false && param.add_wrinkles==false){
 		std::cout << "GeoTransformation is used for nothing." << std::endl;
 		return;
 	}
+
+	int dim = 0;
+	if(param.Shape==1)
+		dim = 1;
 
 	GridTransformation GT;
 	GT.initialise(m, param);
@@ -323,7 +345,8 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 		if(param.add_ramp)
 			GT.ramp(point);
 		if(param.add_wrinkles)
-			GT.wrinkles(point);
+			GT.OneDir_wrinkles(point, dim);
+
 
 		m.vertices(0, node) = point(0);
 		m.vertices(1, node) = point(1);
@@ -350,6 +373,7 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 			bary *= 1.0 / (elem.size+0.0);
 
 			float h = 0.1;
+
 			///
 			Vector3f baryPu = bary + h * u;
 			Vector3f baryMu = bary - h * u;
@@ -358,11 +382,9 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 				GT.ramp(baryMu);
 			}
 			if(param.add_wrinkles){
-				GT.wrinkles(baryPu);
-				GT.wrinkles(baryMu);
+				GT.OneDir_wrinkles(baryPu, dim);
+				GT.OneDir_wrinkles(baryMu, dim);
 			}
-			Vector3f local_dir = baryPu-baryMu;
-			auto angle1 = -atan2(local_dir.dot(u)/h,local_dir.dot(w)/h)*180.0/M_PI+90.0; // atan(dir0/dir2) --> adjacent dir is 2
 
 			///
 			Vector3f baryPv = bary + h * v;
@@ -372,11 +394,9 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 				GT.ramp(baryMv);
 			}
 			if(param.add_wrinkles){
-				GT.wrinkles(baryPv);
-				GT.wrinkles(baryMv);
+				GT.OneDir_wrinkles(baryPv, dim);
+				GT.OneDir_wrinkles(baryMv, dim);
 			}
-			local_dir = baryPv-baryMv;
-			auto angle2 = -atan2(local_dir.dot(v)/h,local_dir.dot(u)/h)*180.0/M_PI+90; // atan(dir1/dir0) --> adjacent dir is 0
 
 			///
 			Vector3f baryPw = bary + h * w;
@@ -386,14 +406,39 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 				GT.ramp(baryMw);
 			}
 			if(param.add_wrinkles){
-				GT.wrinkles(baryPw);
-				GT.wrinkles(baryMw);
+				GT.OneDir_wrinkles(baryPw, dim);
+				GT.OneDir_wrinkles(baryMw, dim);
 			}
-			local_dir = baryPw-baryMw;
-			auto angle0 = -atan2(local_dir.dot(w)/h,local_dir.dot(v)/h)*180.0/M_PI+90.0; // atan(dir2/dir1) --> adjacent dir is 1
 
-			// if (angle2 > 0.1)
-			// 	std::cout << "angle0 : " << angle0 << ", angle1 : " << angle1 << ", angle2 : " << angle2 << std::endl;
+
+			float angle0=0.0, angle1=0.0, angle2=0.0;
+
+
+			// No shift in the V direction which is the normal to the ply
+			// if(dim==1){
+			Vector3f local_dir_use_U = baryPu-baryMu;
+			angle1 = -atan2(local_dir_use_U.dot(u)/h,local_dir_use_U.dot(w)/h)*180.0/M_PI+90.0; // atan(dir0/dir2) --> adjacent dir is 2
+
+			// Vector3f local_dir_use_V = baryPv-baryMv;
+			angle2 = -atan2(local_dir_use_U.dot(v)/h,local_dir_use_U.dot(u)/h)*180.0/M_PI;
+
+			Vector3f local_dir_use_W = baryPw-baryMw;
+			angle0 = -atan2(local_dir_use_W.dot(w)/h,local_dir_use_W.dot(v)/h)*180.0/M_PI+90.0; // atan(dir2/dir1) --> adjacent dir is 1
+
+			// ///
+			// Vector3f local_dir_use_U = baryPu-baryMu;
+			// angle1 = -atan2(local_dir_use_U.dot(u)/h,local_dir_use_U.dot(w)/h)*180.0/M_PI+90.0; // atan(dir0/dir2) --> adjacent dir is 2
+
+			// ///
+			// Vector3f local_dir_use_V = baryPv-baryMv;
+			// angle2 = -atan2(local_dir_use_V.dot(v)/h,local_dir_use_V.dot(u)/h)*180.0/M_PI+90.0; // atan(dir1/dir0) --> adjacent dir is 0
+
+			// ///
+			// Vector3f local_dir_use_W = baryPw-baryMw;
+			// angle0 = -atan2(local_dir_use_W.dot(w)/h,local_dir_use_W.dot(v)/h)*180.0/M_PI+90.0; // atan(dir2/dir1) --> adjacent dir is 1
+
+			if (angle1 > 0.2)
+				std::cout << "angle0 : " << angle0 << ", angle1 : " << angle1 << ", angle2 : " << angle2 << std::endl;
 
 			urot = rotate_hors_axes(v, angle1, u);
 			urot = rotate_hors_axes(w, angle2, urot);

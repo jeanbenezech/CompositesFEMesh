@@ -23,9 +23,14 @@ int main(int argc, const char *argv[]) {
 	m.read_points("input.txt");
 	m.exportDir = true;
 
-	localCoorSyst(m);
+	if(param.Shape==0)
+		localCoorSyst(m);
+	else
+		globalCoorSyst(m);
+
+
 	GeometricTransformation(m, param);
-	StackingSequence(m);
+	// StackingSequence(m);
 
 	if (param.Abaqus_output){ // ABAQUS
 		m.write_ori_inp("Abaqus/"+mesh_name);

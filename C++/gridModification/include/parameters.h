@@ -29,6 +29,7 @@ Vector3f vectorExtract(std::string line){
 class Parameters {
 public:
 
+	int Shape;
 	std::string meshname;
 	bool add_wrinkles;
 	bool add_ramp;
@@ -67,6 +68,9 @@ void Parameters::read(const std::string& filename) {
 	std::getline(input, line);
 
 	while(!line.empty()){
+
+		if (line.find("Shape")!=std::string::npos)
+			Shape = std::stoi(extract(line));
 
 		if (line.find("Resin_betw_plies")!=std::string::npos)
 			cz_id = std::stoi(extract(line));
