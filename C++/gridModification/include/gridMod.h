@@ -2,6 +2,7 @@
 
 #include "mesh.h"
 #include "element.h"
+#include "parameters.h"
 
 #include <cmath>
 #include <vector>
@@ -23,16 +24,16 @@ class GridTransformation{
 
 	// Wrinkles parameters
 	Vector3f defect_location, damping, center_rot;
-	float wrinklesOri;
+	float wrinkleOri;
 	float ref_lenght;
 	float defect_size;
 
 	// General parameters
 	int verbosity = 0;
 
-	void initialise(Mesh& m, float val);
+	void initialise(Mesh& m, Parameters& param);
 	void ramp(Vector3f& point);
-	void setWrinklesParameter();
+	void setWrinklesParameter(Parameters& param);
 	void Y_alligned_wrinkles(Vector3f& point);
 	void wrinkles(Vector3f& point);
 
@@ -40,7 +41,7 @@ class GridTransformation{
 	// float epsilon = 0.1;
 };
 
-void GridTransformation::initialise(Mesh& m, float val) {
+void GridTransformation::initialise(Mesh& m, Parameters& param) {
 	zmax=0;
 	zmin=m.vertices(2, 0);
 	ymin=0;
@@ -72,7 +73,7 @@ void GridTransformation::initialise(Mesh& m, float val) {
 	z3 = zmin + 9.0*deltaz;
 	z4 = zmin + 14.0*deltaz;
 
-	delta_max = val;
+	delta_max = param.rampSize;
 
 	ymid = (ymax-ymin)/2.0;
 
@@ -138,14 +139,14 @@ void GridTransformation::ramp(Vector3f& point){
 	} // ELSE DO NOTHING
 }
 
-void GridTransformation::setWrinklesParameter() {
-	defect_location = {86.0, 75.0, 250.0};
-	wrinklesOri = 30.0;
+void GridTransformation::setWrinklesParameter(Parameters& param) {
+	defect_location = param.wrinklePos;
+	wrinkleOri = param.wrinkleOri;
 
-	defect_size = 4.0;
+	defect_size = param.wrinkleSize;
 	ref_lenght = defect_size+5.*delta_max;
 
-	damping = {2./ref_lenght, 0.7/(ymax-ymin), 10./(zmax-zmin)}; // the more damping is big the small is the wrinkle in that direction
+	damping = {param.wrinkleDamp(0)/ref_lenght, param.wrinkleDamp(1)/(ymax-ymin), param.wrinkleDamp(2)/(zmax-zmin)}; // the more damping is big the small is the wrinkle in that direction
 }
 
 void GridTransformation::Y_alligned_wrinkles(Vector3f& point){
@@ -174,7 +175,7 @@ void GridTransformation::wrinkles(Vector3f& point){
 
 	float xref = defect_location[0];
 	float yref = defect_location[1];
-	float zref = defect_location[2] + (ymid - init[1])*tan(wrinklesOri*M_PI/180.0);
+	float zref = defect_location[2] + (ymid - init[1])*tan(wrinkleOri*M_PI/180.0);
 
 	point[0] += defect_size \
 		* 1./pow(cosh(damping[0] * M_PI * (init[0] - xref)),2.)\
@@ -301,16 +302,16 @@ void localCoorSyst(Mesh& m) {
 	}
 }
 
-void GeometricTransformation(Mesh& m, bool ramp=false, bool add_wrinkles=false) {
+void GeometricTransformation(Mesh& m, Parameters& param) {
 
-	if(ramp==false && add_wrinkles==false){
+	if(param.add_ramp==false && param.add_wrinkles==false){
 		std::cout << "GeoTransformation is used for nothing." << std::endl;
 		return;
 	}
 
 	GridTransformation GT;
-	GT.initialise(m, 6.25);
-	GT.setWrinklesParameter();
+	GT.initialise(m, param);
+	GT.setWrinklesParameter(param);
 
 	for(int node=0; node < m.Nb_vertices(); ++node) {
 
@@ -319,9 +320,9 @@ void GeometricTransformation(Mesh& m, bool ramp=false, bool add_wrinkles=false) 
 		point(1) = m.vertices(1, node);
 		point(2) = m.vertices(2, node);
 
-		if(ramp)
+		if(param.add_ramp)
 			GT.ramp(point);
-		if(add_wrinkles)
+		if(param.add_wrinkles)
 			GT.wrinkles(point);
 
 		m.vertices(0, node) = point(0);
@@ -352,11 +353,11 @@ void GeometricTransformation(Mesh& m, bool ramp=false, bool add_wrinkles=false) 
 			///
 			Vector3f baryPu = bary + h * u;
 			Vector3f baryMu = bary - h * u;
-			if(ramp){
+			if(param.add_ramp){
 				GT.ramp(baryPu);
 				GT.ramp(baryMu);
 			}
-			if(add_wrinkles){
+			if(param.add_wrinkles){
 				GT.wrinkles(baryPu);
 				GT.wrinkles(baryMu);
 			}
@@ -366,11 +367,11 @@ void GeometricTransformation(Mesh& m, bool ramp=false, bool add_wrinkles=false) 
 			///
 			Vector3f baryPv = bary + h * v;
 			Vector3f baryMv = bary - h * v;
-			if(ramp){
+			if(param.add_ramp){
 				GT.ramp(baryPv);
 				GT.ramp(baryMv);
 			}
-			if(add_wrinkles){
+			if(param.add_wrinkles){
 				GT.wrinkles(baryPv);
 				GT.wrinkles(baryMv);
 			}
@@ -380,11 +381,11 @@ void GeometricTransformation(Mesh& m, bool ramp=false, bool add_wrinkles=false) 
 			///
 			Vector3f baryPw = bary + h * w;
 			Vector3f baryMw = bary - h * w;
-			if(ramp){
+			if(param.add_ramp){
 				GT.ramp(baryPw);
 				GT.ramp(baryMw);
 			}
-			if(add_wrinkles){
+			if(param.add_wrinkles){
 				GT.wrinkles(baryPw);
 				GT.wrinkles(baryMw);
 			}

@@ -24,7 +24,7 @@ int main(int argc, const char *argv[]) {
 	m.exportDir = true;
 
 	localCoorSyst(m);
-	GeometricTransformation(m, true, param.add_wrinkles);
+	GeometricTransformation(m, param);
 	StackingSequence(m);
 
 	if (param.Abaqus_output){ // ABAQUS
@@ -35,8 +35,9 @@ int main(int argc, const char *argv[]) {
 	if (param.Dune_output){ // DUNE
 		m.write_ori_txt("DUNE/"+mesh_name);
 		m.write_msh("DUNE/"+mesh_name);
-		m.write_vtk(mesh_name);
 	}
+
+	m.write_vtk(mesh_name);
 
 	return 0;
 }

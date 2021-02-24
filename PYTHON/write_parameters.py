@@ -28,14 +28,27 @@ def write_parameters():
 	parameters.write('lc(f)    : 1\n')        # mesh caracteristic size
 	parameters.write('dx(i)    : 12\n')       #
 	parameters.write('ddy(i)   : 2\n')        #
-	parameters.write('dz(i)    : 30\n')      #
-	parameters.write('dc(i)    : 7\n')       #
+	parameters.write('dz(i)    : 30\n')       #
+	parameters.write('dc(i)    : 7\n')        #
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~TRANSFORMATION~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('wrinkle(b)        : 0\n') # Do we need to add wrinkle in the gridMod (c++) code
-	parameters.write('Abaqus_output(b)  : 1\n') # Do we need to add wrinkle in the gridMod (c++) code
-	parameters.write('Dune_output(b)    : 1\n') # Do we need to add wrinkle in the gridMod (c++) code
+	parameters.write('wrinkle(b)        : 1\n') # Do we need to add wrinkle in the gridMod (c++) code
+	parameters.write('Ramp(b)           : 0\n') #
+	parameters.write('Abaqus_output(b)  : 1\n') #
+	parameters.write('Dune_output(b)    : 0\n') #
+	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
+	parameters.write('~~~~~~~~~~~~~~~~~~~~WRINKLES~~~~~~~~~~~~~~~~~~~~~~\n')
+	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
+	parameters.write('Wsize(f)          : 4.0\n') # Amplitude max
+	parameters.write('Wpos(f)           : 86.0,75.0,250.0\n') # center
+	parameters.write('Wori(f)           : 30.0\n') # Orientation in degree
+	parameters.write('Wdamp(f)          : 2.0,0.7,10.0\n') # reduction of the amplitude through each direction
+	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
+	parameters.write('~~~~~~~~~~~~~~~~~~~~~~RAMP~~~~~~~~~~~~~~~~~~~~~~~~\n')
+	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
+	parameters.write('Rsize(f)          : 6.25\n')
+
 
 	parameters.close()
 
