@@ -437,8 +437,8 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 			// Vector3f local_dir_use_W = baryPw-baryMw;
 			// angle0 = -atan2(local_dir_use_W.dot(w)/h,local_dir_use_W.dot(v)/h)*180.0/M_PI+90.0; // atan(dir2/dir1) --> adjacent dir is 1
 
-			if (angle1 > 0.2)
-				std::cout << "angle0 : " << angle0 << ", angle1 : " << angle1 << ", angle2 : " << angle2 << std::endl;
+			// if (angle1 > 0.2)
+			// 	std::cout << "angle0 : " << angle0 << ", angle1 : " << angle1 << ", angle2 : " << angle2 << std::endl;
 
 			urot = rotate_hors_axes(v, angle1, u);
 			urot = rotate_hors_axes(w, angle2, urot);
