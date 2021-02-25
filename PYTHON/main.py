@@ -1,4 +1,5 @@
 import numpy as np
+import os
 
 from utils.surfaces import *
 from utils.parameters import *
@@ -18,5 +19,8 @@ if __name__ == '__main__':
 
 	# Ajust coordinate system
 	# geo.ajust(param)
+
+	command = 'gmsh {} -3 -format msh2 -o {}'.format(param.name+'.geo', param.name+'.msh')
+	os.system(command)
 
 	geo.dump(param)
