@@ -13,6 +13,7 @@ class sub():
 
 class parameters():
 	def __init__(self,
+				 AbaqusName=None,
 				 Shape=None,
 				 resin=None,
 				 CZ=None,
@@ -127,6 +128,8 @@ def read_parameters(param):
 	param.lc = float(dico['lc'])
 
 	param.name = dico['name']
+
+	param.AbaqusName = dico['AbaqusOdbName']
 
 	param.dx = int(dico['dx'])
 	param.ddy = int(dico['ddy'])

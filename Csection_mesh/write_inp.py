@@ -1,32 +1,18 @@
 import numpy as np
 import glob
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-def orientation_inp(filename):
-	angle=45*np.pi/180
-	""" permet de creer une table d'gridMod abaqus a partir de l'image des troncon issue de la segmentation"""
-	g = open(filename+'.inp','w')
-	g.write('*ORIENTATION, NAME=ori_0\n')
-	g.write('1., 0., 0., 0., 1., 0.\n')
-	g.write('1, 0.\n')
-	g.write('*ORIENTATION, NAME=ori_90\n')
-	g.write('0., 1., 0., -1., 0., 0.\n')
-	g.write('1, 0.\n')
-	g.write('*ORIENTATION, NAME=ori_45\n')
-	g.write(str(np.cos(angle))+', '+str(np.sin(angle))+', 0., '+str(-np.sin(angle))+', '+str(np.cos(angle))+', 0.\n')
-	g.write('1, 0.\n')
-	g.write('*ORIENTATION, NAME=ori_-45\n')
-	g.write(str(np.cos(-angle))+', '+str(np.sin(-angle))+', 0., '+str(-np.sin(-angle))+', '+str(np.cos(-angle))+', 0.\n')
-	g.write('1, 0.\n')
-	g.close()
+from utils.parameters import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if __name__ == '__main__':
 
+	param = parameters()
+	param.init()
+
 	fix=[0, 1]
 	pull=3
-	nb_ply=9
-	name='parameters'
+	nb_ply=param.nbp
+	name=param.AbaqusName
 
 	f=open('Abaqus/'+name+'.inp','w')
 
@@ -44,18 +30,16 @@ if __name__ == '__main__':
 	f.write('**\n')
 	f.write('**---------- PARTS ---------- \n')
 	f.write('*part, name=main\n')
-	f.write('*INCLUDE, INPUT='+name+'_mesh.inp\n')
-	f.write('*INCLUDE, INPUT='+name+'_ori.inp\n')
+	f.write('*INCLUDE, INPUT='+param.name+'_mesh.inp\n')
+	f.write('*INCLUDE, INPUT='+param.name+'_ori.inp\n')
 	# ~~~~~~ MATERIAL ASSIGNEMENT ~~~~~~
 	for i in range(1,nb_ply+1):
 		f.write('*SOLID SECTION, ELSET=elset'+str(i)+', ORIENTATION=ori_loc, MATERIAL=D-8552\n')
-	f.write('*SOLID SECTION, ELSET=elset'+str(nb_ply+2)+', ORIENTATION=ori_loc, MATERIAL=PEEK\n')
-	f.write('*SOLID SECTION, ELSET=elset'+str(nb_ply+3)+', ORIENTATION=ori_loc, MATERIAL=FILLER\n')
-
+	# f.write('*SOLID SECTION, ELSET=elset'+str(nb_ply+2)+', ORIENTATION=ori_loc, MATERIAL=PEEK\n')
 
 	# f.write('*COHESIVE SECTION, ELSET=elset'+str(nb_ply+1)+', STACK DIRECTION=3, MATERIAL=CZ, RESPONSE=TRACTION SEPARATION, THICKNESS=GEOMETRY \n')
-	f.write('*COHESIVE SECTION, ELSET=Cohesive, MATERIAL=CZ, STACK DIRECTION=3, RESPONSE=TRACTION SEPARATION \n')
-	f.write(' 0.001 \n')
+	# f.write('*COHESIVE SECTION, ELSET=Cohesive, MATERIAL=CZ, STACK DIRECTION=3, RESPONSE=TRACTION SEPARATION \n')
+	# f.write(' 0.001 \n')
 		# , ORIENTATION=ori_loc
 	# ~~~~~~ KINEMATIC COUPLING ~~~~~~
 
@@ -76,10 +60,10 @@ if __name__ == '__main__':
 	f.write('{}\n'.format(2960.))
 	#~ f.write('*Expansion, type=ORTHO \n')
 	#~ f.write('-2.1e-07, 3.3e-05, 3.3e-05 \n')
-	f.write('*MATERIAL, name=FILLER \n')
-	f.write('*ELASTIC, type=ENGINEERING CONSTANTS \n')
-	f.write('8800.,  8800., 137300.,  0.487,   0.02,   0.02,  2960.,  4900. \n')
-	f.write('4900., \n')
+	# f.write('*MATERIAL, name=FILLER \n')
+	# f.write('*ELASTIC, type=ENGINEERING CONSTANTS \n')
+	# f.write('8800.,  8800., 137300.,  0.487,   0.02,   0.02,  2960.,  4900. \n')
+	# f.write('4900., \n')
 	#~ f.write('*Expansion, type=ORTHO \n')
 	#~ f.write('3.3e-05,  3.3e-05, -2.1e-07 \n')
 	f.write('*MATERIAL, name=PEEK \n')
