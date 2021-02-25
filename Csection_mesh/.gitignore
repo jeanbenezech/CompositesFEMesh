@@ -1,0 +1,11 @@
+*.geo
+
+*.vtk
+
+*.msh
+
+*input.txt
+
+DUNE/*
+
+Abaqus/*

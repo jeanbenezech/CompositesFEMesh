@@ -23,19 +23,29 @@ public:
 	int nb_nset=0;
 	int nb_elset=0;
 
-	// Matrix<float, Dynamic, Dynamic> sortie;
 	std::vector<float> stacking_sequence;
 	int nb_corner, type;
 	std::vector<Vector2f> P;
-	float theta;
+
+	// ABAQUS FIELDS
+	Matrix<double, Dynamic, Dynamic> S;
+	Matrix<double, Dynamic, Dynamic> E;
+	Matrix<double, Dynamic, Dynamic> U;
+	Matrix<double, Dynamic, Dynamic> SDEG;
+	Matrix<double, Dynamic, Dynamic> QUADSCRT;
+
 
 	// FUNCTION
 	void read_mesh(const std::string& filename);
 	void read_msh(const std::string& filename, bool only_3D, int cz_id);
 	void read_points(const std::string& filename);
+	void read_elem_fields(const std::string& filename);
+	void read_node_fields(const std::string& filename);
+
 	void write_mesh(const std::string& filename);
 	void write_msh(const std::string& filename, int verbosity);
 	bool exportDir=false;
+	bool exportAbaqusFields=false;
 	void write_vtk(const std::string& filename, int verbosity);
 	void write_inp(const std::string& filename);
 	void write_ori_txt(const std::string& filename);
@@ -350,12 +360,56 @@ void Mesh::read_points(const std::string& filename) {
 
 	input >> nb_corner;
 
-	// if (type<4) theta = 90;
-
 	P.resize(nb_corner);
 	for (int i=0; i<P.size();i++) {
 		input >> P[i](0) >> P[i](1);
 	}
+}
+
+void Mesh::read_elem_fields(const std::string& filename) {
+	std::ifstream input;
+	input.open(filename, std::ios::in);
+	if (!input.is_open()) {
+	std::cout << "Error: Cannot open file" << std::endl;
+	}
+	std::cout << "Reading " << filename << std::endl;
+
+	std::string ligne {};
+	std::getline(input, ligne);
+
+	E.resize(6,Tot_cells_);
+	S.resize(6,Tot_cells_);
+
+	SDEG.resize(1,Tot_cells_);
+	QUADSCRT.resize(1,Tot_cells_);
+
+	for(int i = 0; i < Tot_cells_; i++) {
+		int num;
+		input >> num >> S(0, i) >> S(1, i) >> S(2, i) >> S(3, i) >> S(4, i) >> S(5, i)\
+		>> E(0, i) >> E(1, i) >> E(2, i) >> E(3, i) >> E(4, i) >> E(5, i) >> SDEG(0,i)\
+		>> QUADSCRT(0,i);
+	}
+
+}
+
+void Mesh::read_node_fields(const std::string& filename) {
+	std::ifstream input;
+	input.open(filename, std::ios::in);
+	if (!input.is_open()) {
+	std::cout << "Error: Cannot open file" << std::endl;
+	}
+	std::cout << "Reading " << filename << std::endl;
+
+	std::string ligne {};
+	std::getline(input, ligne); // Commentaires
+
+	U.resize(3,nb_vertices_);
+
+	for(int i = 0; i < nb_vertices_; i++) {
+		int num;
+		input >> num >> U(0, i) >> U(1, i) >> U(2, i);
+	}
+
 }
 
 // ~~~~~~~~~~~~~~ DUMP ~~~~~~~~~~~~~~
@@ -519,6 +573,38 @@ void Mesh::write_vtk(const std::string& filename, int verbosity=0) {
 			for (int i=0; i< elem.nb; i++) {
 				output << elem.W(0, i) << " " << elem.W(1, i) << " " << elem.W(2, i) << std::endl;
 			}
+		}
+	}
+
+	if (exportAbaqusFields){
+		output << "SCALARS S float 6\n";
+		output << "LOOKUP_TABLE default\n";
+		for (int i=0; i< Tot_cells_; i++) {
+			output << S(0, i) << " " << S(1, i) << " " << S(2, i) << " " <<  S(3, i) << " " << S(4, i) << " " << S(5, i) << std::endl;
+		}
+
+		output << "SCALARS E float 6\n";
+		output << "LOOKUP_TABLE default\n";
+		for (int i=0; i< Tot_cells_; i++) {
+			output << E(0, i) << " " << E(1, i) << " " << E(2, i) << " " <<  E(3, i) << " " << E(4, i) << " " << E(5, i) << std::endl;
+		}
+
+		output << "SCALARS SDEG float 1\n";
+		output << "LOOKUP_TABLE default\n";
+		for (int i=0; i< Tot_cells_; i++) {
+			output << SDEG(0, i) << std::endl;
+		}
+		output << "SCALARS QUADSCRT float 1\n";
+		output << "LOOKUP_TABLE default\n";
+		for (int i=0; i< Tot_cells_; i++) {
+			output << QUADSCRT(0, i) << std::endl;
+		}
+
+		output << "POINT_DATA " << nb_vertices_ << std::endl;
+		output << "SCALARS U float 3\n";
+		output << "LOOKUP_TABLE default\n";
+		for (int i=0; i< nb_vertices_; i++) {
+			output << U(0, i) << " " << U(1, i) << " " << U(2, i) << std::endl;
 		}
 	}
 

@@ -47,6 +47,10 @@ public:
 	// Ramp parameters
 	float rampSize;
 
+	// Path to results
+	std::string path_to_abaqus_result;
+	std::string AbaqusOdbName;
+
 	void read(const std::string& filename);
 
 	//~Parameters();
@@ -107,6 +111,12 @@ void Parameters::read(const std::string& filename) {
 
 		if (line.find("Wdamp(f)")!=std::string::npos)
 			wrinkleDamp = vectorExtract(line);
+
+		if (line.find("Path2result(s)")!=std::string::npos)
+			path_to_abaqus_result = extract(line);
+
+		if (line.find("AbaqusOdbName(s)")!=std::string::npos)
+			AbaqusOdbName = extract(line);
 
 		std::getline(input, line);
 	}

@@ -1,4 +1,4 @@
-project(gridMod)
+project(odb2vtk)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 cmake_minimum_required(VERSION 2.8.3)
@@ -15,7 +15,7 @@ include_directories(
 
 # the list of source files
 set(SRCS
-  src/gridMod.cpp
+  src/odb2vtk.cpp
 )
 
 find_package(OpenMP)
@@ -24,4 +24,4 @@ if (OPENMP_FOUND)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
-add_executable(gridMod ${SRCS})
+add_executable(odb2vtk ${SRCS})
