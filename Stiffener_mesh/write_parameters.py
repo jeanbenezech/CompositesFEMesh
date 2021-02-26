@@ -4,33 +4,42 @@ import sys
 
 def write_parameters():
 
-	parameters=open('parameters.txt','w')
+	parameters =open('parameters.txt','w')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('name(s)                : Csection\n') # mesh name
-	parameters.write('Shape(i)               : 0\n')   # 0(default): Csection ; 1: flat laminate
-	parameters.write('Resin_betw_plies(b)    : 0\n')   # 1: yes ; 0: no
+	parameters.write('name(s)                : stiffener\n') # mesh name
+	parameters.write('L-shape(b)             : 0\n')   # 1: stiffener L-shape ; 0 stiffener T-shape
+	parameters.write('Flat_Limb(b)           : 1\n')   # 1: yes ; 0: no
+	parameters.write('Resin_bet_plies(b)     : 1\n')   # 1: yes ; 0: no
 	parameters.write('cohezive_elements(b)   : 0\n')   # 1: yes ; 0: no
-	parameters.write('recombine(b)           : 1\n')   # 1: recombine mesh: hex ;  0: no: only prisms
+	parameters.write('recombine(b)           : 1\n')   # 1: recombine mesh: hex, prisms ;  0: no: only prisms
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~GEOMETRY~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('np(i)         : 24\n')    #
-	parameters.write('X(f)          : 150\n')   #
-	parameters.write('Y(f)          : 6.48\n')  #
-	parameters.write('R(f)          : 10\n')    #
-	parameters.write('Height(f)     : 75\n')    #
-	parameters.write('Z(f)          : 500\n')   #
+	parameters.write('np_c(i)       : 5\n')       # Number of plies by curved laminate
+	parameters.write('np(i)         : 4\n')       # Number of plies for the flat plate
+	parameters.write('X(f)          : 6.0\n')    #
+	parameters.write('Y(f)          : 4.0\n')    #
+	parameters.write('R(f)          : 2.0\n')    #
+	parameters.write('Z(f)          : 3.0\n')    #
 	parameters.write('e(f)          : 0.01\n')  # Resin layer thickness
+	parameters.write('fl(f)         : 0.05\n')  # Filler limbs thickness
+	parameters.write('limb(f)       : 2.0\n')    #
+	parameters.write('side(f)       : 3.0\n')    #
+	parameters.write('hat_angle(f)  : 90.0\n')   #
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~MESH~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('lc(f)    : 1\n')        # mesh caracteristic size
-	parameters.write('dx(i)    : 12\n')       #
-	parameters.write('ddy(i)   : 2\n')        #
-	parameters.write('dz(i)    : 30\n')       #
-	parameters.write('dc(i)    : 7\n')        #
+	parameters.write('lc(f)    : 1.0\n') # mesh caracteristic size
+	parameters.write('dx(i)    : 15\n')  #
+	parameters.write('ddy(i)   : 2\n')   #
+	parameters.write('ddy_r(i) : 2\n')   #
+	parameters.write('dz(i)    : 1\n')   #
+	parameters.write('ddz(i)   : 4\n')   #
+	parameters.write('dc(i)    : 12\n')  #
+	parameters.write('dl(i)    : 5\n')   #
+	parameters.write('dside(i) : 5\n')   #
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~TRANSFORMATION~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -54,7 +63,6 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('Path2result(s)    : Abaqus/results/\n')
 	parameters.write('AbaqusOdbName(s)  : model\n')
-
 
 	parameters.close()
 

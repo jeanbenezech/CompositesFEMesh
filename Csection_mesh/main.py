@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
 	param.write_input_orientation('input.txt')
 
+	geo.dump(param)
+
 	command = 'gmsh {} -3 -format msh2 -o {}'.format(param.name+'.geo', param.name+'.msh')
 	os.system(command)
-
-	geo.dump(param)

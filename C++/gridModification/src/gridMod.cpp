@@ -28,9 +28,8 @@ int main(int argc, const char *argv[]) {
 	else
 		globalCoorSyst(m);
 
-
 	GeometricTransformation(m, param);
-	// StackingSequence(m);
+	StackingSequence(m);
 
 	if (param.Abaqus_output){ // ABAQUS
 		m.write_ori_inp("Abaqus/"+mesh_name);
