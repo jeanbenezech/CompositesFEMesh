@@ -23,10 +23,10 @@ def orientation_inp(filename):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if __name__ == '__main__':
 
-	fix=[0, 1]
-	pull=3
-	nb_ply=9
-	name='parameters'
+	fix=[4] #the nset(s) to be fixed (each nset correspond to a face of the Csection)
+	pull=5  #the nset(s) to be pulled
+	nb_ply=24 #number of plies
+	name='Csection' #name of the output inp file
 
 	f=open('Abaqus/'+name+'.inp','w')
 
@@ -49,13 +49,13 @@ if __name__ == '__main__':
 	# ~~~~~~ MATERIAL ASSIGNEMENT ~~~~~~
 	for i in range(1,nb_ply+1):
 		f.write('*SOLID SECTION, ELSET=elset'+str(i)+', ORIENTATION=ori_loc, MATERIAL=D-8552\n')
-	f.write('*SOLID SECTION, ELSET=elset'+str(nb_ply+2)+', ORIENTATION=ori_loc, MATERIAL=PEEK\n')
-	f.write('*SOLID SECTION, ELSET=elset'+str(nb_ply+3)+', ORIENTATION=ori_loc, MATERIAL=FILLER\n')
+#	f.write('*SOLID SECTION, ELSET=elset'+str(nb_ply+2)+', ORIENTATION=ori_loc, MATERIAL=PEEK\n')
+#	f.write('*SOLID SECTION, ELSET=elset'+str(nb_ply+3)+', ORIENTATION=ori_loc, MATERIAL=FILLER\n')
 
 
-	# f.write('*COHESIVE SECTION, ELSET=elset'+str(nb_ply+1)+', STACK DIRECTION=3, MATERIAL=CZ, RESPONSE=TRACTION SEPARATION, THICKNESS=GEOMETRY \n')
-	f.write('*COHESIVE SECTION, ELSET=Cohesive, MATERIAL=CZ, STACK DIRECTION=3, RESPONSE=TRACTION SEPARATION \n')
-	f.write(' 0.001 \n')
+#	# f.write('*COHESIVE SECTION, ELSET=elset'+str(nb_ply+1)+', STACK DIRECTION=3, MATERIAL=CZ, RESPONSE=TRACTION SEPARATION, THICKNESS=GEOMETRY \n')
+#	f.write('*COHESIVE SECTION, ELSET=Cohesive, MATERIAL=CZ, STACK DIRECTION=3, RESPONSE=TRACTION SEPARATION \n')
+#	f.write(' 0.001 \n')
 		# , ORIENTATION=ori_loc
 	# ~~~~~~ KINEMATIC COUPLING ~~~~~~
 
@@ -76,25 +76,25 @@ if __name__ == '__main__':
 	f.write('{}\n'.format(2960.))
 	#~ f.write('*Expansion, type=ORTHO \n')
 	#~ f.write('-2.1e-07, 3.3e-05, 3.3e-05 \n')
-	f.write('*MATERIAL, name=FILLER \n')
-	f.write('*ELASTIC, type=ENGINEERING CONSTANTS \n')
-	f.write('8800.,  8800., 137300.,  0.487,   0.02,   0.02,  2960.,  4900. \n')
-	f.write('4900., \n')
+#	f.write('*MATERIAL, name=FILLER \n')
+#	f.write('*ELASTIC, type=ENGINEERING CONSTANTS \n')
+#	f.write('8800.,  8800., 137300.,  0.487,   0.02,   0.02,  2960.,  4900. \n')
+#	f.write('4900., \n')
 	#~ f.write('*Expansion, type=ORTHO \n')
 	#~ f.write('3.3e-05,  3.3e-05, -2.1e-07 \n')
-	f.write('*MATERIAL, name=PEEK \n')
-	f.write('*ELASTIC \n')
-	f.write('2500., 0.4 \n')
+#	f.write('*MATERIAL, name=PEEK \n')
+#	f.write('*ELASTIC \n')
+#	f.write('2500., 0.4 \n')
 	#~ f.write('*Expansion \n')
 	#~ f.write('4.7e-05, \n')
 
-	f.write('*MATERIAL, name=CZ \n')
-	f.write('*ELASTIC, TYPE=TRACTION \n')
-	f.write(' 2244898., 1250000., 754841. \n')
-	f.write('*DAMAGE INITIATION, CRITERION=QUADS \n')
-	f.write(' 74.2, 110.4, 110.4 \n')
-	f.write('*DAMAGE EVOLUTION, TYPE=ENERGY, MIXED MODE BEHAVIOR=BK, POWER=1.45 \n')
-	f.write(' 0.3, 0.87, 0.87 \n')
+#	f.write('*MATERIAL, name=CZ \n')
+#	f.write('*ELASTIC, TYPE=TRACTION \n')
+#	f.write(' 2244898., 1250000., 754841. \n')
+#	f.write('*DAMAGE INITIATION, CRITERION=QUADS \n')
+#	f.write(' 74.2, 110.4, 110.4 \n')
+#	f.write('*DAMAGE EVOLUTION, TYPE=ENERGY, MIXED MODE BEHAVIOR=BK, POWER=1.45 \n')
+#	f.write(' 0.3, 0.87, 0.87 \n')
 	# f.write('*DAMAGE STABILIZATION \n')
 	# f.write('0.00001 \n')
 
@@ -125,7 +125,7 @@ if __name__ == '__main__':
 	# f.write('0.1, 1.0, 1e-03, 1.0\n')
 	f.write('1e-02, 1.0, 1e-06, 5e-01\n')
 	f.write('*BOUNDARY, TYPE=DISPLACEMENT\n')
-	f.write('m.MasterNode'+str(pull)+', 2, 2, 1\n')
+	f.write('m.MasterNode'+str(pull)+', 3, 3, -1\n')
 	# ~~~~~~~~~~~~~ OUTPUT ~~~~~~~~~~~~~
 	f.write('**\n')
 	f.write('**---------- OUTPUT ---------- \n')
@@ -134,8 +134,8 @@ if __name__ == '__main__':
 	f.write('U, RF\n')
 	f.write('*ELEMENT OUTPUT, elset=m.All_elements\n')
 	f.write('EVOL, E, S\n')
-	f.write('*ELEMENT OUTPUT, elset=m.Cohesive\n')
-	f.write('SDEG, QUADSCRT\n')
+#	f.write('*ELEMENT OUTPUT, elset=m.Cohesive\n')
+#	f.write('SDEG, QUADSCRT\n')
 
 
 
