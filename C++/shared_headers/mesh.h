@@ -652,9 +652,9 @@ void Mesh::write_ori_inp(const std::string& filename) {
 
 	for(auto& elem : Elements){
 		for (int i=0; i< elem.nb; i++) {
-			output << elem.global_indices(i) << " ";
-			output << elem.U(0, i) << " " << elem.U(1, i) << " " << elem.U(2, i) << " ";
-			output << elem.V(0, i) << " " << elem.V(1, i) << " " << elem.V(2, i) << std::endl;
+			output << elem.global_indices(i) << ", ";
+			output << elem.U(0, i) << ", " << elem.U(1, i) << ", " << elem.U(2, i) << ", ";
+			output << elem.V(0, i) << ", " << elem.V(1, i) << ", " << elem.V(2, i) << std::endl;
 		}
 	}
 
@@ -695,12 +695,12 @@ void Mesh::write_inp(const std::string& filename) {
 	float epsi=0.01;
 
 	for (int i=0; i<nb_vertices_;i++) {
-			 if (vertices(0, i)-xmin<epsi) {nsets[0].push_back(i);}
-		else if (xmax-vertices(0, i)<epsi) {nsets[1].push_back(i);}
-		else if (vertices(1, i)-ymin<epsi) {nsets[2].push_back(i);}
-		else if (ymax-vertices(1, i)<epsi) {nsets[3].push_back(i);}
-		else if (vertices(2, i)-zmin<epsi) {nsets[4].push_back(i);}
-		else if (zmax-vertices(2, i)<epsi) {nsets[5].push_back(i);}
+		if (vertices(0, i)-xmin<epsi) {nsets[0].push_back(i);}
+		if (xmax-vertices(0, i)<epsi) {nsets[1].push_back(i);}
+		if (vertices(1, i)-ymin<epsi) {nsets[2].push_back(i);}
+		if (ymax-vertices(1, i)<epsi) {nsets[3].push_back(i);}
+		if (vertices(2, i)-zmin<epsi) {nsets[4].push_back(i);}
+		if (zmax-vertices(2, i)<epsi) {nsets[5].push_back(i);}
 	}
 
 	for(int j=0; j< nb_nset;j++) {
@@ -741,7 +741,7 @@ void Mesh::write_inp(const std::string& filename) {
 	if(elem.type != "Triangle" || elem.type != "Quadrilateral"){ // We would ony use 3D elements in Abaqus (that could change later)
 		output << "*ELEMENT, type=" << elem.abaqus_type << ", ELSET=" << elem.type << std::endl;
 		for (int i=0; i< elem.nb; i++) {
-			output << elem.global_indices(i)+1 << ", ";
+			output << elem.global_indices(i) << ", ";
 			for (int j =0; j < elem.Nodes.rows()-1; j++)
 				output << elem.Nodes(j,i)+1 << ", ";
 			output << elem.Nodes(elem.Nodes.rows()-1,i)+1 << std::endl;
