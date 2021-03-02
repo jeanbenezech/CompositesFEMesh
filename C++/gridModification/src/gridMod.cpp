@@ -34,6 +34,7 @@ int main(int argc, const char *argv[]) {
 	if (param.Abaqus_output){ // ABAQUS
 		m.write_ori_inp("Abaqus/"+mesh_name);
 		m.write_inp("Abaqus/"+mesh_name);
+		m.write_abaqus_cae_input("Abaqus/"+mesh_name);
 	}
 
 	if (param.Dune_output){ // DUNE

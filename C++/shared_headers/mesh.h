@@ -50,6 +50,7 @@ public:
 	void write_inp(const std::string& filename);
 	void write_ori_txt(const std::string& filename);
 	void write_ori_inp(const std::string& filename);
+	void write_abaqus_cae_input(const std::string& filename);
 
 	void initialise(const int nb_plies);
 	void print(std::string type, int number);
@@ -798,6 +799,162 @@ void Mesh::write_inp(const std::string& filename) {
 		output << "*NSET,NSET=MasterNode" << j << std::endl;
 		output << nb_vertices_+1+j << ", " << std::endl;
 	}
+}
+
+void Mesh::write_abaqus_cae_input(const std::string& filename) {
+	std::ofstream output;
+	output.open(filename+"_CAE.inp", std::ios::out);
+	if (!output.is_open()) {
+	std::cout << "Error: Cannot open file" << std::endl;
+	} else {
+		std::cout << "Writting " << filename+"_mesh.inp" << std::endl;
+	}
+
+	// ~~~~~~~~~ NSET and ElSET preparation ~~~~~~~~~
+	std::vector<std::vector<int>> nsets, elsets;
+	std::vector<Vector3f> masterNodes;
+
+	// ~~~~~~~~~ NSET ~~~~~~~~~
+	nb_nset=6;
+	nsets.resize(nb_nset);
+	masterNodes.resize(nb_nset);
+
+	float xmin, xmax, ymin, ymax, zmin, zmax;
+	xmin=ymin=zmin=  10000;
+	xmax=ymax=zmax= -10000;
+	for (int i=0; i<nb_vertices_;i++) {
+		if (xmin > vertices(0, i)) {xmin = vertices(0, i);}
+		if (xmax < vertices(0, i)) {xmax = vertices(0, i);}
+		if (ymin > vertices(1, i)) {ymin = vertices(1, i);}
+		if (ymax < vertices(1, i)) {ymax = vertices(1, i);}
+		if (zmin > vertices(2, i)) {zmin = vertices(2, i);}
+		if (zmax < vertices(2, i)) {zmax = vertices(2, i);}
+	}
+
+	float epsi=0.01;
+
+	for (int i=0; i<nb_vertices_;i++) {
+		if (vertices(0, i)-xmin<epsi) {nsets[0].push_back(i);}
+		if (xmax-vertices(0, i)<epsi) {nsets[1].push_back(i);}
+		if (vertices(1, i)-ymin<epsi) {nsets[2].push_back(i);}
+		if (ymax-vertices(1, i)<epsi) {nsets[3].push_back(i);}
+		if (vertices(2, i)-zmin<epsi) {nsets[4].push_back(i);}
+		if (zmax-vertices(2, i)<epsi) {nsets[5].push_back(i);}
+	}
+
+	for(int j=0; j< nb_nset;j++) {
+		masterNodes[j](0)=0.0;
+		masterNodes[j](1)=0.0;
+		masterNodes[j](2)=0.0;
+		for(int i=0; i<nsets[j].size(); i++) {
+			masterNodes[j](0) += vertices(0,nsets[j][i]);
+			masterNodes[j](1) += vertices(1,nsets[j][i]);
+			masterNodes[j](2) += vertices(2,nsets[j][i]);
+		}
+		masterNodes[j](0)/=nsets[j].size();
+		masterNodes[j](1)/=nsets[j].size();
+		masterNodes[j](2)/=nsets[j].size();
+	}
+
+
+	std::cout << nb_nset            << " NSETs"  << std::endl;
+	std::cout << nb_elset           << " ELSETs"  << std::endl;
+
+	// ~~~~~~~~~ P A R T ~~~~~~~~~
+	output << "*Part, name=MAIN" << std::endl;
+
+	// ~~~~~~~~~ N O D E S ~~~~~~~~~
+
+	output << "*NODE" << std::endl;
+	output << nb_vertices_+nb_nset << std::endl; // Plus the number of master nodes
+	for(int i=0; i< nb_vertices_; ++i) {
+		output << i+1 << ", " << vertices(0,i) << ", " << vertices(1,i) << ", " << vertices(2,i) << std::endl;
+	}
+	// Adding master nodes
+	for(int j=0; j< nb_nset;j++) {
+		output << nb_vertices_+1+j << ", " <<  masterNodes[j](0) << ", " << masterNodes[j](1) << ", " << masterNodes[j](2) << std::endl;
+	}
+
+	// ~~~~~~~~~ E L E M E N T S ~~~~~~~~~
+
+	output << "******* E L E M E N T S *************" << std::endl;
+
+	for(auto& elem : Elements){
+	if(elem.type != "Triangle" || elem.type != "Quadrilateral"){ // We would ony use 3D elements in Abaqus (that could change later)
+		output << "*ELEMENT, type=" << elem.abaqus_type << ", ELSET=" << elem.type << std::endl;
+		for (int i=0; i< elem.nb; i++) {
+			output << elem.global_indices(i) << ", ";
+			for (int j =0; j < elem.Nodes.rows()-1; j++)
+				output << elem.Nodes(j,i)+1 << ", ";
+			output << elem.Nodes(elem.Nodes.rows()-1,i)+1 << std::endl;
+		}
+	}
+	}
+
+	// ~~~~~~~~~ E N D  P A R T ~~~~~~~~~
+	output << "*End Part" << std::endl;
+
+	//ELSET
+	elsets.resize(nb_elset);
+	for(auto& elem : Elements){
+		if(elem.type != "Triangle" || elem.type != "Quadrilateral"){ // We would ony use 3D elements in Abaqus (that could change later)
+			for (int i=0; i< elem.nb; i++)
+				elsets[elem.Markers(0,i)-1].push_back(elem.global_indices(i));
+		}
+	}
+
+
+	output << "*Assembly, name=Assembly" << std::endl;
+
+	output << "*Instance, name=Imain, part=MAIN" << std::endl;
+	output << "*End Instance" << std::endl;
+
+
+
+
+	// ~~~~~~~~~ E L S E T S ~~~~~~~~~
+	output << "******* E L E M E N T S   S E T S *************" << std::endl;
+	output << "*ELSET,ELSET=All_elements, instance=Imain" << std::endl;
+	for(auto& elem : Elements){
+		if(elem.type != "Triangle" || elem.type != "Quadrilateral"){ // We would ony use 3D elements in Abaqus (that could change later)
+			for (int i=0; i< elem.nb; i++){
+				output << elem.global_indices(i);
+				if ((i+1)%10 == 0) { output << "," << std::endl; }
+				else { output << ", "; }
+			}
+		}
+	}
+	output << std::endl;
+	for(int j=0; j< nb_elset;j++) {
+		output << "*ELSET,ELSET=elset" << j+1 << ", instance=Imain" << std::endl;
+		for(int i=0; i< elsets[j].size(); ++i) {
+			output << elsets[j][i];
+			if (i==elsets[j].size()-1) { output << "," << std::endl; }
+			else if ((i+1)%10 == 0) { output << "," << std::endl; }
+			else { output << ", "; }
+		}
+	}
+
+	// ~~~~~~~~~ NSET ~~~~~~~~~
+	output << "******* N O D E S   S E T S *************" << std::endl;
+	for(int j=0; j< nb_nset;j++) {
+		if (nsets[j].size()>0) {
+			output << "*NSET,NSET=nset" << j << ", instance=Imain" << std::endl;
+			for(int i=0; i< nsets[j].size(); ++i) {
+				output << nsets[j][i]+1;
+				if (i==nsets[j].size()-1) { output << "," << std::endl; }
+				else if ((i+1)%10 == 0) { output << "," << std::endl; }
+				else { output << ", "; }
+			}
+		}
+	}
+	for(int j=0; j< nb_nset;j++) {
+		output << "*NSET,NSET=MasterNode" << j << ", instance=Imain" << std::endl;
+		output << nb_vertices_+1+j << ", " << std::endl;
+	}
+
+	output << "*End Assembly" << std::endl;
+
 }
 
 #endif /* end of include guard: MESH_H */
