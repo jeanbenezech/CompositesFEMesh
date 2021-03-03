@@ -2,25 +2,6 @@ import numpy as np
 import glob
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-def orientation_inp(filename):
-	angle=45*np.pi/180
-	""" permet de creer une table d'orientation abaqus a partir de l'image des troncon issue de la segmentation"""
-	g = open(filename+'.inp','w')
-	g.write('*ORIENTATION, NAME=ori_0\n')
-	g.write('1., 0., 0., 0., 1., 0.\n')
-	g.write('1, 0.\n')
-	g.write('*ORIENTATION, NAME=ori_90\n')
-	g.write('0., 1., 0., -1., 0., 0.\n')
-	g.write('1, 0.\n')
-	g.write('*ORIENTATION, NAME=ori_45\n')
-	g.write(str(np.cos(angle))+', '+str(np.sin(angle))+', 0., '+str(-np.sin(angle))+', '+str(np.cos(angle))+', 0.\n')
-	g.write('1, 0.\n')
-	g.write('*ORIENTATION, NAME=ori_-45\n')
-	g.write(str(np.cos(-angle))+', '+str(np.sin(-angle))+', 0., '+str(-np.sin(-angle))+', '+str(np.cos(-angle))+', 0.\n')
-	g.write('1, 0.\n')
-	g.close()
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if __name__ == '__main__':
 
 	fix=[0, 1]

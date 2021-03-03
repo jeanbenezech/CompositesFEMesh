@@ -807,7 +807,7 @@ void Mesh::write_abaqus_cae_input(const std::string& filename) {
 	if (!output.is_open()) {
 	std::cout << "Error: Cannot open file" << std::endl;
 	} else {
-		std::cout << "Writting " << filename+"_mesh.inp" << std::endl;
+		std::cout << "Writting " << filename+"_CAE.inp" << std::endl;
 	}
 
 	// ~~~~~~~~~ NSET and ElSET preparation ~~~~~~~~~
@@ -891,6 +891,29 @@ void Mesh::write_abaqus_cae_input(const std::string& filename) {
 	}
 	}
 
+
+	output << "*ORIENTATION, NAME=ori_glob" << std::endl;
+	output << "1., 0., 0., 0., 1., 0." << std::endl;
+	output << "1, 0." << std::endl;
+	output << "*DISTRIBUTION, NAME=ori_loc_distribution, LOCATION=ELEMENT, TABLE=ori_tab" << std::endl;
+	output << ", 1.0,  0.0,  0.0,  0.0,  1.0, 0.0" << std::endl;
+
+	for(auto& elem : Elements){
+		for (int i=0; i< elem.nb; i++) {
+			output << elem.global_indices(i) << ", ";
+			output << elem.U(0, i) << ", " << elem.U(1, i) << ", " << elem.U(2, i) << ", ";
+			output << elem.V(0, i) << ", " << elem.V(1, i) << ", " << elem.V(2, i) << std::endl;
+		}
+	}
+
+	output << "*ORIENTATION, NAME=ori_loc" << std::endl;
+	output << "ori_loc_distribution" << std::endl;
+
+
+	for(int j=0; j< nb_elset;j++) {
+		output << "*SOLID SECTION, ELSET=elset" << j+1 << ", ORIENTATION=ori_loc, MATERIAL=myMaterial" << std::endl;
+	}
+
 	// ~~~~~~~~~ E N D  P A R T ~~~~~~~~~
 	output << "*End Part" << std::endl;
 
@@ -955,6 +978,15 @@ void Mesh::write_abaqus_cae_input(const std::string& filename) {
 
 	output << "*End Assembly" << std::endl;
 
+	output << "*DISTRIBUTION TABLE, NAME=ori_tab" << std::endl;
+	output << "coord3d, coord3d" << std::endl;
+
+	output << "**" << std::endl;
+	output << "**---------- MATERIALS ---------- " << std::endl;
+	output << "*MATERIAL, NAME=myMaterial " << std::endl;
+	output << "*ELASTIC, TYPE=ENGINEERING CONSTANTS" << std::endl;
+	output << "137300., 8800., 8800., 0.314, 0.314, 0.487, 4900., 4900." << std::endl;
+	output << "2960." << std::endl;
 }
 
 #endif /* end of include guard: MESH_H */

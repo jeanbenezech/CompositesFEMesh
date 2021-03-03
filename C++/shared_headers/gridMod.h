@@ -189,7 +189,6 @@ void GridTransformation::wrinkles(Vector3f& point){
 	return;
 }
 
-
 /////////////////////////////////////////////////////////////////////////////////////
 
 void find_U(Mesh& m, Vector3f& u, Vector3f bary) {
