@@ -4,8 +4,8 @@
 #include "utils.h"
 #include <cmath>
 #include <cstdlib>
-#include <eigen3/Eigen/Eigenvalues>
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Eigenvalues>
+#include <Eigen/Dense>
 
 using namespace Eigen;
 

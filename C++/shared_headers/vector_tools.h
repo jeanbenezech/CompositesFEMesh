@@ -2,10 +2,12 @@
 
 #include <cmath>
 #include <vector>
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 #include <iostream>
-#include <eigen3/Eigen/LU>
-#include <eigen3/Eigen/Geometry>
+#include <Eigen/LU>
+#include <Eigen/Geometry>
+
+#define PI 3.14159265
 
 using namespace Eigen;
 
@@ -24,7 +26,7 @@ Vector3f rotate_hors_axes(const Vector3f& u, float theta, const Vector3f& v) { /
 		Q(1,2)=-Q(2,1);
 		id.setIdentity();
 		Q2 = Q*Q;
-		theta=theta*M_PI/180;
+		theta=theta*PI/180;
 		R = id + std::sin(theta) * Q + (1-std::cos(theta)) * Q2;
 		urot = R*v;
 		urot.normalize();

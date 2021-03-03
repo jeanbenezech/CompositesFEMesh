@@ -4,8 +4,8 @@
 #include <string>
 #include <sstream>
 #include <regex>
-#include <eigen3/Eigen/LU>
-#include <eigen3/Eigen/Geometry>
+#include <Eigen/LU>
+#include <Eigen/Geometry>
 
 using std::string;
 using namespace Eigen;

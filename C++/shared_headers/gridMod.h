@@ -7,10 +7,12 @@
 
 #include <cmath>
 #include <vector>
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 #include <iostream>
-#include <eigen3/Eigen/LU>
-#include <eigen3/Eigen/Geometry>
+#include <Eigen/LU>
+#include <Eigen/Geometry>
+
+#define PI 3.14159265
 
 using namespace Eigen;
 
@@ -156,12 +158,12 @@ void GridTransformation::OneDir_wrinkles(Vector3f& point, int dim){
 
 	float xref = defect_location[0];
 	float yref = defect_location[1];
-	float zref = defect_location[2] + (ymid - init[1])*tan(wrinkleOri*M_PI/180.0);
+	float zref = defect_location[2] + (ymid - init[1])*tan(wrinkleOri*PI/180.0);
 
 	point[dim] += defect_size \
-		* 1./pow(cosh(damping[0] * M_PI * (init[0] - xref)),2.)\
-		* 1./pow(cosh(damping[1] * M_PI * (init[1] - yref)),2.)\
-		* 1./pow(cosh(damping[2] * M_PI * (init[2] - zref)),2.);
+		* 1./pow(cosh(damping[0] * PI * (init[0] - xref)),2.)\
+		* 1./pow(cosh(damping[1] * PI * (init[1] - yref)),2.)\
+		* 1./pow(cosh(damping[2] * PI * (init[2] - zref)),2.);
 
 	return;
 }
@@ -173,17 +175,17 @@ void GridTransformation::wrinkles(Vector3f& point){
 
 	float xref = defect_location[0];
 	float yref = defect_location[1];
-	float zref = defect_location[2] + (ymid - init[1])*tan(wrinkleOri*M_PI/180.0);
+	float zref = defect_location[2] + (ymid - init[1])*tan(wrinkleOri*PI/180.0);
 
 	point[0] += defect_size \
-		* 1./pow(cosh(damping[0] * M_PI * (init[0] - xref)),2.)\
-		* 1./pow(cosh(damping[1] * M_PI * (init[1] - yref)),2.)\
-		* 1./pow(cosh(damping[2] * M_PI * (init[2] - zref)),2.);
+		* 1./pow(cosh(damping[0] * PI * (init[0] - xref)),2.)\
+		* 1./pow(cosh(damping[1] * PI * (init[1] - yref)),2.)\
+		* 1./pow(cosh(damping[2] * PI * (init[2] - zref)),2.);
 
 	point[1] += 0.5 * defect_size \
-		* 1./pow(cosh(damping[0] * M_PI * (init[0] - xref)),2.)\
-		* 1./pow(cosh(damping[1] * M_PI * (init[1] - yref)),2.)\
-		* 1./pow(cosh(damping[2] * M_PI * (init[2] - zref)),2.);
+		* 1./pow(cosh(damping[0] * PI * (init[0] - xref)),2.)\
+		* 1./pow(cosh(damping[1] * PI * (init[1] - yref)),2.)\
+		* 1./pow(cosh(damping[2] * PI * (init[2] - zref)),2.);
 
 
 	return;
@@ -386,25 +388,25 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 			// No shift in the V direction which is the normal to the ply
 			// if(dim==1){
 			Vector3f local_dir_use_U = baryPu-baryMu;
-			angle1 = -atan2(local_dir_use_U.dot(u)/h,local_dir_use_U.dot(w)/h)*180.0/M_PI+90.0; // atan(dir0/dir2) --> adjacent dir is 2
+			angle1 = -atan2(local_dir_use_U.dot(u)/h,local_dir_use_U.dot(w)/h)*180.0/PI+90.0; // atan(dir0/dir2) --> adjacent dir is 2
 
 			// Vector3f local_dir_use_V = baryPv-baryMv;
-			angle2 = -atan2(local_dir_use_U.dot(v)/h,local_dir_use_U.dot(u)/h)*180.0/M_PI;
+			angle2 = -atan2(local_dir_use_U.dot(v)/h,local_dir_use_U.dot(u)/h)*180.0/PI;
 
 			Vector3f local_dir_use_W = baryPw-baryMw;
-			angle0 = -atan2(local_dir_use_W.dot(w)/h,local_dir_use_W.dot(v)/h)*180.0/M_PI+90.0; // atan(dir2/dir1) --> adjacent dir is 1
+			angle0 = -atan2(local_dir_use_W.dot(w)/h,local_dir_use_W.dot(v)/h)*180.0/PI+90.0; // atan(dir2/dir1) --> adjacent dir is 1
 
 			// ///
 			// Vector3f local_dir_use_U = baryPu-baryMu;
-			// angle1 = -atan2(local_dir_use_U.dot(u)/h,local_dir_use_U.dot(w)/h)*180.0/M_PI+90.0; // atan(dir0/dir2) --> adjacent dir is 2
+			// angle1 = -atan2(local_dir_use_U.dot(u)/h,local_dir_use_U.dot(w)/h)*180.0/PI+90.0; // atan(dir0/dir2) --> adjacent dir is 2
 
 			// ///
 			// Vector3f local_dir_use_V = baryPv-baryMv;
-			// angle2 = -atan2(local_dir_use_V.dot(v)/h,local_dir_use_V.dot(u)/h)*180.0/M_PI+90.0; // atan(dir1/dir0) --> adjacent dir is 0
+			// angle2 = -atan2(local_dir_use_V.dot(v)/h,local_dir_use_V.dot(u)/h)*180.0/PI+90.0; // atan(dir1/dir0) --> adjacent dir is 0
 
 			// ///
 			// Vector3f local_dir_use_W = baryPw-baryMw;
-			// angle0 = -atan2(local_dir_use_W.dot(w)/h,local_dir_use_W.dot(v)/h)*180.0/M_PI+90.0; // atan(dir2/dir1) --> adjacent dir is 1
+			// angle0 = -atan2(local_dir_use_W.dot(w)/h,local_dir_use_W.dot(v)/h)*180.0/PI+90.0; // atan(dir2/dir1) --> adjacent dir is 1
 
 			// if (angle1 > 0.2)
 			// 	std::cout << "angle0 : " << angle0 << ", angle1 : " << angle1 << ", angle2 : " << angle2 << std::endl;
