@@ -13,6 +13,8 @@ include_directories(
 
 )
 
+message("variable is $ENV{EIGEN_INC}")
+
 # the list of source files
 set(SRCS
   src/gridMod.cpp

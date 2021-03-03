@@ -915,7 +915,6 @@ void Mesh::write_abaqus_cae_input(const std::string& filename) {
 	}
 
 	// ~~~~~~~~~ E N D  P A R T ~~~~~~~~~
-	output << "*End Part" << std::endl;
 
 	//ELSET
 	elsets.resize(nb_elset);
@@ -925,15 +924,6 @@ void Mesh::write_abaqus_cae_input(const std::string& filename) {
 				elsets[elem.Markers(0,i)-1].push_back(elem.global_indices(i));
 		}
 	}
-
-
-	output << "*Assembly, name=Assembly" << std::endl;
-
-	output << "*Instance, name=Imain, part=MAIN" << std::endl;
-	output << "*End Instance" << std::endl;
-
-
-
 
 	// ~~~~~~~~~ E L S E T S ~~~~~~~~~
 	output << "******* E L E M E N T S   S E T S *************" << std::endl;
@@ -976,6 +966,11 @@ void Mesh::write_abaqus_cae_input(const std::string& filename) {
 		output << nb_vertices_+1+j << ", " << std::endl;
 	}
 
+	output << "*End Part" << std::endl;
+
+	output << "*Assembly, name=Assembly" << std::endl;
+	output << "*Instance, name=Imain, part=MAIN" << std::endl;
+	output << "*End Instance" << std::endl;
 	output << "*End Assembly" << std::endl;
 
 	output << "*DISTRIBUTION TABLE, NAME=ori_tab" << std::endl;
