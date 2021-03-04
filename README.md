@@ -49,9 +49,9 @@ cmake .. -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc
 make
 ```
 
+---\
 ---
-
-Procedure to execute any C++ code in this repository:
+* **APPLICATION**
 
 For now the python folders (**Csection_mesh** and **Stiffener_mesh**) are used as working directory so a commun use of the tools is:
 ```
@@ -62,7 +62,8 @@ You can now check *parameters.txt* and modify it if needed.
 ```
 python main.py
 ```
-*main.py* provide the command line to use [gmsh](https://gmsh.info/).\
+*main.py* provide the command line to use [gmsh](https://gmsh.info/).
+
 Output: 
 * A mesh in .msh2 format.
 
