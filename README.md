@@ -4,12 +4,12 @@ This repository provide a tool-box (in **pyhton** and **C++**) for composite lam
 The VTK format is mainly used so the user could use [paraview](https://www.paraview.org/) for visualisation.\
 The objective is to provide inputs for [Abaqus](https://www.technia.co.uk/software/simulia/abaqus/) and [Dune-composites](https://gitlab.dune-project.org/anne.reinarz/dune-composites).
 
-⋅⋅* **Csection_mesh** and **Stiffener_mesh** contains **python** scripts which generate the input file (*.geo*) for [gmsh](https://gmsh.info/).
+* **Csection_mesh** and **Stiffener_mesh** contains **python** scripts which generate the input file (*.geo*) for [gmsh](https://gmsh.info/).
 
 * **Csection_mesh** for Csection part but also flat laminate (depending on the option chosen).\
 * **Stiffener_mesh** for T-shape or L-shape stiffeners (depending on the option chosen).
 
-⋅⋅* **C++** folder contains tools for FE mesh manipulation (grid transformation, local material orientation attribution, etc).
+* **C++** folder contains tools for FE mesh manipulation (grid transformation, local material orientation attribution, etc).
 
 * All **C++** tools use the same headers libraries locate in **C++/shared_headers**.\
 * **C++/gridModification** is used for material orientation attribution and potentially grid transformation (a ramp for the Csection or a wrinkle).\
@@ -24,7 +24,7 @@ For windows, all cmake command have to be followed by:
 -G "Unix Makefiles"
 ```
 
-⋅⋅* [eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) installation (as provided by eigen doc) and linkage to these tools:
+* [eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) installation (as provided by eigen doc) and linkage to these tools:
 
 ```
 git clone https://gitlab.com/libeigen/eigen.git
@@ -42,7 +42,7 @@ make install
 This last needs administrator priviledge.\
 Now you have to specify the path_to_eigen in your environment variable at the name *EIGEN_INC*.
 
-⋅⋅* **gridModification** and **odb2vtk**:
+* **gridModification** and **odb2vtk**:
 ```
 cd build
 cmake .. -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc
@@ -63,7 +63,8 @@ You can now check *parameters.txt* and modify it if needed.
 python main.py
 ```
 *main.py* provide the command line to use [gmsh](https://gmsh.info/).\
-Output: a mesh in .msh2 format.
+Output: 
+* A mesh in .msh2 format.
 
 From now, you may need to mkdir an **Abaqus** and/or **DUNE** folders if they are not in the current folder. Then:
 ```
