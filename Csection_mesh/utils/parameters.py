@@ -88,7 +88,6 @@ class parameters():
 
 	def write_input_orientation(self, filename):
 		f=open(filename, 'w')
-		val = 1
 
 		f.write(str(len(self.refOriPoint))+'\n')
 		for point in self.refOriPoint:
