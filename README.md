@@ -6,12 +6,12 @@ The objective is to provide inputs for [Abaqus](https://www.technia.co.uk/softwa
 
 * **Csection_mesh** and **Stiffener_mesh** contains **python** scripts which generate the input file (*.geo*) for [gmsh](https://gmsh.info/).
 
-* **Csection_mesh** for Csection part but also flat laminate (depending on the option chosen).\
+* **Csection_mesh** for Csection part but also flat laminate (depending on the option chosen).
 * **Stiffener_mesh** for T-shape or L-shape stiffeners (depending on the option chosen).
 
 * **C++** folder contains tools for FE mesh manipulation (grid transformation, local material orientation attribution, etc).
 
-* All **C++** tools use the same headers libraries locate in **C++/shared_headers**.\
+* All **C++** tools use the same headers libraries locate in **C++/shared_headers**.
 * **C++/gridModification** is used for material orientation attribution and potentially grid transformation (a ramp for the Csection or a wrinkle).\
 * **C++/odb2vtk** provides examples of ODB results reader (**C++/odb2vtk/Abaqus2txt_examples**) to extract Abaqus results as a list save in a *.txt* file; and a **C++** function (**C++/odb2vtk**) used to associate these extracted data to the corresponding mesh in VTK format.
 

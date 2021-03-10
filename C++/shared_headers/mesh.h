@@ -74,21 +74,26 @@ private:
 void Mesh::initialise(const int nb_plies) {
 
 	stacking_sequence.resize(nb_plies);
-	
+
+
 	stacking_sequence[0] =  45.0;
 	stacking_sequence[1] = -45.0;
 	stacking_sequence[2] =  90.0;
 	stacking_sequence[3] =   0.0;
 	stacking_sequence[4] = -45.0;
 	stacking_sequence[5] =  45.0;
-	stacking_sequence[6] =  45.0;
-	stacking_sequence[7] = -45.0;
-	stacking_sequence[8] =  90.0;
-	stacking_sequence[9] =   0.0;
-	stacking_sequence[10]= -45.0;
-	stacking_sequence[11]=  45.0;
-	for(int i=0; i< 12;i++){
-		stacking_sequence[12+i] = stacking_sequence[11-i];
+	if (nb_plies>6){
+		stacking_sequence[6] =  45.0;
+		stacking_sequence[7] = -45.0;
+		stacking_sequence[8] =  90.0;
+		stacking_sequence[9] =   0.0;
+		stacking_sequence[10]= -45.0;
+		stacking_sequence[11]=  45.0;
+	}
+	if (nb_plies>12){
+		for(int i=0; i< 12;i++){
+			stacking_sequence[12+i] = stacking_sequence[11-i];
+		}
 	}
 
 }
