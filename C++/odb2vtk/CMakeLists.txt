@@ -29,4 +29,4 @@ endif()
 find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
 add_executable(odb2vtk ${SRCS})
-target_link_libraries (gridMod Eigen3::Eigen)
+target_link_libraries (odb2vtk Eigen3::Eigen)

@@ -18,12 +18,13 @@ int main(int argc, const char *argv[]) {
 	std::string mesh_name = param.meshname.substr(0, lastindex);
 	m.read_msh(mesh_name+".msh", true, param.cz_id);
 
-	m.read_elem_fields(param.path_to_abaqus_result+param.AbaqusOdbName+".txt");
+	// m.read_elem_fields(param.path_to_abaqus_result+param.AbaqusOdbName+".txt");
 	m.read_node_fields(param.path_to_abaqus_result+param.AbaqusOdbName+"_U.txt");
 
-	m.exportAbaqusFields = true;
+	// m.exportAbaqusFields = true;
+	m.exportAbaqusDisplacement = true;
 
-	m.write_vtk("Abaqus_result");
+	m.write_vtk(param.path_to_abaqus_result+param.AbaqusOdbName);
 
 	return 0;
 }

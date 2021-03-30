@@ -22,23 +22,14 @@ def add_c_line(geo, param, line, cntL, stype):
 	cntL+=1
 	return cntL
 
-def add_y_lines(geo, param, cntL, Ylines):
+def add_y_lines(geo, param, cntL, Ylines, layer_type=0):
 
-	if param.resin==0:
+	if layer_type==0: # ply layer
 		val=param.ddy
-	else:
-		if param.CZ==1:
-			if dy%4==1: # comp layer discr
-				val=param.ddy
-			elif dy%2==0:  # resin layer discr
-				val=param.ddy
-			else:
-				val=1
-		else:
-			if dy%2==1:
-				val=param.ddy
-			else:
-				val=param.ddy
+	elif layer_type==1: # resin layer
+		val=param.ddy
+	elif layer_type==2: # Cohezive layer
+		val=1
 
 	for i in range(len(param.substr)+1):
 		geo.Lines.append([Ylines[0][i], Ylines[1][i]])
@@ -53,10 +44,10 @@ def add_y_lines(geo, param, cntL, Ylines):
 def front_surf(param, geo, rep, cntL, cntS, dy, layer_type=0):
 
 	incr_vol = int((dy-1)/2)
-	if param.CZ:
+	if param.CZ and param.resin:
 		incr_vol=int((dy-1)/4)
 	# print(geo.delta_v)
-	if param.resin==0: # Case where there is no resin layer between plies
+	if param.resin==0 and param.CZ==0: # Case where there is no resin layer between plies
 		incr_vol = (dy-1)
 
 	start = cntL - (4*len(param.substr) + 2)
@@ -67,9 +58,12 @@ def front_surf(param, geo, rep, cntL, cntS, dy, layer_type=0):
 		geo.Surfaces.append([start + k, start + k + yline_start + 2, start + k + yline_start + 1, start + k + newXline_start + 1])
 
 		if layer_type==1: # resin layer
-			geo.Physical_volumes[-2].append(cntS)
+			if param.CZ:
+				geo.Physical_volumes[-2].append(cntS)
+			else:
+				geo.Physical_volumes[-1].append(cntS)
 		elif layer_type==2: # Cohezive layer
-			geo.Physical_volumes[-3].append(cntS)
+			geo.Physical_volumes[-1].append(cntS)
 		else:
 			geo.Physical_volumes[incr_vol+geo.delta_v].append(cntS)
 

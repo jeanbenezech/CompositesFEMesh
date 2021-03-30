@@ -24,22 +24,33 @@ int main(int argc, const char *argv[]) {
 	m.exportDir = true;
 
 	if(param.Shape==0)
-		localCoorSyst(m);
+		localCoorSyst(m, param);
 	else
 		globalCoorSyst(m);
 
+	std::cout << "ici" << std::endl;
+
 	GeometricTransformation(m, param);
-	StackingSequence(m);
+	StackingSequence(m, param);
+
+	std::cout << "ici" << std::endl;
 
 	if (param.Abaqus_output){ // ABAQUS
 		m.write_ori_inp("Abaqus/"+mesh_name);
 		m.write_inp("Abaqus/"+mesh_name);
-		m.write_abaqus_cae_input("Abaqus/"+mesh_name);
+		m.write_abaqus_cae_input("Abaqus/"+mesh_name, param);
 	}
 
+	std::cout << "ici" << std::endl;
+
 	if (param.Dune_output){ // DUNE
-		m.write_ori_txt("DUNE/"+mesh_name);
-		m.write_msh("DUNE/"+mesh_name);
+		if (param.add_wrinkles==1){
+			m.write_ori_txt("DUNE/"+param.WID+"_"+mesh_name);
+			m.write_msh("DUNE/"+param.WID+"_"+mesh_name);
+		} else {
+			m.write_ori_txt("DUNE/"+mesh_name);
+			m.write_msh("DUNE/"+mesh_name);
+		}
 	}
 
 	m.write_vtk(mesh_name);

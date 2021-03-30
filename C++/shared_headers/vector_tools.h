@@ -11,10 +11,10 @@
 
 using namespace Eigen;
 
-Vector3f rotate_hors_axes(const Vector3f& u, float theta, const Vector3f& v) { // ref vector, angle, vector to be rot
-	Vector3f urot;
+Vector3d rotate_hors_axes(const Vector3d& u, double theta, const Vector3d& v) { // ref vector, angle, vector to be rot
+	Vector3d urot;
 	if (std::abs(theta)>0.0) {
-		Matrix3f Q,R,id,Q2;
+		Matrix3d Q,R,id,Q2;
 		Q(0,0)=0.0;
 		Q(1,1)=0.0;
 		Q(2,2)=0.0;

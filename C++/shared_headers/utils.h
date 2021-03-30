@@ -99,14 +99,14 @@ std::vector<int> splitngetINT(std::string& line) {
 
 bool isnul(VectorXf& v) {
 	bool nul=true;
-	float epsi = 0.00001;
+	double epsi = 0.00001;
 	for(int i=0; i<v.size();i++) {if(v(i)>epsi) {nul=false;break;}}
 	return nul;
 }
 
-bool issame(Vector3f old, Vector3f nouveau) {
+bool issame(Vector3d old, Vector3d nouveau) {
 	bool same=true;
-	float epsi = 0.001;
+	double epsi = 0.001;
 	for(int i=0; i<3;i++) {
 		if(std::abs(old(i)-nouveau(i))>epsi) {
 			same=false;
@@ -116,9 +116,9 @@ bool issame(Vector3f old, Vector3f nouveau) {
 	return same;
 }
 
-bool issame2(Vector3f old, Vector3f nouveau) {
+bool issame2(Vector3d old, Vector3d nouveau) {
 	bool same=false;
-	float epsi = 0.001;
+	double epsi = 0.001;
 	if(std::abs(old(0)-nouveau(0))<epsi && std::abs(old(1)-nouveau(1))<epsi && std::abs(old(2)-nouveau(2))<epsi) {
 		same=true;
 	}
@@ -166,7 +166,7 @@ std::string int2string(int f) {
   return os.str();
 }
 
-std::string float2string(float f) {
+std::string double2string(double f) {
   std::ostringstream os;
   os << f;
   return os.str();

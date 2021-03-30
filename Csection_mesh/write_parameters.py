@@ -16,7 +16,7 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~GEOMETRY~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('np(i)         : 24\n')    #
+	parameters.write('np(i)         : 6\n')     # 6, 12 or 24 # TODO: find a clever way of setting stacking sequence
 	parameters.write('X(f)          : 150\n')   #
 	parameters.write('Y(f)          : 6.48\n')  #
 	parameters.write('R(f)          : 10\n')    #
@@ -29,15 +29,15 @@ def write_parameters():
 	parameters.write('lc(f)    : 1\n')        # mesh caracteristic size
 	parameters.write('dx(i)    : 12\n')       #
 	parameters.write('ddy(i)   : 2\n')        #
-	parameters.write('dz(i)    : 30\n')       #
+	parameters.write('dz(i)    : 20\n')       #
 	parameters.write('dc(i)    : 7\n')        #
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~TRANSFORMATION~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('wrinkle(b)        : 1\n') # Do we need to add wrinkle in the gridMod (c++) code
-	parameters.write('Ramp(b)           : 0\n') #
+	parameters.write('wrinkle(b)        : 0\n') # Do we need to add wrinkle in the gridMod (c++) code
+	parameters.write('Ramp(b)           : 1\n') #
 	parameters.write('Abaqus_output(b)  : 1\n') #
-	parameters.write('Dune_output(b)    : 0\n') #
+	parameters.write('Dune_output(b)    : 1\n') #
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~WRINKLES~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')

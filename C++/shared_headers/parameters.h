@@ -14,8 +14,8 @@ std::string extract(std::string line) {
 	return out;
 }
 
-Vector3f vectorExtract(std::string line){
-	Vector3f out;
+Vector3d vectorExtract(std::string line){
+	Vector3d out;
 	size_t begin = line.find_last_of(":")+2U;
 	std::string myvector = line.substr(begin, line.size());
 	size_t coma1 = myvector.find_first_of(",");
@@ -36,16 +36,19 @@ public:
 	bool Abaqus_output;
 	bool Dune_output;
 	int nb_plies;
-	int cz_id;
+
+	int cz_id, resin_id;
+	bool isResin, isCZ;
 
 	// Wrinkle parameters
-	float wrinkleSize;
-	Vector3f wrinklePos;
-	Vector3f wrinkleDamp;
-	float wrinkleOri;
+	std::string WID;
+	double wrinkleSize;
+	Vector3d wrinklePos;
+	Vector3d wrinkleDamp;
+	double wrinkleOri;
 
 	// Ramp parameters
-	float rampSize;
+	double rampSize;
 
 	// Path to results
 	std::string path_to_abaqus_result;
@@ -77,7 +80,10 @@ void Parameters::read(const std::string& filename) {
 			Shape = std::stoi(extract(line));
 
 		if (line.find("Resin_betw_plies")!=std::string::npos)
-			cz_id = std::stoi(extract(line));
+			isResin = std::stoi(extract(line));
+
+		if (line.find("cohezive_elements")!=std::string::npos)
+			isCZ = std::stoi(extract(line));
 
 		if (line.find("np(i)")!=std::string::npos)
 			nb_plies = std::stoi(extract(line));
@@ -100,6 +106,9 @@ void Parameters::read(const std::string& filename) {
 		if (line.find("Rsize(f)")!=std::string::npos)
 			rampSize = std::stof(extract(line));
 
+		if (line.find("WID(s)")!=std::string::npos)
+			WID = extract(line);
+
 		if (line.find("Wsize(f)")!=std::string::npos)
 			wrinkleSize = std::stof(extract(line));
 
@@ -119,6 +128,17 @@ void Parameters::read(const std::string& filename) {
 			AbaqusOdbName = extract(line);
 
 		std::getline(input, line);
+	}
+
+	cz_id = -1;
+	resin_id = -1;
+	if (isResin && isCZ){
+		cz_id = nb_plies+2;
+		resin_id = nb_plies+1;
+	} else if (isResin && !isCZ) {
+		resin_id = nb_plies+1;
+	} else if (!isResin && isCZ) {
+		cz_id = nb_plies+1;
 	}
 }
 

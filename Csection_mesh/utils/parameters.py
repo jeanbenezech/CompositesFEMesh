@@ -27,7 +27,6 @@ class parameters():
 				 dc=None,
 				 nbp_by_surf=None,
 				 nbl_by_surf=None,
-				 nb_total_plies=None,
 				 X=None,
 				 Height=None,
 				 Y=None,
@@ -75,16 +74,12 @@ class parameters():
 		elif self.Shape==1: # Flat laminate
 			self.substr.append(substr4)
 
-		if self.resin:
-			if self.CZ: # 1 ply = 1 comp layer + 2 resin elastic layer + 1 CZ (-3 at the end because no resin at the top)
-				self.dy = 4*self.nbp-2
-			else:
-				self.dy = 2*self.nbp
+		if self.resin and self.CZ:
+			self.dy = 4*self.nbp-2 # 1 ply = 1 comp layer + 2 resin elastic layer + 1 CZ (-3 at the end because no resin at the top)
+		elif self.resin or self.CZ:
+			self.dy = 2*self.nbp
 		else:
 			self.dy = (self.nbp+1)
-
-		# To define the size of Volume vector
-		self.nb_total_plies = 3*(self.dy-1) # 3* mid plus limbs
 
 	def write_input_orientation(self, filename):
 		f=open(filename, 'w')
@@ -113,8 +108,8 @@ def read_parameters(param):
 	param.resin = int(dico['Resin_betw_plies'])
 	param.recombine = int(dico['recombine'])
 	param.CZ = int(dico['cohezive_elements'])
-	if param.resin==0:
-		param.CZ = 0
+	# if param.resin==0:
+	# 	param.CZ = 0
 
 	param.nbp = int(dico['np'])
 	param.X = float(dico['X'])

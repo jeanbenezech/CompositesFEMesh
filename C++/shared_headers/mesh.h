@@ -3,8 +3,10 @@
 
 #include "utils.h"
 #include "element.h"
+#include "parameters.h"
 #include <iostream>
 #include <fstream>
+#include <iomanip>
 #include <cmath>
 #include <cstdlib>
 #include <Eigen/Eigenvalues>
@@ -15,7 +17,7 @@ using namespace Eigen;
 class Mesh {
 public:
 	// PRINCIPAL VARIABLES
-	Matrix<float, Dynamic, Dynamic> vertices;
+	Matrix<double, Dynamic, Dynamic> vertices;
 	std::vector<Element> Elements;
 
 	std::string mesh_type;
@@ -23,7 +25,7 @@ public:
 	int nb_nset=0;
 	int nb_elset=0;
 
-	std::vector<float> stacking_sequence;
+	std::vector<double> stacking_sequence;
 	int nb_corner, type;
 	std::vector<Vector2f> P;
 
@@ -46,11 +48,12 @@ public:
 	void write_msh(const std::string& filename, int verbosity);
 	bool exportDir=false;
 	bool exportAbaqusFields=false;
+	bool exportAbaqusDisplacement=false;
 	void write_vtk(const std::string& filename, int verbosity);
 	void write_inp(const std::string& filename);
 	void write_ori_txt(const std::string& filename);
 	void write_ori_inp(const std::string& filename);
-	void write_abaqus_cae_input(const std::string& filename);
+	void write_abaqus_cae_input(const std::string& filename, Parameters& param);
 
 	void initialise(const int nb_plies);
 	void print(std::string type, int number);
@@ -74,6 +77,13 @@ private:
 void Mesh::initialise(const int nb_plies) {
 
 	stacking_sequence.resize(nb_plies);
+
+	// stacking_sequence[0] =  90.0;
+	// stacking_sequence[1] =  90.0;
+	// stacking_sequence[2] =  90.0;
+	// stacking_sequence[3] =  90.0;
+	// stacking_sequence[4] =  90.0;
+	// stacking_sequence[5] =  90.0;
 
 
 	stacking_sequence[0] =  45.0;
@@ -136,7 +146,7 @@ void Mesh::read_mesh(const std::string& filename) {
 	vertices.resize(3, nb_vertices_);
 	//std::cout << nb_vertices_ << std::endl;
 	for(int i=0; i< nb_vertices_; ++i) {
-		float x, y, z, d;
+		double x, y, z, d;
 		input >> x >> y >> z >> d;
 		vertices(0,i)=x;
 		vertices(1,i)=y;
@@ -228,7 +238,7 @@ void Mesh::read_msh(const std::string& filename, bool only_3D, int cz_id) {
 	std::string ligne {};
 	std::getline(input, ligne); // $MeshFormat
 
-	float version;
+	double version;
 	input >> version;
 	//~ std::cout << version << std::endl;
 
@@ -244,7 +254,7 @@ void Mesh::read_msh(const std::string& filename, bool only_3D, int cz_id) {
 
 	vertices.resize(3, nb_vertices_);
 	for(int i=0; i< nb_vertices_; ++i) {
-		float x, y, z, d;
+		double x, y, z, d;
 		input >> d >> x >> y >> z;
 		vertices(0,d-1)=x;
 		vertices(1,d-1)=y;
@@ -328,27 +338,27 @@ void Mesh::read_msh(const std::string& filename, bool only_3D, int cz_id) {
 	}
 
 	if(istet){
-		Elements[incr_elem].initialise("Tetrahedron", ltet.size(), ltet[0][2]-1);
+		Elements[incr_elem].initialise("Tetrahedron", ltet.size(), 1);//ltet[0][2]-1);
 		Elements[incr_elem].fill(ltet, nb_elset);
 		incr_elem += 1;
 	}
 	if(ishex){
-		Elements[incr_elem].initialise("Hexahedron", lhex.size(), lhex[0][2]-1);
+		Elements[incr_elem].initialise("Hexahedron", lhex.size(), 1);//lhex[0][2]-1);
 		Elements[incr_elem].fill(lhex, nb_elset);
 		incr_elem += 1;
 	}
 	if(iscoh){
-		Elements[incr_elem].initialise("Cohesive", lcoh.size(), lcoh[0][2]-1);
+		Elements[incr_elem].initialise("Cohesive", lcoh.size(), 1);//lcoh[0][2]-1);
 		Elements[incr_elem].fill(lcoh, nb_elset);
 		incr_elem += 1;
 	}
 	if(iswed){
-		Elements[incr_elem].initialise("Prism", lwed.size(), lwed[0][2]-1);
+		Elements[incr_elem].initialise("Prism", lwed.size(), 1);//lwed[0][2]-1);
 		Elements[incr_elem].fill(lwed, nb_elset);
 		incr_elem += 1;
 	}
 	if(ispyr){
-		Elements[incr_elem].initialise("Pyramid", lpyr.size(), lpyr[0][2]-1);
+		Elements[incr_elem].initialise("Pyramid", lpyr.size(), 1);//lpyr[0][2]-1);
 		Elements[incr_elem].fill(lpyr, nb_elset);
 		incr_elem += 1;
 	}
@@ -480,7 +490,7 @@ void Mesh::write_msh(const std::string& filename, int verbosity=1) {
 	output << "$Nodes" << std::endl;
 	output << nb_vertices_ << std::endl;
 	for(int i=0; i< nb_vertices_; ++i) {
-		output << i+1 << " " << vertices(0,i) << " " << vertices(1,i) << " " << vertices(2,i) << std::endl;
+		output << std::setprecision(15) << i+1 << " " << vertices(0,i) << " " << vertices(1,i) << " " << vertices(2,i) << std::endl;
 	}
 	output << "$EndNodes" << std::endl;
 	output << "$Elements" << std::endl;
@@ -520,7 +530,7 @@ void Mesh::write_vtk(const std::string& filename, int verbosity=0) {
 	output << "ASCII\n";
 	output << "DATASET UNSTRUCTURED_GRID\n";
 
-	output << "POINTS " << nb_vertices_ << " float" << std::endl;
+	output << "POINTS " << nb_vertices_ << " double" << std::endl;
 	for (int i=0; i< nb_vertices_; i++) {
 		output << vertices(0,i) << " " << vertices(1,i) << " " << vertices(2,i) << std::endl;
 	}
@@ -559,21 +569,21 @@ void Mesh::write_vtk(const std::string& filename, int verbosity=0) {
 	}
 
 	if (exportDir){
-		output << "SCALARS U float 3\n";
+		output << "SCALARS U double 3\n";
 		output << "LOOKUP_TABLE default\n";
 		for(auto& elem : Elements){
 			for (int i=0; i< elem.nb; i++) {
 				output << elem.U(0, i) << " " << elem.U(1, i) << " " << elem.U(2, i) << std::endl;
 			}
 		}
-		output << "SCALARS V float 3\n";
+		output << "SCALARS V double 3\n";
 		output << "LOOKUP_TABLE default\n";
 		for(auto& elem : Elements){
 			for (int i=0; i< elem.nb; i++) {
 				output << elem.V(0, i) << " " << elem.V(1, i) << " " << elem.V(2, i) << std::endl;
 			}
 		}
-		output << "SCALARS W float 3\n";
+		output << "SCALARS W double 3\n";
 		output << "LOOKUP_TABLE default\n";
 		for(auto& elem : Elements){
 			for (int i=0; i< elem.nb; i++) {
@@ -583,31 +593,33 @@ void Mesh::write_vtk(const std::string& filename, int verbosity=0) {
 	}
 
 	if (exportAbaqusFields){
-		output << "SCALARS S float 6\n";
+		output << "SCALARS S double 6\n";
 		output << "LOOKUP_TABLE default\n";
 		for (int i=0; i< Tot_cells_; i++) {
 			output << S(0, i) << " " << S(1, i) << " " << S(2, i) << " " <<  S(3, i) << " " << S(4, i) << " " << S(5, i) << std::endl;
 		}
 
-		output << "SCALARS E float 6\n";
+		output << "SCALARS E double 6\n";
 		output << "LOOKUP_TABLE default\n";
 		for (int i=0; i< Tot_cells_; i++) {
 			output << E(0, i) << " " << E(1, i) << " " << E(2, i) << " " <<  E(3, i) << " " << E(4, i) << " " << E(5, i) << std::endl;
 		}
 
-		output << "SCALARS SDEG float 1\n";
+		output << "SCALARS SDEG double 1\n";
 		output << "LOOKUP_TABLE default\n";
 		for (int i=0; i< Tot_cells_; i++) {
 			output << SDEG(0, i) << std::endl;
 		}
-		output << "SCALARS QUADSCRT float 1\n";
+		output << "SCALARS QUADSCRT double 1\n";
 		output << "LOOKUP_TABLE default\n";
 		for (int i=0; i< Tot_cells_; i++) {
 			output << QUADSCRT(0, i) << std::endl;
 		}
+	}
 
+	if (exportAbaqusDisplacement){
 		output << "POINT_DATA " << nb_vertices_ << std::endl;
-		output << "SCALARS U float 3\n";
+		output << "SCALARS U double 3\n";
 		output << "LOOKUP_TABLE default\n";
 		for (int i=0; i< nb_vertices_; i++) {
 			output << U(0, i) << " " << U(1, i) << " " << U(2, i) << std::endl;
@@ -633,9 +645,9 @@ void Mesh::write_ori_txt(const std::string& filename) {
 			output << elem.global_indices(i) << " ";
 			output << elem.Markers(0, i) << " ";
 			output << stacking_sequence[elem.Markers(0, i) - 1] << " ";
-			output << elem.U(0, i) << " " << elem.U(1, i) << " " << elem.U(2, i) << " ";
-			output << elem.V(0, i) << " " << elem.V(1, i) << " " << elem.V(2, i) << " ";
-			output << elem.W(0, i) << " " << elem.W(1, i) << " " << elem.W(2, i) << std::endl;
+			output << std::setprecision(15) << elem.U(0, i) << " " << elem.U(1, i) << " " << elem.U(2, i) << " ";
+			output << std::setprecision(15) << elem.V(0, i) << " " << elem.V(1, i) << " " << elem.V(2, i) << " ";
+			output << std::setprecision(15) << elem.W(0, i) << " " << elem.W(1, i) << " " << elem.W(2, i) << std::endl;
 		}
 	}
 }
@@ -659,8 +671,8 @@ void Mesh::write_ori_inp(const std::string& filename) {
 	for(auto& elem : Elements){
 		for (int i=0; i< elem.nb; i++) {
 			output << elem.global_indices(i) << ", ";
-			output << elem.U(0, i) << ", " << elem.U(1, i) << ", " << elem.U(2, i) << ", ";
-			output << elem.V(0, i) << ", " << elem.V(1, i) << ", " << elem.V(2, i) << std::endl;
+			output << std::setprecision(15) << elem.U(0, i) << ", " << elem.U(1, i) << ", " << elem.U(2, i) << ", ";
+			output << std::setprecision(15) << elem.V(0, i) << ", " << elem.V(1, i) << ", " << elem.V(2, i) << std::endl;
 		}
 	}
 
@@ -679,14 +691,14 @@ void Mesh::write_inp(const std::string& filename) {
 
 	// ~~~~~~~~~ NSET and ElSET preparation ~~~~~~~~~
 	std::vector<std::vector<int>> nsets, elsets;
-	std::vector<Vector3f> masterNodes;
+	std::vector<Vector3d> masterNodes;
 
 	// ~~~~~~~~~ NSET ~~~~~~~~~
 	nb_nset=6;
 	nsets.resize(nb_nset);
 	masterNodes.resize(nb_nset);
 
-	float xmin, xmax, ymin, ymax, zmin, zmax;
+	double xmin, xmax, ymin, ymax, zmin, zmax;
 	xmin=ymin=zmin=  10000;
 	xmax=ymax=zmax= -10000;
 	for (int i=0; i<nb_vertices_;i++) {
@@ -698,7 +710,7 @@ void Mesh::write_inp(const std::string& filename) {
 		if (zmax < vertices(2, i)) {zmax = vertices(2, i);}
 	}
 
-	float epsi=0.01;
+	double epsi=0.01;
 
 	for (int i=0; i<nb_vertices_;i++) {
 		if (vertices(0, i)-xmin<epsi) {nsets[0].push_back(i);}
@@ -806,7 +818,7 @@ void Mesh::write_inp(const std::string& filename) {
 	}
 }
 
-void Mesh::write_abaqus_cae_input(const std::string& filename) {
+void Mesh::write_abaqus_cae_input(const std::string& filename, Parameters& param) {
 	std::ofstream output;
 	output.open(filename+"_CAE.inp", std::ios::out);
 	if (!output.is_open()) {
@@ -817,14 +829,14 @@ void Mesh::write_abaqus_cae_input(const std::string& filename) {
 
 	// ~~~~~~~~~ NSET and ElSET preparation ~~~~~~~~~
 	std::vector<std::vector<int>> nsets, elsets;
-	std::vector<Vector3f> masterNodes;
+	std::vector<Vector3d> masterNodes;
 
 	// ~~~~~~~~~ NSET ~~~~~~~~~
 	nb_nset=6;
 	nsets.resize(nb_nset);
 	masterNodes.resize(nb_nset);
 
-	float xmin, xmax, ymin, ymax, zmin, zmax;
+	double xmin, xmax, ymin, ymax, zmin, zmax;
 	xmin=ymin=zmin=  10000;
 	xmax=ymax=zmax= -10000;
 	for (int i=0; i<nb_vertices_;i++) {
@@ -836,7 +848,7 @@ void Mesh::write_abaqus_cae_input(const std::string& filename) {
 		if (zmax < vertices(2, i)) {zmax = vertices(2, i);}
 	}
 
-	float epsi=0.01;
+	double epsi=0.01;
 
 	for (int i=0; i<nb_vertices_;i++) {
 		if (vertices(0, i)-xmin<epsi) {nsets[0].push_back(i);}
@@ -861,15 +873,35 @@ void Mesh::write_abaqus_cae_input(const std::string& filename) {
 		masterNodes[j](2)/=nsets[j].size();
 	}
 
+	//ELSET
+	elsets.resize(nb_elset);
+	for(auto& elem : Elements){
+		if(elem.type != "Triangle" || elem.type != "Quadrilateral"){ // We would ony use 3D elements in Abaqus (that could change later)
+			for (int i=0; i< elem.nb; i++)
+				elsets[elem.Markers(0,i)-1].push_back(elem.global_indices(i));
+		}
+	}
+
 
 	std::cout << nb_nset            << " NSETs"  << std::endl;
 	std::cout << nb_elset           << " ELSETs"  << std::endl;
 
+	// Headings
+	output << "*Heading" << std::endl;
+	output << "**" << std::endl;
+	output << "*Preprint, echo=NO, model=NO, history=NO, contact=NO" << std::endl;
+
 	// ~~~~~~~~~ P A R T ~~~~~~~~~
+	output << "**" << std::endl;
+	output << "** PARTS" << std::endl;
+	output << "**" << std::endl;
 	output << "*Part, name=MAIN" << std::endl;
 
 	// ~~~~~~~~~ N O D E S ~~~~~~~~~
 
+	output << "**" << std::endl;
+	output << "** NODES" << std::endl;
+	output << "**" << std::endl;
 	output << "*NODE" << std::endl;
 	output << nb_vertices_+nb_nset << std::endl; // Plus the number of master nodes
 	for(int i=0; i< nb_vertices_; ++i) {
@@ -882,8 +914,9 @@ void Mesh::write_abaqus_cae_input(const std::string& filename) {
 
 	// ~~~~~~~~~ E L E M E N T S ~~~~~~~~~
 
-	output << "******* E L E M E N T S *************" << std::endl;
-
+	output << "**" << std::endl;
+	output << "** ELEMENTS" << std::endl;
+	output << "**" << std::endl;
 	for(auto& elem : Elements){
 	if(elem.type != "Triangle" || elem.type != "Quadrilateral"){ // We would ony use 3D elements in Abaqus (that could change later)
 		output << "*ELEMENT, type=" << elem.abaqus_type << ", ELSET=" << elem.type << std::endl;
@@ -896,43 +929,11 @@ void Mesh::write_abaqus_cae_input(const std::string& filename) {
 	}
 	}
 
-
-	output << "*ORIENTATION, NAME=ori_glob" << std::endl;
-	output << "1., 0., 0., 0., 1., 0." << std::endl;
-	output << "1, 0." << std::endl;
-	output << "*DISTRIBUTION, NAME=ori_loc_distribution, LOCATION=ELEMENT, TABLE=ori_tab" << std::endl;
-	output << ", 1.0,  0.0,  0.0,  0.0,  1.0, 0.0" << std::endl;
-
-	for(auto& elem : Elements){
-		for (int i=0; i< elem.nb; i++) {
-			output << elem.global_indices(i) << ", ";
-			output << elem.U(0, i) << ", " << elem.U(1, i) << ", " << elem.U(2, i) << ", ";
-			output << elem.V(0, i) << ", " << elem.V(1, i) << ", " << elem.V(2, i) << std::endl;
-		}
-	}
-
-	output << "*ORIENTATION, NAME=ori_loc" << std::endl;
-	output << "ori_loc_distribution" << std::endl;
-
-
-	for(int j=0; j< nb_elset;j++) {
-		output << "*SOLID SECTION, ELSET=elset" << j+1 << ", ORIENTATION=ori_loc, MATERIAL=myMaterial" << std::endl;
-	}
-
-	// ~~~~~~~~~ E N D  P A R T ~~~~~~~~~
-
-	//ELSET
-	elsets.resize(nb_elset);
-	for(auto& elem : Elements){
-		if(elem.type != "Triangle" || elem.type != "Quadrilateral"){ // We would ony use 3D elements in Abaqus (that could change later)
-			for (int i=0; i< elem.nb; i++)
-				elsets[elem.Markers(0,i)-1].push_back(elem.global_indices(i));
-		}
-	}
-
-	// ~~~~~~~~~ E L S E T S ~~~~~~~~~
-	output << "******* E L E M E N T S   S E T S *************" << std::endl;
-	output << "*ELSET,ELSET=All_elements, instance=Imain" << std::endl;
+	// ~~~~~~~~~ ELSETS ~~~~~~~~~
+	output << "**" << std::endl;
+	output << "** ELEMENTS SETS" << std::endl;
+	output << "**" << std::endl;
+	output << "*ELSET,ELSET=All_elements" << std::endl;
 	for(auto& elem : Elements){
 		if(elem.type != "Triangle" || elem.type != "Quadrilateral"){ // We would ony use 3D elements in Abaqus (that could change later)
 			for (int i=0; i< elem.nb; i++){
@@ -944,7 +945,7 @@ void Mesh::write_abaqus_cae_input(const std::string& filename) {
 	}
 	output << std::endl;
 	for(int j=0; j< nb_elset;j++) {
-		output << "*ELSET,ELSET=elset" << j+1 << ", instance=Imain" << std::endl;
+		output << "*ELSET,ELSET=elset" << j+1 << std::endl;
 		for(int i=0; i< elsets[j].size(); ++i) {
 			output << elsets[j][i];
 			if (i==elsets[j].size()-1) { output << "," << std::endl; }
@@ -953,8 +954,47 @@ void Mesh::write_abaqus_cae_input(const std::string& filename) {
 		}
 	}
 
+	
+	output << "*SOLID SECTION, ELSET= Hexahedron, ORIENTATION=ori_loc, MATERIAL=myMaterial" << std::endl;
+
+	if(param.isCZ){
+		output << "*COHESIVE SECTION, ELSET= Cohesive, MATERIAL=CZ, STACK DIRECTION=1, RESPONSE=TRACTION SEPARATION, THICKNESS=GEOMETRY" << std::endl;
+		// output << "*COHESIVE SECTION, ELSET=Cohesive, MATERIAL=CZ, STACK DIRECTION=3, RESPONSE=TRACTION SEPARATION" << std::endl;
+		// output << " 0.001" << std::endl;
+	}
+
+	output << "*ORIENTATION, NAME=ori_glob" << std::endl;
+	output << "1., 0., 0., 0., 1., 0." << std::endl;
+	output << "1, 0." << std::endl;
+	output << "*ORIENTATION, NAME=ori_loc" << std::endl;
+	output << "ori_loc_distribution" << std::endl;
+	output << "*DISTRIBUTION, NAME=ori_loc_distribution, LOCATION=ELEMENT, TABLE=ori_tab" << std::endl;
+	output << ", 1.0,  0.0,  0.0,  0.0,  1.0, 0.0" << std::endl;
+	for(auto& elem : Elements){
+		for (int i=0; i< elem.nb; i++) {
+			output << elem.global_indices(i) << ", ";
+			output << elem.U(0, i) << ", " << elem.U(1, i) << ", " << elem.U(2, i) << ", ";
+			output << elem.V(0, i) << ", " << elem.V(1, i) << ", " << elem.V(2, i) << std::endl;
+		}
+	}
+
+
+
+	output << "*End Part" << std::endl;
+	// ~~~~~~~~~ E N D  P A R T ~~~~~~~~~
+
+
+	output << "**" << std::endl;
+	output << "** ASSEMBLY" << std::endl;
+	output << "**" << std::endl;
+	output << "*Assembly, name=Assembly" << std::endl;
+	output << "*Instance, name=Imain, part=MAIN" << std::endl;
+	output << "*End Instance" << std::endl;
+
 	// ~~~~~~~~~ NSET ~~~~~~~~~
-	output << "******* N O D E S   S E T S *************" << std::endl;
+	output << "**" << std::endl;
+	output << "** NODES SETS" << std::endl;
+	output << "**" << std::endl;
 	for(int j=0; j< nb_nset;j++) {
 		if (nsets[j].size()>0) {
 			output << "*NSET,NSET=nset" << j << ", instance=Imain" << std::endl;
@@ -971,22 +1011,37 @@ void Mesh::write_abaqus_cae_input(const std::string& filename) {
 		output << nb_vertices_+1+j << ", " << std::endl;
 	}
 
-	output << "*End Part" << std::endl;
-
-	output << "*Assembly, name=Assembly" << std::endl;
-	output << "*Instance, name=Imain, part=MAIN" << std::endl;
-	output << "*End Instance" << std::endl;
 	output << "*End Assembly" << std::endl;
 
-	output << "*DISTRIBUTION TABLE, NAME=ori_tab" << std::endl;
-	output << "coord3d, coord3d" << std::endl;
 
 	output << "**" << std::endl;
-	output << "**---------- MATERIALS ---------- " << std::endl;
+	output << "** MATERIALS" << std::endl;
+	output << "**" << std::endl;
 	output << "*MATERIAL, NAME=myMaterial " << std::endl;
 	output << "*ELASTIC, TYPE=ENGINEERING CONSTANTS" << std::endl;
 	output << "137300., 8800., 8800., 0.314, 0.314, 0.487, 4900., 4900." << std::endl;
 	output << "2960." << std::endl;
+
+	if(param.isCZ){
+		output << "*MATERIAL, name=CZ" << std::endl;
+		output << "*ELASTIC, TYPE=TRACTION" << std::endl;
+		output << " 2244898., 1250000., 754841." << std::endl;
+		output << "*DAMAGE INITIATION, CRITERION=QUADS" << std::endl;
+		output << " 74.2, 110.4, 110.4" << std::endl;
+		output << "*DAMAGE EVOLUTION, TYPE=ENERGY, MIXED MODE BEHAVIOR=BK, POWER=1.45" << std::endl;
+		output << " 0.3, 0.87, 0.87" << std::endl;
+	}
+
+	if(param.isResin){
+		output << "*MATERIAL, name=PEEK" << std::endl;
+		output << "*ELASTIC" << std::endl;
+		output << " 2500., 0.4" << std::endl;
+	}
+
+	output << "**" << std::endl;
+	output << "*DISTRIBUTION TABLE, NAME=ori_tab" << std::endl;
+	output << "coord3d, coord3d" << std::endl;
+
 }
 
 #endif /* end of include guard: MESH_H */

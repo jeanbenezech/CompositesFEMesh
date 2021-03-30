@@ -37,10 +37,9 @@ if __name__ == '__main__':
 		f.write('*SOLID SECTION, ELSET=elset'+str(i)+', ORIENTATION=ori_loc, MATERIAL=D-8552\n')
 	# f.write('*SOLID SECTION, ELSET=elset'+str(nb_ply+2)+', ORIENTATION=ori_loc, MATERIAL=PEEK\n')
 
-	# f.write('*COHESIVE SECTION, ELSET=elset'+str(nb_ply+1)+', STACK DIRECTION=3, MATERIAL=CZ, RESPONSE=TRACTION SEPARATION, THICKNESS=GEOMETRY \n')
-	# f.write('*COHESIVE SECTION, ELSET=Cohesive, MATERIAL=CZ, STACK DIRECTION=3, RESPONSE=TRACTION SEPARATION \n')
+	f.write('*COHESIVE SECTION, ELSET=Cohesive, STACK DIRECTION=1, MATERIAL=CZ, RESPONSE=TRACTION SEPARATION, THICKNESS=GEOMETRY \n')
+	# f.write('*COHESIVE SECTION, ELSET=Cohesive, MATERIAL=CZ, STACK DIRECTION=1, RESPONSE=TRACTION SEPARATION \n')
 	# f.write(' 0.001 \n')
-		# , ORIENTATION=ori_loc
 	# ~~~~~~ KINEMATIC COUPLING ~~~~~~
 
 	for fi in fix:
@@ -109,7 +108,7 @@ if __name__ == '__main__':
 	# f.write('0.1, 1.0, 1e-03, 1.0\n')
 	f.write('1e-02, 1.0, 1e-06, 5e-01\n')
 	f.write('*BOUNDARY, TYPE=DISPLACEMENT\n')
-	f.write('m.MasterNode'+str(pull)+', 2, 2, 1\n')
+	f.write('m.MasterNode'+str(pull)+', 2, 2, -1\n')
 	# ~~~~~~~~~~~~~ OUTPUT ~~~~~~~~~~~~~
 	f.write('**\n')
 	f.write('**---------- OUTPUT ---------- \n')

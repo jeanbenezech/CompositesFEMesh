@@ -37,30 +37,40 @@ def Clines(param, geo, rep):
 	for dy in range(1, param.dy):
 
 
-		if param.resin==0:
+		if param.resin==0 and param.CZ == 0:
 			radius += delta_R # comp layer thickness
-		else:
-			if param.CZ==0:
-				if dy%2==1:
-					radius += delta_R-param.e # comp layer thickness
-					ptype=0
-				else:
-					radius += param.e  # resin thickness
-					ptype=1
-			else:
-				rT = param.e
-				cT = param.e / 100.
-				pT = delta_R - 2*rT - cT
 
-				if dy%4==1: # comp layer thickness
-					radius += pT
-					ptype=0
-				elif dy%2==0: # resin thickness
-					radius += rT
-					ptype=1
-				elif dy%4==3: # cohezive thickness
-					radius += cT
-					ptype=2
+		elif param.resin==1 and param.CZ == 0:
+			if dy%2==1:
+				radius += delta_R-param.e # comp layer thickness
+				ptype=0
+			else:
+				radius += param.e  # resin thickness
+				ptype=1
+
+		elif param.resin==0 and param.CZ ==1:
+			cT = param.e / 10.
+			if dy%2==1:
+				radius += delta_R-cT # comp layer thickness
+				ptype=0
+			else:
+				radius += cT  # cohezive thickness
+				ptype=2
+
+		else:
+			rT = param.e
+			cT = param.e / 100.
+			pT = delta_R - 2*rT - cT
+
+			if dy%4==1: # comp layer thickness
+				radius += pT
+				ptype=0
+			elif dy%2==0: # resin thickness
+				radius += rT
+				ptype=1
+			elif dy%4==3: # cohezive thickness
+				radius += cT
+				ptype=2
 
 		rep.update_line_ref(radius)
 		Ylines[1][0] = cntP
@@ -72,7 +82,7 @@ def Clines(param, geo, rep):
 			elif param.substr[stype].shape=='curved':
 				cntP, cntL = curved_points(geo, param, cntP, cntL, rep, Ylines, stype)
 		
-		cntL = add_y_lines(geo, param, cntL, Ylines)
+		cntL = add_y_lines(geo, param, cntL, Ylines, layer_type=ptype)
 		Ylines[0] = copy.deepcopy(Ylines[1])
 
 		cntS = front_surf(param, geo, rep, cntL, cntS, dy, layer_type=ptype)

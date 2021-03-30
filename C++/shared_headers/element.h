@@ -4,6 +4,8 @@
 #include "utils.h"
 #include <cmath>
 #include <cstdlib>
+#include <iostream>
+#include <fstream>
 #include <Eigen/Eigenvalues>
 #include <Eigen/Dense>
 
@@ -25,9 +27,9 @@ public:
 	Matrix<int, Dynamic, Dynamic> Nodes;
 	Matrix<int, Dynamic, Dynamic> Markers;
 
-	Matrix<float, Dynamic, Dynamic> U;
-	Matrix<float, Dynamic, Dynamic> V;
-	Matrix<float, Dynamic, Dynamic> W;
+	Matrix<double, Dynamic, Dynamic> U;
+	Matrix<double, Dynamic, Dynamic> V;
+	Matrix<double, Dynamic, Dynamic> W;
 
 	// FUNCTION
 	void initialise(std::string type, int nb_elem, int nb_marker);
