@@ -55,7 +55,7 @@ public:
 	void write_ori_inp(const std::string& filename);
 	void write_abaqus_cae_input(const std::string& filename, Parameters& param);
 
-	void initialise(const int nb_plies);
+	void initialise(Parameters& param);
 	void print(std::string type, int number);
 
 	int Nb_vertices(){return nb_vertices_;}
@@ -74,37 +74,33 @@ private:
 
 // ~~~~~~~~~~~~~~ INIT ~~~~~~~~~~~~~~
 
-void Mesh::initialise(const int nb_plies) {
+void Mesh::initialise(Parameters& param) {
 
-	stacking_sequence.resize(nb_plies);
+	stacking_sequence.resize(param.nb_plies);
 
-	// stacking_sequence[0] =  90.0;
-	// stacking_sequence[1] =  90.0;
+	for(int i=0; i<param.nb_plies; i++)
+		stacking_sequence[i] = param.StackSeq[i](0);
+
+
+	// stacking_sequence[0] =  45.0;
+	// stacking_sequence[1] = -45.0;
 	// stacking_sequence[2] =  90.0;
-	// stacking_sequence[3] =  90.0;
-	// stacking_sequence[4] =  90.0;
-	// stacking_sequence[5] =  90.0;
-
-
-	stacking_sequence[0] =  45.0;
-	stacking_sequence[1] = -45.0;
-	stacking_sequence[2] =  90.0;
-	stacking_sequence[3] =   0.0;
-	stacking_sequence[4] = -45.0;
-	stacking_sequence[5] =  45.0;
-	if (nb_plies>6){
-		stacking_sequence[6] =  45.0;
-		stacking_sequence[7] = -45.0;
-		stacking_sequence[8] =  90.0;
-		stacking_sequence[9] =   0.0;
-		stacking_sequence[10]= -45.0;
-		stacking_sequence[11]=  45.0;
-	}
-	if (nb_plies>12){
-		for(int i=0; i< 12;i++){
-			stacking_sequence[12+i] = stacking_sequence[11-i];
-		}
-	}
+	// stacking_sequence[3] =   0.0;
+	// stacking_sequence[4] = -45.0;
+	// stacking_sequence[5] =  45.0;
+	// if (nb_plies>6){
+	// 	stacking_sequence[6] =  45.0;
+	// 	stacking_sequence[7] = -45.0;
+	// 	stacking_sequence[8] =  90.0;
+	// 	stacking_sequence[9] =   0.0;
+	// 	stacking_sequence[10]= -45.0;
+	// 	stacking_sequence[11]=  45.0;
+	// }
+	// if (nb_plies>12){
+	// 	for(int i=0; i< 12;i++){
+	// 		stacking_sequence[12+i] = stacking_sequence[11-i];
+	// 	}
+	// }
 
 }
 
@@ -1021,6 +1017,9 @@ void Mesh::write_abaqus_cae_input(const std::string& filename, Parameters& param
 	output << "*ELASTIC, TYPE=ENGINEERING CONSTANTS" << std::endl;
 	output << "137300., 8800., 8800., 0.314, 0.314, 0.487, 4900., 4900." << std::endl;
 	output << "2960." << std::endl;
+	// Spencer's
+	// output << "115000., 7500., 7500., 0.3, 0.3, 0.45, 3200., 3200." << std::endl;
+	// output << "3200." << std::endl;
 
 	if(param.isCZ){
 		output << "*MATERIAL, name=CZ" << std::endl;

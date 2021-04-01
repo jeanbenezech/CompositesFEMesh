@@ -37,7 +37,8 @@ class parameters():
 				 theta=None,
 				 lc=None,
 				 refOriPoint=None,
-				 substr=None):
+				 substr=None,
+				 StackSeq=None):
 		self.nbp = nbp
 		self.theta=0
 
@@ -129,5 +130,11 @@ def read_parameters(param):
 	param.ddy = int(dico['ddy'])
 	param.dz = int(dico['dz'])
 	param.dc = int(dico['dc'])
+
+	param.StackSeq = []
+	for i in range(param.nbp):
+		lpair=dico['p'+str(i)]
+		pair = np.asarray([float(lpair.strip().split(',')[0]),float(lpair.strip().split(',')[1])])
+		param.StackSeq.append(pair)
 
 	return param

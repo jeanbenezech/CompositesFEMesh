@@ -36,8 +36,7 @@ class GridTransformation{
 
 	void initialise(Mesh& m, Parameters& param);
 	void ramp(Vector3d& point);
-	void setWrinklesParameter(Parameters& param);
-	void OneDir_wrinkles(Vector3d& point, int dim);
+	void OneDir_wrinkles(Vector3d& point, int dim, int number, Parameters& param);
 	void wrinkles(Vector3d& point);
 
 	private:
@@ -142,19 +141,15 @@ void GridTransformation::ramp(Vector3d& point){
 	} // ELSE DO NOTHING
 }
 
-void GridTransformation::setWrinklesParameter(Parameters& param) {
-	defect_location = param.wrinklePos;
-	wrinkleOri = param.wrinkleOri;
 
-	defect_size = param.wrinkleSize;
-	ref_lenght = defect_size+5.*delta_max;
-
-	damping = {param.wrinkleDamp(0)/ref_lenght, param.wrinkleDamp(1)/(ymax-ymin), param.wrinkleDamp(2)/(zmax-zmin)}; // the more damping is big the small is the wrinkle in that direction
-}
-
-void GridTransformation::OneDir_wrinkles(Vector3d& point, int dim){
+void GridTransformation::OneDir_wrinkles(Vector3d& point, int dim, int number, Parameters& param){
 
 	Vector3d init = point;
+
+	defect_location = param.wrinklePos[number];
+	wrinkleOri = param.wrinkleOri[number];
+	defect_size = param.wrinkleSize[number];
+	damping = {param.wrinkleDamp[number](0)/(xmax-xmin), param.wrinkleDamp[number](1)/(ymax-ymin), param.wrinkleDamp[number](2)/(zmax-zmin)}; // the more damping is big the small is the wrinkle in that direction
 
 	double xref = defect_location[0];
 	double yref = defect_location[1];
@@ -306,7 +301,7 @@ void globalCoorSyst(Mesh& m) {
 
 void GeometricTransformation(Mesh& m, Parameters& param) {
 
-	if(param.add_ramp==false && param.add_wrinkles==false){
+	if(param.add_ramp==false && param.add_wrinkles==0){
 		std::cout << "GeoTransformation is used for nothing." << std::endl;
 		return;
 	}
@@ -317,7 +312,6 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 
 	GridTransformation GT;
 	GT.initialise(m, param);
-	GT.setWrinklesParameter(param);
 
 	for(int node=0; node < m.Nb_vertices(); ++node) {
 
@@ -329,7 +323,8 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 		if(param.add_ramp)
 			GT.ramp(point);
 		if(param.add_wrinkles)
-			GT.OneDir_wrinkles(point, dim);
+			for(int i=0; i<param.add_wrinkles;i++)
+				GT.OneDir_wrinkles(point, dim, i, param);
 
 
 		m.vertices(0, node) = point(0);
@@ -366,8 +361,12 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 				GT.ramp(baryMu);
 			}
 			if(param.add_wrinkles){
-				GT.OneDir_wrinkles(baryPu, dim);
-				GT.OneDir_wrinkles(baryMu, dim);
+				for(int i=0; i<param.add_wrinkles;i++)
+					GT.OneDir_wrinkles(baryPu, dim, i, param);
+				// GT.OneDir_wrinkles(baryPu, dim);
+				for(int i=0; i<param.add_wrinkles;i++)
+					GT.OneDir_wrinkles(baryMu, dim, i, param);
+				// GT.OneDir_wrinkles(baryMu, dim);
 			}
 
 			///
@@ -378,8 +377,13 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 				GT.ramp(baryMv);
 			}
 			if(param.add_wrinkles){
-				GT.OneDir_wrinkles(baryPv, dim);
-				GT.OneDir_wrinkles(baryMv, dim);
+				for(int i=0; i<param.add_wrinkles;i++)
+					GT.OneDir_wrinkles(baryPv, dim, i, param);
+				for(int i=0; i<param.add_wrinkles;i++)
+					GT.OneDir_wrinkles(baryMv, dim, i, param);
+
+				// GT.OneDir_wrinkles(baryPv, dim);
+				// GT.OneDir_wrinkles(baryMv, dim);
 			}
 
 			///
@@ -390,8 +394,13 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 				GT.ramp(baryMw);
 			}
 			if(param.add_wrinkles){
-				GT.OneDir_wrinkles(baryPw, dim);
-				GT.OneDir_wrinkles(baryMw, dim);
+				for(int i=0; i<param.add_wrinkles;i++)
+					GT.OneDir_wrinkles(baryPw, dim, i, param);
+				for(int i=0; i<param.add_wrinkles;i++)
+					GT.OneDir_wrinkles(baryMw, dim, i, param);
+
+				// GT.OneDir_wrinkles(baryPw, dim);
+				// GT.OneDir_wrinkles(baryMw, dim);
 			}
 
 

@@ -19,7 +19,7 @@ int main(int argc, const char *argv[]) {
 	std::string mesh_name = param.meshname.substr(0, lastindex);
 	m.read_msh(mesh_name+".msh", true, param.cz_id);
 
-	m.initialise(param.nb_plies);
+	m.initialise(param);
 	m.read_points("input.txt");
 	m.exportDir = true;
 
@@ -28,12 +28,8 @@ int main(int argc, const char *argv[]) {
 	else
 		globalCoorSyst(m);
 
-	std::cout << "ici" << std::endl;
-
 	GeometricTransformation(m, param);
 	StackingSequence(m, param);
-
-	std::cout << "ici" << std::endl;
 
 	if (param.Abaqus_output){ // ABAQUS
 		m.write_ori_inp("Abaqus/"+mesh_name);
@@ -41,10 +37,8 @@ int main(int argc, const char *argv[]) {
 		m.write_abaqus_cae_input("Abaqus/"+mesh_name, param);
 	}
 
-	std::cout << "ici" << std::endl;
-
 	if (param.Dune_output){ // DUNE
-		if (param.add_wrinkles==1){
+		if (param.add_wrinkles>=1){
 			m.write_ori_txt("DUNE/"+param.WID+"_"+mesh_name);
 			m.write_msh("DUNE/"+param.WID+"_"+mesh_name);
 		} else {

@@ -4,11 +4,11 @@ import random
 # geometry in millimeters
 
 def write_parameters():
-	nb_plies = 6
-	nb_wrinkles = 0
-	Xlenght = 150.0
+	nb_plies = 20
+	nb_wrinkles = 30
+	Xlenght = 25.0
 	Ylenght = 7.0
-	Zlenght = 500.0
+	Zlenght = 10.0
 
 	# WRINKLES Parameters
 	minWsize = -0.2
@@ -39,10 +39,10 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('name(s)                : Csection\n') # mesh name
-	parameters.write('Shape(i)               : 0\n')   # 0(default): Csection ; 1: flat laminate
+	parameters.write('name(s)                : laminate\n') # mesh name
+	parameters.write('Shape(i)               : 1\n')   # 0(default): Csection ; 1: flat laminate
 	parameters.write('Resin_betw_plies(b)    : 0\n')   # 1: yes ; 0: no
-	parameters.write('cohezive_elements(b)   : 0\n')   # 1: yes ; 0: no
+	parameters.write('cohezive_elements(b)   : 1\n')   # 1: yes ; 0: no
 	parameters.write('recombine(b)           : 1\n')   # 1: recombine mesh: hex ;  0: no: only prisms
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~GEOMETRY~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -92,6 +92,7 @@ def write_parameters():
 			parameters.write('Wpos'+str(i)+'(f)    : '+str(random.uniform(minWposX, maxWposX))+','+str(random.uniform(minWposY, maxWposY))+','+str(random.uniform(minWposZ, maxWposZ))+'\n') # center
 			parameters.write('Wori'+str(i)+'(f)    : '+str(random.uniform(minWori, maxWori))+'\n') # Orientation in degree
 			parameters.write('Wdamp'+str(i)+'(f)   : '+str(random.uniform(minWdampX, maxWdampX))+','+str(random.uniform(minWdampY, maxWdampY))+','+str(random.uniform(minWdampZ, maxWdampZ))+'\n') # reduction of the amplitude through each direction
+	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~RAMP~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('Rsize(f)          : 6.25\n')

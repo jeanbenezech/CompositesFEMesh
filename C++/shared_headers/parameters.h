@@ -20,9 +20,19 @@ Vector3d vectorExtract(std::string line){
 	std::string myvector = line.substr(begin, line.size());
 	size_t coma1 = myvector.find_first_of(",");
 	size_t coma2 = myvector.find_last_of(",");
-	out(0) = std::stof(myvector.substr(      0U, coma1));
-	out(1) = std::stof(myvector.substr(coma1+1U, coma2));
-	out(2) = std::stof(myvector.substr(coma2+1U, myvector.size()));
+	out(0) = std::stod(myvector.substr(      0U, coma1));
+	out(1) = std::stod(myvector.substr(coma1+1U, coma2));
+	out(2) = std::stod(myvector.substr(coma2+1U, myvector.size()));
+	return out;
+}
+
+Vector2d ExtractV2d(std::string line){
+	Vector2d out;
+	size_t begin = line.find_last_of(":")+2U;
+	std::string myvector = line.substr(begin, line.size());
+	size_t coma = myvector.find_first_of(",");
+	out(0) = std::stod(myvector.substr(      0U, coma));
+	out(1) = std::stod(myvector.substr(coma+1U, myvector.size()));
 	return out;
 }
 
@@ -31,7 +41,7 @@ public:
 
 	int Shape;
 	std::string meshname;
-	bool add_wrinkles;
+	int add_wrinkles;
 	bool add_ramp;
 	bool Abaqus_output;
 	bool Dune_output;
@@ -40,12 +50,14 @@ public:
 	int cz_id, resin_id;
 	bool isResin, isCZ;
 
+	std::vector<Vector2d> StackSeq;
+
 	// Wrinkle parameters
 	std::string WID;
-	double wrinkleSize;
-	Vector3d wrinklePos;
-	Vector3d wrinkleDamp;
-	double wrinkleOri;
+	std::vector<double> wrinkleSize;
+	std::vector<Vector3d> wrinklePos;
+	std::vector<Vector3d> wrinkleDamp;
+	std::vector<double> wrinkleOri;
 
 	// Ramp parameters
 	double rampSize;
@@ -73,6 +85,12 @@ void Parameters::read(const std::string& filename) {
 
 	std::string line {};
 	std::getline(input, line);
+
+	StackSeq.resize(0);
+	wrinkleSize.resize(0);
+	wrinklePos.resize(0);
+	wrinkleDamp.resize(0);
+	wrinkleOri.resize(0);
 
 	while(!line.empty()){
 
@@ -109,23 +127,36 @@ void Parameters::read(const std::string& filename) {
 		if (line.find("WID(s)")!=std::string::npos)
 			WID = extract(line);
 
-		if (line.find("Wsize(f)")!=std::string::npos)
-			wrinkleSize = std::stof(extract(line));
+		if (line.find("Wsize")!=std::string::npos){
+			double tmp = std::stof(extract(line));
+			wrinkleSize.push_back(tmp);
+		}
 
-		if (line.find("Wori(f)")!=std::string::npos)
-			wrinkleOri = std::stof(extract(line));
+		if (line.find("Wori")!=std::string::npos){
+			double tmp = std::stof(extract(line));
+			wrinkleOri.push_back(tmp);
+		}
 
-		if (line.find("Wpos(f)")!=std::string::npos)
-			wrinklePos = vectorExtract(line);
+		if (line.find("Wpos")!=std::string::npos){
+			Vector3d tmp = vectorExtract(line);
+			wrinklePos.push_back(tmp);
+		}
 
-		if (line.find("Wdamp(f)")!=std::string::npos)
-			wrinkleDamp = vectorExtract(line);
+		if (line.find("Wdamp")!=std::string::npos){
+			Vector3d tmp = vectorExtract(line);
+			wrinkleDamp.push_back(tmp);
+		}
 
 		if (line.find("Path2result(s)")!=std::string::npos)
 			path_to_abaqus_result = extract(line);
 
 		if (line.find("AbaqusOdbName(s)")!=std::string::npos)
 			AbaqusOdbName = extract(line);
+
+		if (line.find("(f,f)")!=std::string::npos){
+			Vector2d tmp = ExtractV2d(line);
+			StackSeq.push_back(tmp);
+		}
 
 		std::getline(input, line);
 	}

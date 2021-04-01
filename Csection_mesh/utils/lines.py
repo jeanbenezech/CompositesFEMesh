@@ -36,6 +36,8 @@ def Clines(param, geo, rep):
 	radius = 0
 	for dy in range(1, param.dy):
 
+		delta_R = param.StackSeq[int((dy-1)/2)][1]
+
 
 		if param.resin==0 and param.CZ == 0:
 			radius += delta_R # comp layer thickness
