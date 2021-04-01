@@ -17,7 +17,7 @@ def write_parameters():
 	minWposX = 0.11*Xlenght
 	maxWposX = 0.89*Xlenght
 
-	minWposY = -0.31*Ylenght
+	minWposY = - 0.31*Ylenght
 	maxWposY = 0.0
 
 	minWposZ = 0.11*Zlenght
@@ -51,7 +51,7 @@ def write_parameters():
 	parameters.write('X(f)          : '+str(Xlenght)+'\n')   #
 	parameters.write('Y(f)          : '+str(Ylenght)+'\n')  #
 	parameters.write('R(f)          : 10\n')    #
-	parameters.write('Height(f)     : 75\n')    #
+	parameters.write('Height(f)     : '+str(height)+'\n')    #
 	parameters.write('Z(f)          : '+str(Zlenght)+'\n')   #
 	parameters.write('e(f)          : 0.01\n')  # Resin layer thickness
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')

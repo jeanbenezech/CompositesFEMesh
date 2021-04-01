@@ -9,6 +9,7 @@ def write_parameters():
 	Xlenght = 150.0
 	Ylenght = 7.0
 	Zlenght = 500.0
+	height = 75
 
 	# WRINKLES Parameters
 	minWsize = -0.2
@@ -17,8 +18,8 @@ def write_parameters():
 	minWposX = 0.11*Xlenght
 	maxWposX = 0.89*Xlenght
 
-	minWposY = -0.31*Ylenght
-	maxWposY = 0.0
+	minWposY = height - 0.31*Ylenght
+	maxWposY = height + 0.0
 
 	minWposZ = 0.11*Zlenght
 	maxWposZ = 0.89*Zlenght
