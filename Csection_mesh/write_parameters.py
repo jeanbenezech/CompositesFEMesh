@@ -59,9 +59,9 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	for i in range(nb_plies):
 		if i<10:
-			parameters.write('p'+str(i)+'(f,f)   : 0.0,0.355\n')
+			parameters.write('p'+str(i)+'(f,f)   : 0.0,0.3\n')
 		else:
-			parameters.write('p'+str(i)+'(f,f)  : 0.0,0.355\n')
+			parameters.write('p'+str(i)+'(f,f)  : 0.0,0.3\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~MESH~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
