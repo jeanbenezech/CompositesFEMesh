@@ -10,6 +10,8 @@ def write_parameters():
 	Ylenght = 7.0
 	Zlenght = 10.0
 
+	ply_thickness = 0.355# Ylenght/(nb_plies+0.0)
+
 	# WRINKLES Parameters
 	minWsize = -0.2
 	maxWsize = 0.2
@@ -47,7 +49,7 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~GEOMETRY~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('np(i)         : '+str(nb_plies)+'\n')     # 6, 12 or 24 # TODO: find a clever way of setting stacking sequence
+	parameters.write('np(i)         : '+str(nb_plies)+'\n')  #
 	parameters.write('X(f)          : '+str(Xlenght)+'\n')   #
 	parameters.write('Y(f)          : '+str(Ylenght)+'\n')  #
 	parameters.write('R(f)          : 10\n')    #
@@ -59,9 +61,9 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	for i in range(nb_plies):
 		if i<10:
-			parameters.write('p'+str(i)+'(f,f)   : 0.0,0.355\n')
+			parameters.write('p'+str(i)+'(f,f)   : 0.0,'+str(ply_thickness)+'\n')
 		else:
-			parameters.write('p'+str(i)+'(f,f)  : 0.0,0.355\n')
+			parameters.write('p'+str(i)+'(f,f)  : 0.0,'+str(ply_thickness)+'\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~MESH~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')

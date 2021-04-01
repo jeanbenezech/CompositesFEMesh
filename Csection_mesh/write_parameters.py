@@ -11,6 +11,8 @@ def write_parameters():
 	Zlenght = 500.0
 	height = 75
 
+	ply_thickness = Ylenght/(nb_plies+0.0)
+
 	# WRINKLES Parameters
 	minWsize = -0.2
 	maxWsize = 0.2
@@ -60,17 +62,17 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	for i in range(nb_plies):
 		if i<10:
-			parameters.write('p'+str(i)+'(f,f)   : 0.0,0.3\n')
+			parameters.write('p'+str(i)+'(f,f)   : 0.0,'+str(ply_thickness)+'\n')
 		else:
-			parameters.write('p'+str(i)+'(f,f)  : 0.0,0.3\n')
+			parameters.write('p'+str(i)+'(f,f)  : 0.0,'+str(ply_thickness)+'\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~MESH~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('lc(f)    : 1\n')        # mesh caracteristic size
-	parameters.write('dx(i)    : 50\n')       #
-	parameters.write('ddy(i)   : 3\n')        #
-	parameters.write('dz(i)    : 15\n')       #
-	parameters.write('dc(i)    : 7\n')        #
+	parameters.write('dx(i)    : 50\n')       # discretization in X direction
+	parameters.write('ddy(i)   : 3\n')        # discretization of ply thickness
+	parameters.write('dz(i)    : 15\n')       # discretization in Z direction
+	parameters.write('dc(i)    : 7\n')        # discretization of corners
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~TRANSFORMATION~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
