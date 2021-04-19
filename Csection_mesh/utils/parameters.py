@@ -5,11 +5,12 @@ class sub():
 				 L=None, # lenght
 				 thick=None, # local thickness
 				 Ori=None, # gridMod (straight) max angle (curved)
+				 DX=None,
 				 shape=None):
 		self.L = 0
 		self.thick = 0
 		self.Ori = 0
-
+		self.DX = 0
 
 class parameters():
 	def __init__(self,
@@ -52,6 +53,7 @@ class parameters():
 		substr.L = self.Height
 		substr.T = 0
 		substr.Ori = 0 * np.pi/180.
+		substr.DX = int((self.dx+0.0) * 0.5)
 		substr.shape='straight'
 
 		substr2 = sub()
@@ -64,6 +66,7 @@ class parameters():
 		substr4.L = self.X
 		substr4.T = 0
 		substr4.Ori = 0 * np.pi/180.
+		substr4.DX = self.dx
 		substr4.shape='straight'
 
 		if self.Shape==0: # Csection

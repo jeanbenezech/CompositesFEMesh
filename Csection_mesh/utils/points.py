@@ -32,7 +32,7 @@ def straight_points(geo, param, cntP, cntL, rep, Ylines, stype, dy=0):
 	rep.T = copy.deepcopy(points[-1])
 
 	geo.All_points.append(points)
-	cntL = add_x_line(geo, param, line, cntL, dy)
+	cntL = add_x_line(geo, param, line, cntL, stype)
 
 	return cntP, cntL
 

@@ -5,10 +5,11 @@ from utils.geometry import *
 
 # ~~~~~~~~~~~~~~ ADD LINES ~~~~~~~~~~~~~~
 
-def add_x_line(geo, param, line, cntL, dy=0):
+def add_x_line(geo, param, line, cntL, stype):
 	geo.Lines.append(line) #0 -8 ;;; #5 -3
 	geo.Transfinite_curves[0].append(cntL)
-	geo.Transfinite_curves[1].append(param.dx) # TODO discretization function of the substr
+	geo.Transfinite_curves[1].append(param.substr[stype].DX)
+	print(stype, param.substr[stype].DX)
 
 	cntL+=1
 	return cntL

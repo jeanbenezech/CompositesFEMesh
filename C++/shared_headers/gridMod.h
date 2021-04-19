@@ -141,7 +141,6 @@ void GridTransformation::ramp(Vector3d& point){
 	} // ELSE DO NOTHING
 }
 
-
 void GridTransformation::OneDir_wrinkles(Vector3d& point, int dim, int number, Parameters& param){
 
 	Vector3d init = point;

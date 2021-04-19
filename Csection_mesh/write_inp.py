@@ -9,8 +9,8 @@ if __name__ == '__main__':
 	param = parameters()
 	param.init()
 
-	fix=[0, 1]
-	pull=3
+	fix=[0]
+	pull=1
 	nb_ply=param.nbp
 	name=param.AbaqusName
 
@@ -35,11 +35,8 @@ if __name__ == '__main__':
 	# ~~~~~~ MATERIAL ASSIGNEMENT ~~~~~~
 	for i in range(1,nb_ply+1):
 		f.write('*SOLID SECTION, ELSET=elset'+str(i)+', ORIENTATION=ori_loc, MATERIAL=D-8552\n')
-	# f.write('*SOLID SECTION, ELSET=elset'+str(nb_ply+2)+', ORIENTATION=ori_loc, MATERIAL=PEEK\n')
 
-	f.write('*COHESIVE SECTION, ELSET=Cohesive, STACK DIRECTION=1, MATERIAL=CZ, RESPONSE=TRACTION SEPARATION, THICKNESS=GEOMETRY \n')
-	# f.write('*COHESIVE SECTION, ELSET=Cohesive, MATERIAL=CZ, STACK DIRECTION=1, RESPONSE=TRACTION SEPARATION \n')
-	# f.write(' 0.001 \n')
+	f.write('*COHESIVE SECTION, ELSET=elset'+str(nb_ply+1)+', MATERIAL=CZ, RESPONSE=TRACTION SEPARATION, THICKNESS=GEOMETRY \n')
 	# ~~~~~~ KINEMATIC COUPLING ~~~~~~
 
 	for fi in fix:
@@ -65,15 +62,15 @@ if __name__ == '__main__':
 	# f.write('4900., \n')
 	#~ f.write('*Expansion, type=ORTHO \n')
 	#~ f.write('3.3e-05,  3.3e-05, -2.1e-07 \n')
-	f.write('*MATERIAL, name=PEEK \n')
-	f.write('*ELASTIC \n')
-	f.write('2500., 0.4 \n')
+	# f.write('*MATERIAL, name=PEEK \n')
+	# f.write('*ELASTIC \n')
+	# f.write('2500., 0.4 \n')
 	#~ f.write('*Expansion \n')
 	#~ f.write('4.7e-05, \n')
 
 	f.write('*MATERIAL, name=CZ \n')
 	f.write('*ELASTIC, TYPE=TRACTION \n')
-	f.write(' 2244898., 1250000., 754841. \n')
+	f.write(' 7612.,1370.,1370.\n')
 	f.write('*DAMAGE INITIATION, CRITERION=QUADS \n')
 	f.write(' 74.2, 110.4, 110.4 \n')
 	f.write('*DAMAGE EVOLUTION, TYPE=ENERGY, MIXED MODE BEHAVIOR=BK, POWER=1.45 \n')
@@ -108,7 +105,7 @@ if __name__ == '__main__':
 	# f.write('0.1, 1.0, 1e-03, 1.0\n')
 	f.write('1e-02, 1.0, 1e-06, 5e-01\n')
 	f.write('*BOUNDARY, TYPE=DISPLACEMENT\n')
-	f.write('m.MasterNode'+str(pull)+', 2, 2, -1\n')
+	f.write('m.MasterNode'+str(pull)+', 2, 2, -2\n')
 	# ~~~~~~~~~~~~~ OUTPUT ~~~~~~~~~~~~~
 	f.write('**\n')
 	f.write('**---------- OUTPUT ---------- \n')

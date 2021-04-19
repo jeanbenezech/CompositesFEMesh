@@ -31,6 +31,12 @@ public:
 	Matrix<double, Dynamic, Dynamic> V;
 	Matrix<double, Dynamic, Dynamic> W;
 
+	// ABAQUS FIELDS
+	Matrix<double, Dynamic, Dynamic> S;
+	Matrix<double, Dynamic, Dynamic> E;
+	Matrix<double, Dynamic, Dynamic> SDEG;
+	Matrix<double, Dynamic, Dynamic> QUADSCRT;
+
 	// FUNCTION
 	void initialise(std::string type, int nb_elem, int nb_marker);
 	void fill(std::vector<std::vector<int>> l, int& nb_elset);
@@ -94,6 +100,11 @@ void Element::initialise(std::string key, int nb_elem, int nb_marker) {
 	U.resize(3, nb);
 	V.resize(3, nb);
 	W.resize(3, nb);
+
+	S.resize(6, nb);
+	E.resize(6, nb);
+	SDEG.resize(1, nb);
+	QUADSCRT.resize(1, nb);
 }
 
 void Element::fill(std::vector<std::vector<int>> l, int& nb_set) {

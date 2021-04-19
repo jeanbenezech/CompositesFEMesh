@@ -30,11 +30,7 @@ public:
 	std::vector<Vector2f> P;
 
 	// ABAQUS FIELDS
-	Matrix<double, Dynamic, Dynamic> S;
-	Matrix<double, Dynamic, Dynamic> E;
-	Matrix<double, Dynamic, Dynamic> U;
-	Matrix<double, Dynamic, Dynamic> SDEG;
-	Matrix<double, Dynamic, Dynamic> QUADSCRT;
+	Matrix<double, Dynamic, Dynamic> X;
 
 
 	// FUNCTION
@@ -389,17 +385,25 @@ void Mesh::read_elem_fields(const std::string& filename) {
 	std::string ligne {};
 	std::getline(input, ligne);
 
-	E.resize(6,Tot_cells_);
-	S.resize(6,Tot_cells_);
-
-	SDEG.resize(1,Tot_cells_);
-	QUADSCRT.resize(1,Tot_cells_);
+	Matrix<double, Dynamic, Dynamic> tmp;
+	tmp.resize(14,Tot_cells_);
 
 	for(int i = 0; i < Tot_cells_; i++) {
 		int num;
-		input >> num >> S(0, i) >> S(1, i) >> S(2, i) >> S(3, i) >> S(4, i) >> S(5, i)\
-		>> E(0, i) >> E(1, i) >> E(2, i) >> E(3, i) >> E(4, i) >> E(5, i) >> SDEG(0,i)\
-		>> QUADSCRT(0,i);
+		input >> num >> tmp(0, i) >> tmp(1, i) >> tmp(2, i) >> tmp(3, i) >> tmp(4, i) >> tmp(5, i)\
+		>> tmp(6, i) >> tmp(7, i) >> tmp(8, i) >> tmp(9, i) >> tmp(10, i) >> tmp(11, i) >> tmp(12,i)\
+		>> tmp(13,i);
+	}
+
+	for(auto& elem : Elements){
+		for (int i=0; i< elem.nb; i++) {
+			for(int j=0; j<6; j++){
+				elem.S(j,i) = tmp(j,elem.global_indices[i]);
+				elem.E(j,i) = tmp(j+6,elem.global_indices[i]);
+			}
+			elem.SDEG(0,i) = tmp(12,elem.global_indices[i]);
+			elem.QUADSCRT(0,i) = tmp(13,elem.global_indices[i]);
+		}
 	}
 
 }
@@ -415,11 +419,11 @@ void Mesh::read_node_fields(const std::string& filename) {
 	std::string ligne {};
 	std::getline(input, ligne); // Commentaires
 
-	U.resize(3,nb_vertices_);
+	X.resize(3,nb_vertices_);
 
 	for(int i = 0; i < nb_vertices_; i++) {
 		int num;
-		input >> num >> U(0, i) >> U(1, i) >> U(2, i);
+		input >> num >> X(0, i) >> X(1, i) >> X(2, i);
 	}
 
 }
@@ -591,25 +595,33 @@ void Mesh::write_vtk(const std::string& filename, int verbosity=0) {
 	if (exportAbaqusFields){
 		output << "SCALARS S double 6\n";
 		output << "LOOKUP_TABLE default\n";
-		for (int i=0; i< Tot_cells_; i++) {
-			output << S(0, i) << " " << S(1, i) << " " << S(2, i) << " " <<  S(3, i) << " " << S(4, i) << " " << S(5, i) << std::endl;
+		for(auto& elem : Elements){
+			for (int i=0; i< elem.nb; i++) {
+				output << elem.S(0, i) << " " << elem.S(1, i) << " " << elem.S(2, i) << " " <<  elem.S(3, i) << " " << elem.S(4, i) << " " << elem.S(5, i) << std::endl;
+			}
 		}
 
 		output << "SCALARS E double 6\n";
 		output << "LOOKUP_TABLE default\n";
-		for (int i=0; i< Tot_cells_; i++) {
-			output << E(0, i) << " " << E(1, i) << " " << E(2, i) << " " <<  E(3, i) << " " << E(4, i) << " " << E(5, i) << std::endl;
+		for(auto& elem : Elements){
+			for (int i=0; i< elem.nb; i++) {
+				output << elem.E(0, i) << " " << elem.E(1, i) << " " << elem.E(2, i) << " " <<  elem.E(3, i) << " " << elem.E(4, i) << " " << elem.E(5, i) << std::endl;
+			}
 		}
 
 		output << "SCALARS SDEG double 1\n";
 		output << "LOOKUP_TABLE default\n";
-		for (int i=0; i< Tot_cells_; i++) {
-			output << SDEG(0, i) << std::endl;
+		for(auto& elem : Elements){
+			for (int i=0; i< elem.nb; i++) {
+				output << elem.SDEG(0, i) << std::endl;
+			}
 		}
 		output << "SCALARS QUADSCRT double 1\n";
 		output << "LOOKUP_TABLE default\n";
-		for (int i=0; i< Tot_cells_; i++) {
-			output << QUADSCRT(0, i) << std::endl;
+		for(auto& elem : Elements){
+			for (int i=0; i< elem.nb; i++) {
+				output << elem.QUADSCRT(0, i) << std::endl;
+			}
 		}
 	}
 
@@ -618,7 +630,7 @@ void Mesh::write_vtk(const std::string& filename, int verbosity=0) {
 		output << "SCALARS U double 3\n";
 		output << "LOOKUP_TABLE default\n";
 		for (int i=0; i< nb_vertices_; i++) {
-			output << U(0, i) << " " << U(1, i) << " " << U(2, i) << std::endl;
+			output << X(0, i) << " " << X(1, i) << " " << X(2, i) << std::endl;
 		}
 	}
 
@@ -751,17 +763,36 @@ void Mesh::write_inp(const std::string& filename) {
 
 	output << "******* E L E M E N T S *************" << std::endl;
 
+	std::vector<int> cno = {2, 1, 5, 6, 3, 0, 4, 7};
 	for(auto& elem : Elements){
 	if(elem.type != "Triangle" || elem.type != "Quadrilateral"){ // We would ony use 3D elements in Abaqus (that could change later)
 		output << "*ELEMENT, type=" << elem.abaqus_type << ", ELSET=" << elem.type << std::endl;
 		for (int i=0; i< elem.nb; i++) {
 			output << elem.global_indices(i) << ", ";
-			for (int j =0; j < elem.Nodes.rows()-1; j++)
-				output << elem.Nodes(j,i)+1 << ", ";
-			output << elem.Nodes(elem.Nodes.rows()-1,i)+1 << std::endl;
+			if(elem.type == "Cohesive"){
+				for (int j =0; j < elem.Nodes.rows()-1; j++)
+					output << elem.Nodes(cno[j],i)+1 << ", ";
+				output << elem.Nodes(cno[elem.Nodes.rows()-1],i)+1 << std::endl;
+			}else{
+				for (int j =0; j < elem.Nodes.rows()-1; j++)
+					output << elem.Nodes(j,i)+1 << ", ";
+				output << elem.Nodes(elem.Nodes.rows()-1,i)+1 << std::endl;
+			}
 		}
 	}
 	}
+
+	// for(auto& elem : Elements){
+	// if(elem.type != "Triangle" || elem.type != "Quadrilateral"){ // We would ony use 3D elements in Abaqus (that could change later)
+	// 	output << "*ELEMENT, type=" << elem.abaqus_type << ", ELSET=" << elem.type << std::endl;
+	// 	for (int i=0; i< elem.nb; i++) {
+	// 		output << elem.global_indices(i) << ", ";
+	// 		for (int j =0; j < elem.Nodes.rows()-1; j++)
+	// 			output << elem.Nodes(j,i)+1 << ", ";
+	// 		output << elem.Nodes(elem.Nodes.rows()-1,i)+1 << std::endl;
+	// 	}
+	// }
+	// }
 
 	//ELSET
 	elsets.resize(nb_elset);
@@ -913,14 +944,22 @@ void Mesh::write_abaqus_cae_input(const std::string& filename, Parameters& param
 	output << "**" << std::endl;
 	output << "** ELEMENTS" << std::endl;
 	output << "**" << std::endl;
+	// Change node ordering for cohesive
+	std::vector<int> cno = {2, 1, 5, 6, 3, 0, 4, 7};
 	for(auto& elem : Elements){
 	if(elem.type != "Triangle" || elem.type != "Quadrilateral"){ // We would ony use 3D elements in Abaqus (that could change later)
 		output << "*ELEMENT, type=" << elem.abaqus_type << ", ELSET=" << elem.type << std::endl;
 		for (int i=0; i< elem.nb; i++) {
 			output << elem.global_indices(i) << ", ";
-			for (int j =0; j < elem.Nodes.rows()-1; j++)
-				output << elem.Nodes(j,i)+1 << ", ";
-			output << elem.Nodes(elem.Nodes.rows()-1,i)+1 << std::endl;
+			if(elem.type == "Cohesive"){
+				for (int j =0; j < elem.Nodes.rows()-1; j++)
+					output << elem.Nodes(cno[j],i)+1 << ", ";
+				output << elem.Nodes(cno[elem.Nodes.rows()-1],i)+1 << std::endl;
+			}else{
+				for (int j =0; j < elem.Nodes.rows()-1; j++)
+					output << elem.Nodes(j,i)+1 << ", ";
+				output << elem.Nodes(elem.Nodes.rows()-1,i)+1 << std::endl;
+			}
 		}
 	}
 	}
@@ -954,7 +993,8 @@ void Mesh::write_abaqus_cae_input(const std::string& filename, Parameters& param
 	output << "*SOLID SECTION, ELSET= Hexahedron, ORIENTATION=ori_loc, MATERIAL=myMaterial" << std::endl;
 
 	if(param.isCZ){
-		output << "*COHESIVE SECTION, ELSET= Cohesive, MATERIAL=CZ, STACK DIRECTION=1, RESPONSE=TRACTION SEPARATION, THICKNESS=GEOMETRY" << std::endl;
+		output << "*COHESIVE SECTION, ELSET= Cohesive, MATERIAL=CZ, RESPONSE=TRACTION SEPARATION, THICKNESS=GEOMETRY" << std::endl;
+		// output << "*COHESIVE SECTION, ELSET= Cohesive, MATERIAL=CZ, STACK DIRECTION=1, RESPONSE=TRACTION SEPARATION, THICKNESS=GEOMETRY" << std::endl;
 		// output << "*COHESIVE SECTION, ELSET=Cohesive, MATERIAL=CZ, STACK DIRECTION=3, RESPONSE=TRACTION SEPARATION" << std::endl;
 		// output << " 0.001" << std::endl;
 	}
@@ -1024,7 +1064,7 @@ void Mesh::write_abaqus_cae_input(const std::string& filename, Parameters& param
 	if(param.isCZ){
 		output << "*MATERIAL, name=CZ" << std::endl;
 		output << "*ELASTIC, TYPE=TRACTION" << std::endl;
-		output << " 2244898., 1250000., 754841." << std::endl;
+		output << " 7612.,1370.,1370." << std::endl;
 		output << "*DAMAGE INITIATION, CRITERION=QUADS" << std::endl;
 		output << " 74.2, 110.4, 110.4" << std::endl;
 		output << "*DAMAGE EVOLUTION, TYPE=ENERGY, MIXED MODE BEHAVIOR=BK, POWER=1.45" << std::endl;

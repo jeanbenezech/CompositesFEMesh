@@ -3,7 +3,7 @@ import sys
 import os
 
 # frames = np.asarray([])
-frames = np.asarray(range(1, 390, 2))
+frames = np.asarray(range(1, 8))
 
 command = 'mkdir all_result'
 os.system(command)

@@ -4,11 +4,12 @@ import random
 # geometry in millimeters
 
 def write_parameters():
-	nb_plies = 20
-	nb_wrinkles = 30
+	nb_plies = 5
+	nb_wrinkles = 1
 	Xlenght = 25.0
 	Ylenght = 7.0
 	Zlenght = 10.0
+	height = 0.0
 
 	ply_thickness = 0.355# Ylenght/(nb_plies+0.0)
 
@@ -19,8 +20,8 @@ def write_parameters():
 	minWposX = 0.11*Xlenght
 	maxWposX = 0.89*Xlenght
 
-	minWposY = - 0.31*Ylenght
-	maxWposY = 0.0
+	minWposY = -0.3* Ylenght
+	maxWposY = 0#Ylenght
 
 	minWposZ = 0.11*Zlenght
 	maxWposZ = 0.89*Zlenght
@@ -69,7 +70,7 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('lc(f)    : 1\n')        # mesh caracteristic size
 	parameters.write('dx(i)    : 50\n')       #
-	parameters.write('ddy(i)   : 3\n')        #
+	parameters.write('ddy(i)   : 2\n')        #
 	parameters.write('dz(i)    : 15\n')       #
 	parameters.write('dc(i)    : 7\n')        #
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -78,7 +79,7 @@ def write_parameters():
 	parameters.write('wrinkle(i)        : '+str(nb_wrinkles)+'\n') # Do we need to add wrinkle in the gridMod (c++) code, 2+ for multiple wrinkles
 	parameters.write('Ramp(b)           : 0\n') #
 	parameters.write('Abaqus_output(b)  : 1\n') #
-	parameters.write('Dune_output(b)    : 1\n') #
+	parameters.write('Dune_output(b)    : 0\n') #
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~WRINKLES~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')

@@ -9,8 +9,11 @@
 using namespace Eigen;
 
 int main(int argc, const char *argv[]) {
+	// for (int i=0; i<101; i++){
+
 	Parameters param;
 	param.read("parameters.txt");
+	// param.read("parameters_"+std::to_string(i)+".txt");
 
 	// read & initialisation du mesh
 	Mesh m;
@@ -32,6 +35,7 @@ int main(int argc, const char *argv[]) {
 	StackingSequence(m, param);
 
 	if (param.Abaqus_output){ // ABAQUS
+		m.write_msh("Abaqus/results/"+mesh_name); // for visualisation: mesh with in it wrinkle
 		m.write_ori_inp("Abaqus/"+mesh_name);
 		m.write_inp("Abaqus/"+mesh_name);
 		m.write_abaqus_cae_input("Abaqus/"+mesh_name, param);
@@ -48,6 +52,8 @@ int main(int argc, const char *argv[]) {
 	}
 
 	m.write_vtk(mesh_name);
+	// m.write_vtk(mesh_name+"_"+std::to_string(i));
+	// }
 
 	return 0;
 }

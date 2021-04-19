@@ -51,6 +51,6 @@ if __name__ == '__main__':
 	nframe=-1
 	if len(sys.argv)>2:
 		nframe = int(sys.argv[2])
-	print 'Get odb fields at frame number '+str(nframe)
+	print ('Get odb fields at frame number '+str(nframe))
 
 	export_field(filename, nframe)
