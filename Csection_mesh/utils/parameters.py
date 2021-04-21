@@ -24,6 +24,7 @@ class parameters():
 				 dx=None,
 				 dy=None,
 				 ddy=None,
+				 dflange=None,
 				 dz=None,
 				 dc=None,
 				 nbp_by_surf=None,
@@ -53,7 +54,7 @@ class parameters():
 		substr.L = self.Height
 		substr.T = 0
 		substr.Ori = 0 * np.pi/180.
-		substr.DX = int((self.dx+0.0) * 0.5)
+		substr.DX = self.dflange
 		substr.shape='straight'
 
 		substr2 = sub()
@@ -131,6 +132,7 @@ def read_parameters(param):
 
 	param.dx = int(dico['dx'])
 	param.ddy = int(dico['ddy'])
+	param.dflange = int(dico['dflange'])
 	param.dz = int(dico['dz'])
 	param.dc = int(dico['dc'])
 

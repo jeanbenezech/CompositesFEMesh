@@ -10,16 +10,19 @@ import matplotlib.cm as cm
 
 # geometry in millimeters
 
-def write_parameters(cnt,p1, p2, p3, p4):
-	nb_plies = 6
-	nb_wrinkles = 1
-	Xlenght = 150.0
-	Ylenght = 7.0
+def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
+	nb_plies = 1
+	nb_wrinkles = 0
+	Xlenght = 140.0
+	Ylenght = 5.0
 	Zlenght = 500.0
-	height = 75
+	height = 35
+	r_ext = 10.0 # external radius
 
 	ply_thickness = Ylenght/(nb_plies+0.0)
-	StackSeq = [45.0, -45.0, 90.0, 0.0, -45.0, 45.0]
+	# StackSeq = [45.0, -45.0, 90.0, 0.0, -45.0, 45.0]
+	StackSeq = [90.0]
+	# StackSeq = [90.0, 90.0, 90.0, 90.0, 90.0, 90.0]
 
 	# WRINKLES Parameters
 	minWsize = -0.2
@@ -47,8 +50,10 @@ def write_parameters(cnt,p1, p2, p3, p4):
 	maxWori = 20
 
 
-
-	parameters=open('parameters_'+str(cnt)+'.txt','w')
+	if (cnt>0):
+		parameters=open('parameters_'+str(cnt)+'.txt','w')
+	else:
+		parameters=open('parameters.txt','w')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -63,7 +68,7 @@ def write_parameters(cnt,p1, p2, p3, p4):
 	parameters.write('np(i)         : '+str(nb_plies)+'\n')     # 6, 12 or 24 # TODO: find a clever way of setting stacking sequence
 	parameters.write('X(f)          : '+str(Xlenght)+'\n')   #
 	parameters.write('Y(f)          : '+str(Ylenght)+'\n')  #
-	parameters.write('R(f)          : 10\n')    #
+	parameters.write('R(f)          : '+str(r_ext)+'\n')    #
 	parameters.write('Height(f)     : '+str(height)+'\n')    #
 	parameters.write('Z(f)          : '+str(Zlenght)+'\n')   #
 	parameters.write('e(f)          : 0.01\n')  # Resin layer thickness
@@ -78,40 +83,43 @@ def write_parameters(cnt,p1, p2, p3, p4):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~MESH~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('lc(f)    : 1\n')        # mesh caracteristic size
-	parameters.write('dx(i)    : 20\n')       # discretization in X direction
-	parameters.write('ddy(i)   : 1\n')        # discretization of ply thickness
-	parameters.write('dz(i)    : 60\n')       # discretization in Z direction
-	parameters.write('dc(i)    : 7\n')        # discretization of corners
+	parameters.write('lc(f)      : 1\n')    # mesh caracteristic size
+	parameters.write('dx(i)      : 30\n')   # discretization in X direction
+	parameters.write('dflange(i) : 12\n')    # discretization of the flange
+	parameters.write('ddy(i)     : 1\n')    # discretization of ply thickness
+	parameters.write('dz(i)      : 80\n')   # discretization in Z direction
+	parameters.write('dc(i)      : 6\n')    # discretization of corners
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~TRANSFORMATION~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('wrinkle(i)        : '+str(nb_wrinkles)+'\n') # Do we need to add wrinkle in the gridMod (c++) code, 2+ for multiple wrinkles
 	parameters.write('Ramp(b)           : 1\n') #
-	parameters.write('Abaqus_output(b)  : 0\n') #
-	parameters.write('Dune_output(b)    : 1\n') #
+	parameters.write('Abaqus_output(b)  : 1\n') #
+	parameters.write('Dune_output(b)    : 0\n') #
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~WRINKLES~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('WID(s)             : Defect_'+str(cnt)+'\n')
-	parameters.write('Wsize(f)    : '+str(p1)+'\n') # Amplitude max
-	parameters.write('Wpos(f)     : 84.0,73.3,207.7\n') # center
-	parameters.write('Wori(f)     : '+str(p4)+'\n') # Orientation in degree
-	parameters.write('Wdamp(f)    : 8.0,'+str(p2)+','+str(p3)+'\n') # reduction of the amplitude through each direction
-	# for i in range(nb_wrinkles):
-	# 	if i<10:
-	# 		parameters.write('Wsize'+str(i)+'(f)    : '+str(random.uniform(minWsize, maxWsize))+'\n') # Amplitude max
-	# 		parameters.write('Wpos'+str(i)+'(f)     : '+str(random.uniform(minWposX, maxWposX))+','+str(random.uniform(minWposY, maxWposY))+','+str(random.uniform(minWposZ, maxWposZ))+'\n') # center
-	# 		parameters.write('Wori'+str(i)+'(f)     : '+str(random.uniform(minWori, maxWori))+'\n') # Orientation in degree
-	# 		parameters.write('Wdamp'+str(i)+'(f)    : '+str(random.uniform(minWdampX, maxWdampX))+','+str(random.uniform(minWdampY, maxWdampY))+','+str(random.uniform(minWdampZ, maxWdampZ))+'\n') # reduction of the amplitude through each direction
-	# 	else:
-	# 		parameters.write('Wsize'+str(i)+'(f)   : '+str(random.uniform(minWsize, maxWsize))+'\n') # Amplitude max
-	# 		parameters.write('Wpos'+str(i)+'(f)    : '+str(random.uniform(minWposX, maxWposX))+','+str(random.uniform(minWposY, maxWposY))+','+str(random.uniform(minWposZ, maxWposZ))+'\n') # center
-	# 		parameters.write('Wori'+str(i)+'(f)    : '+str(random.uniform(minWori, maxWori))+'\n') # Orientation in degree
-	# 		parameters.write('Wdamp'+str(i)+'(f)   : '+str(random.uniform(minWdampX, maxWdampX))+','+str(random.uniform(minWdampY, maxWdampY))+','+str(random.uniform(minWdampZ, maxWdampZ))+'\n') # reduction of the amplitude through each direction
+	if (nb_wrinkles>0):
+		parameters.write('WID(s)             : Defect_'+str(cnt)+'\n')
+	# parameters.write('Wsize(f)    : '+str(p1)+'\n') # Amplitude max
+	# parameters.write('Wpos(f)     : 84.0,73.3,207.7\n') # center
+	# parameters.write('Wori(f)     : '+str(p4)+'\n') # Orientation in degree
+	# parameters.write('Wdamp(f)    : 8.0,'+str(p2)+','+str(p3)+'\n') # reduction of the amplitude through each direction
+	for i in range(nb_wrinkles):
+		if i<10:
+			parameters.write('Wsize'+str(i)+'(f)    : '+str(random.uniform(minWsize, maxWsize))+'\n') # Amplitude max
+			parameters.write('Wpos'+str(i)+'(f)     : '+str(random.uniform(minWposX, maxWposX))+','+str(random.uniform(minWposY, maxWposY))+','+str(random.uniform(minWposZ, maxWposZ))+'\n') # center
+			parameters.write('Wori'+str(i)+'(f)     : '+str(random.uniform(minWori, maxWori))+'\n') # Orientation in degree
+			parameters.write('Wdamp'+str(i)+'(f)    : '+str(random.uniform(minWdampX, maxWdampX))+','+str(random.uniform(minWdampY, maxWdampY))+','+str(random.uniform(minWdampZ, maxWdampZ))+'\n') # reduction of the amplitude through each direction
+		else:
+			parameters.write('Wsize'+str(i)+'(f)   : '+str(random.uniform(minWsize, maxWsize))+'\n') # Amplitude max
+			parameters.write('Wpos'+str(i)+'(f)    : '+str(random.uniform(minWposX, maxWposX))+','+str(random.uniform(minWposY, maxWposY))+','+str(random.uniform(minWposZ, maxWposZ))+'\n') # center
+			parameters.write('Wori'+str(i)+'(f)    : '+str(random.uniform(minWori, maxWori))+'\n') # Orientation in degree
+			parameters.write('Wdamp'+str(i)+'(f)   : '+str(random.uniform(minWdampX, maxWdampX))+','+str(random.uniform(minWdampY, maxWdampY))+','+str(random.uniform(minWdampZ, maxWdampZ))+'\n') # reduction of the amplitude through each direction
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~RAMP~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('Rsize(f)          : 6.25\n')
+	parameters.write('StartEndinZdir(f) : 100.0,125.0,50.0\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~ABAQUS~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -179,11 +187,11 @@ def plot_DampYZ(x, title, colors):
 
 if __name__ == '__main__':
 
-	n_samples = 100
-	space = Space([(2., 12.), (1., 6.), (3., 10.), (-5., 5.)])
-
-	lhs = Lhs(lhs_type="classic", criterion=None)
-	x = lhs.generate(space.dimensions, n_samples)
+	# For Chensen
+	# n_samples = 100
+	# space = Space([(2., 12.), (1., 6.), (3., 10.), (-5., 5.)])
+	# lhs = Lhs(lhs_type="classic", criterion=None)
+	# x = lhs.generate(space.dimensions, n_samples)
 
 	# colors = cm.coolwarm(np.linspace(0, 1, n_samples))
 	# plot_S_dampY(x, 'Size vs dampY',colors)
@@ -197,5 +205,8 @@ if __name__ == '__main__':
 	# 	f.write(str(np.array(x)[i, 0])+', '+str(np.array(x)[i, 1])+', '+str(np.array(x)[i, 2])+', '+str(np.array(x)[i, 3])+'\n')
 	# f.close()
 
-	for cnt in range(n_samples):
-		write_parameters(cnt,np.array(x)[cnt, 0], np.array(x)[cnt, 1], np.array(x)[cnt, 2], np.array(x)[cnt, 3])
+	# for cnt in range(n_samples):
+	# 	write_parameters(cnt,np.array(x)[cnt, 0], np.array(x)[cnt, 1], np.array(x)[cnt, 2], np.array(x)[cnt, 3])
+
+
+	write_parameters()

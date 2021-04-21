@@ -4,8 +4,8 @@ import random
 # geometry in millimeters
 
 def write_parameters():
-	nb_plies = 5
-	nb_wrinkles = 1
+	nb_plies = 20
+	nb_wrinkles = 30
 	Xlenght = 25.0
 	Ylenght = 7.0
 	Zlenght = 10.0
@@ -14,17 +14,19 @@ def write_parameters():
 	ply_thickness = 0.355# Ylenght/(nb_plies+0.0)
 
 	# WRINKLES Parameters
-	minWsize = -0.2
-	maxWsize = 0.2
+	minWsize = -0.5
+	maxWsize = 0.8
 
 	minWposX = 0.11*Xlenght
 	maxWposX = 0.89*Xlenght
+	# minWposX = 0.49*Xlenght
+	# maxWposX = 0.51*Xlenght
 
 	minWposY = -0.3* Ylenght
 	maxWposY = 0#Ylenght
 
-	minWposZ = 0.11*Zlenght
-	maxWposZ = 0.89*Zlenght
+	minWposZ = 0.45*Zlenght
+	maxWposZ = 0.55*Zlenght
 
 	minWdampX = 2.0
 	maxWdampX = 9.0
@@ -60,7 +62,19 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~STACKSEQ~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	for i in range(nb_plies):
+	for i in range(8):
+		if i<10:
+			parameters.write('p'+str(i)+'(f,f)   : 0.0,'+str(ply_thickness)+'\n')
+		else:
+			parameters.write('p'+str(i)+'(f,f)  : 0.0,'+str(ply_thickness)+'\n')
+	parameters.write('p8(f,f)   : 0.0,0.31\n')
+	for i in range(9,17):
+		if i<10:
+			parameters.write('p'+str(i)+'(f,f)   : 0.0,'+str(ply_thickness)+'\n')
+		else:
+			parameters.write('p'+str(i)+'(f,f)  : 0.0,'+str(ply_thickness)+'\n')
+	parameters.write('p17(f,f)  : 0.0,0.31\n')
+	for i in range(18,20):
 		if i<10:
 			parameters.write('p'+str(i)+'(f,f)   : 0.0,'+str(ply_thickness)+'\n')
 		else:
@@ -72,7 +86,8 @@ def write_parameters():
 	parameters.write('dx(i)    : 50\n')       #
 	parameters.write('ddy(i)   : 2\n')        #
 	parameters.write('dz(i)    : 15\n')       #
-	parameters.write('dc(i)    : 7\n')        #
+	parameters.write('dc(i)    : 0\n')        #
+	parameters.write('dflange(i) : 0\n')     # discretization of the flange
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~TRANSFORMATION~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')

@@ -61,6 +61,7 @@ public:
 
 	// Ramp parameters
 	double rampSize;
+	Vector3d StartEndinZdir;
 
 	// Path to results
 	std::string path_to_abaqus_result;
@@ -114,6 +115,9 @@ void Parameters::read(const std::string& filename) {
 
 		if (line.find("Ramp(b)")!=std::string::npos)
 			add_ramp = std::stoi(extract(line));
+
+		if (line.find("StartEndinZdir(f)")!=std::string::npos)
+			StartEndinZdir = vectorExtract(line);
 
 		if (line.find("Abaqus_output")!=std::string::npos)
 			Abaqus_output = std::stoi(extract(line));

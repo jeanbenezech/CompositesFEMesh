@@ -31,37 +31,38 @@ if __name__ == '__main__':
 	f.write('*INCLUDE, INPUT='+param.name+'_mesh.inp\n')
 	f.write('*INCLUDE, INPUT='+param.name+'_ori.inp\n')
 	# ~~~~~~ MATERIAL ASSIGNEMENT ~~~~~~
-	# Csection
-	f.write('*SOLID SECTION, ELSET=Hexahedra, ORIENTATION=ori_loc, MATERIAL=D-8552\n')
-	f.write('*COHESIVE SECTION, ELSET=Cohesive, MATERIAL=CZ, RESPONSE=TRACTION SEPARATION, THICKNESS=GEOMETRY \n')
 	# Laminate
-	# for i in range(1,nb_ply+1):
-	# 	f.write('*SOLID SECTION, ELSET=elset'+str(i)+', ORIENTATION=ori_loc, MATERIAL=D-8552\n')
-	# f.write('*COHESIVE SECTION, ELSET=elset'+str(nb_ply+1)+', MATERIAL=CZ, RESPONSE=TRACTION SEPARATION, THICKNESS=GEOMETRY \n')
+	for i in range(1,9):
+		f.write('*SOLID SECTION, ELSET=elset'+str(i)+', ORIENTATION=ori_loc, MATERIAL=UD\n')
+	f.write('*SOLID SECTION, ELSET=elset9, ORIENTATION=ori_loc, MATERIAL=WOVEN\n')
+	for i in range(10,18):
+		f.write('*SOLID SECTION, ELSET=elset'+str(i)+', ORIENTATION=ori_loc, MATERIAL=UD\n')
+	f.write('*SOLID SECTION, ELSET=elset18, ORIENTATION=ori_loc, MATERIAL=WOVEN\n')
+	for i in range(19,21):
+		f.write('*SOLID SECTION, ELSET=elset'+str(i)+', ORIENTATION=ori_loc, MATERIAL=UD\n')
+	f.write('*COHESIVE SECTION, ELSET=elset'+str(nb_ply+1)+', MATERIAL=CZ, RESPONSE=TRACTION SEPARATION, THICKNESS=GEOMETRY \n')
 
 	# ~~~~~~ KINEMATIC COUPLING ~~~~~~
-	# Csection
-	f.write('*KINEMATIC COUPLING, REF NODE=MasterNode4\n')
-	f.write('nset4, 1, 6\n')
-	f.write('*KINEMATIC COUPLING, REF NODE=MasterNode5\n')
-	f.write('nset5, 1, 6\n')
-	f.write('*end part\n')
 	# Laminate
-	# f.write('*KINEMATIC COUPLING, REF NODE=MasterNode'+str(fi)+'\n')
-	# f.write('nset'+str(fi)+', 1, 6\n')
-	# f.write('*KINEMATIC COUPLING, REF NODE=MasterNode'+str(pull)+'\n')
-	# f.write('nset'+str(pull)+', 1, 6\n')
-	# f.write('*end part\n')
+	f.write('*KINEMATIC COUPLING, REF NODE=MasterNode0\n')
+	f.write('nset0, 1, 6\n')
+	f.write('*KINEMATIC COUPLING, REF NODE=MasterNode1\n')
+	f.write('nset1, 1, 6\n')
+	f.write('*end part\n')
 
 
 	# ~~~~~~~~~~~~~ MATERIAL ~~~~~~~~~~~~~
 	# Csection
 	f.write('**\n')
 	f.write('**---------- MATERIALS ---------- \n')
-	f.write('*MATERIAL, NAME=AS4-8552 \n')
+	f.write('*MATERIAL, NAME=UD \n')
 	f.write('*ELASTIC, TYPE=ENGINEERING CONSTANTS \n')
-	f.write('{}, {}, {}, {}, {}, {}, {}, {}\n'.format(137300., 8800., 8800., 0.314, 0.314, 0.487, 4900., 4900.))
-	f.write('{}\n'.format(2960.))
+	f.write('{}, {}, {}, {}, {}, {}, {}, {}\n'.format(115000., 7500., 7500., 0.3, 0.3, 0.45, 3200., 3200.))
+	f.write('{}\n'.format(3200.))
+	f.write('*MATERIAL, NAME=WOVEN \n')
+	f.write('*ELASTIC, TYPE=ENGINEERING CONSTANTS \n')
+	f.write('{}, {}, {}, {}, {}, {}, {}, {}\n'.format(63000., 63000., 7500., 0.047, 0.047, 0.45, 3200., 3200.))
+	f.write('{}\n'.format(3200.))
 
 	# Csection
 	f.write('*MATERIAL, name=CZ \n')
@@ -85,11 +86,11 @@ if __name__ == '__main__':
 	f.write('**---------- INIT BOUND ---------- \n')
 	f.write('*BOUNDARY, TYPE=DISPLACEMENT\n')
 	# Csection
-	f.write('m.MasterNode4, 1, 1, 0.0\n')
-	f.write('m.MasterNode4, 2, 2, 0.0\n')
-	f.write('m.MasterNode4, 3, 3, 0.0\n')
-	f.write('m.MasterNode5, 1, 1, 0.0\n')
-	f.write('m.MasterNode5, 2, 2, 0.0\n')
+	f.write('m.MasterNode0, 1, 1, 0.0\n')
+	f.write('m.MasterNode0, 2, 2, 0.0\n')
+	f.write('m.MasterNode0, 3, 3, 0.0\n')
+	f.write('m.MasterNode1, 1, 1, 0.0\n')
+	f.write('m.MasterNode1, 2, 2, 0.0\n')
 	# Laminate
 
 
@@ -98,12 +99,9 @@ if __name__ == '__main__':
 	f.write('**---------- STEP ---------- \n')
 	f.write('*STEP, NAME=Step-1, SOLVER=ITERATIVE, inc=5000\n')
 	f.write('*STATIC, stabilize, factor=1e-2\n')
-	# f.write('0.1, 1.0, 1e-03, 1.0\n')
 	f.write('1e-02, 1.0, 1e-06, 5e-01\n')
 	f.write('*BOUNDARY, TYPE=DISPLACEMENT\n')
-	# Csection
-	f.write('m.MasterNode5, 3, 3, -2\n')
-	# Laminate
+	f.write('m.MasterNode1, 1, 1, -2\n')
 	# ~~~~~~~~~~~~~ OUTPUT ~~~~~~~~~~~~~
 	f.write('**\n')
 	f.write('**---------- OUTPUT ---------- \n')
