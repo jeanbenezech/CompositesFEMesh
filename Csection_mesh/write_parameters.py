@@ -17,12 +17,12 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	Ylenght = 5.0
 	Zlenght = 500.0
 	height = 35
-	r_ext = 10.0 # external radius
+	r_ext = 5.0 + Ylenght # external radius
 
 	ply_thickness = Ylenght/(nb_plies+0.0)
 	# StackSeq = [45.0, -45.0, 90.0, 0.0, -45.0, 45.0]
-	StackSeq = [90.0]
-	# StackSeq = [90.0, 90.0, 90.0, 90.0, 90.0, 90.0]
+	# StackSeq = [90.0]
+	StackSeq = [90.0, 90.0, 90.0, 90.0, 90.0, 90.0]
 
 	# WRINKLES Parameters
 	minWsize = -0.2
@@ -60,7 +60,7 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('name(s)                : Csection\n') # mesh name
 	parameters.write('Shape(i)               : 0\n')   # 0(default): Csection ; 1: flat laminate
 	parameters.write('Resin_betw_plies(b)    : 0\n')   # 1: yes ; 0: no
-	parameters.write('cohezive_elements(b)   : 0\n')   # 1: yes ; 0: no
+	parameters.write('cohezive_elements(b)   : 1\n')   # 1: yes ; 0: no
 	parameters.write('recombine(b)           : 1\n')   # 1: recombine mesh: hex ;  0: no: only prisms
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~GEOMETRY~~~~~~~~~~~~~~~~~~~~~~\n')

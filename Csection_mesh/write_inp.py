@@ -32,7 +32,7 @@ if __name__ == '__main__':
 	f.write('*INCLUDE, INPUT='+param.name+'_ori.inp\n')
 	# ~~~~~~ MATERIAL ASSIGNEMENT ~~~~~~
 	# Csection
-	f.write('*SOLID SECTION, ELSET=Hexahedra, ORIENTATION=ori_loc, MATERIAL=D-8552\n')
+	f.write('*SOLID SECTION, ELSET=Hexahedra, ORIENTATION=ori_loc, MATERIAL=AS4-8552\n')
 	f.write('*COHESIVE SECTION, ELSET=Cohesive, MATERIAL=CZ, RESPONSE=TRACTION SEPARATION, THICKNESS=GEOMETRY \n')
 	# Laminate
 	# for i in range(1,nb_ply+1):

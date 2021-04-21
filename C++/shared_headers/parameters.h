@@ -79,7 +79,7 @@ void Parameters::read(const std::string& filename) {
 	std::ifstream input;
 	input.open(filename, std::ios::in);
 	if (!input.is_open()) {
-		std::cout << "Error: Cannot open file" << std::endl;
+		std::cout << "Error: Cannot open file" << filename << std::endl;
 	} else {
 		std::cout << "Reading " << filename << std::endl;
 	}

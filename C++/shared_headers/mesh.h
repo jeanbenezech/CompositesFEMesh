@@ -223,7 +223,7 @@ void Mesh::read_msh(const std::string& filename, bool only_3D, int cz_id) {
 	std::ifstream input;
 	input.open(filename, std::ios::in);
 	if (!input.is_open()) {
-	std::cout << "Error: Cannot open file" << std::endl;
+	std::cout << "Error: Cannot open file" << filename  << std::endl;
 	}
 	std::cout << "Reading " << filename << std::endl;
 
@@ -361,7 +361,7 @@ void Mesh::read_points(const std::string& filename) {
 	std::ifstream input;
 	input.open(filename, std::ios::in);
 	if (!input.is_open()) {
-		std::cout << "Error: Cannot open file" << std::endl;
+		std::cout << "Error: Cannot open file" << filename << std::endl;
 	} else{
 		std::cout << "Reading " << filename << std::endl;
 	}
@@ -378,7 +378,7 @@ void Mesh::read_elem_fields(const std::string& filename) {
 	std::ifstream input;
 	input.open(filename, std::ios::in);
 	if (!input.is_open()) {
-	std::cout << "Error: Cannot open file" << std::endl;
+	std::cout << "Error: Cannot open file" << filename << std::endl;
 	}
 	std::cout << "Reading " << filename << std::endl;
 
@@ -412,7 +412,7 @@ void Mesh::read_node_fields(const std::string& filename) {
 	std::ifstream input;
 	input.open(filename, std::ios::in);
 	if (!input.is_open()) {
-	std::cout << "Error: Cannot open file" << std::endl;
+	std::cout << "Error: Cannot open file" << filename << std::endl;
 	}
 	std::cout << "Reading " << filename << std::endl;
 
@@ -434,7 +434,7 @@ void Mesh::write_mesh(const std::string& filename) {
 	std::ofstream output;
 	output.open(filename+".mesh", std::ios::out);
 	if (!output.is_open()) {
-	std::cout << "Error: Cannot open file" << std::endl;
+	std::cout << "Error: Cannot open file" << filename << std::endl;
 	}
 	std::cout << "Writting " << filename+".mesh" << std::endl;
 
@@ -471,7 +471,7 @@ void Mesh::write_msh(const std::string& filename, int verbosity=1) {
 	std::ofstream output;
 	output.open(filename+".msh", std::ios::out);
 	if (!output.is_open()) {
-	std::cout << "Error: Cannot open file" << std::endl;
+	std::cout << "Error: Cannot open file" << filename << std::endl;
 	}
 	std::cout << "Writting " << filename+".msh" << std::endl;
 
@@ -641,7 +641,7 @@ void Mesh::write_ori_txt(const std::string& filename) {
 	std::ofstream output;
 	output.open(filename+"_ori.txt", std::ios::out);
 	if (!output.is_open()) {
-	std::cout << "Error: Cannot open file" << std::endl;
+	std::cout << "Error: Cannot open file" << filename << std::endl;
 	}
 	std::cout << "Writting " << filename+"_ori.txt" << std::endl;
 
@@ -665,7 +665,7 @@ void Mesh::write_ori_inp(const std::string& filename) {
 	std::ofstream output;
 	output.open(filename+"_ori.inp", std::ios::out);
 	if (!output.is_open()) {
-	std::cout << "Error: Cannot open file" << std::endl;
+	std::cout << "Error: Cannot open file" << filename << std::endl;
 	}
 	std::cout << "Writting " << filename+"_ori.inp" << std::endl;
 
@@ -692,7 +692,7 @@ void Mesh::write_inp(const std::string& filename) {
 	std::ofstream output;
 	output.open(filename+"_mesh.inp", std::ios::out);
 	if (!output.is_open()) {
-	std::cout << "Error: Cannot open file" << std::endl;
+	std::cout << "Error: Cannot open file" << filename << std::endl;
 	} else {
 		std::cout << "Writting " << filename+"_mesh.inp" << std::endl;
 	}
