@@ -11,7 +11,7 @@ import matplotlib.cm as cm
 # geometry in millimeters
 
 def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
-	nb_plies = 1
+	nb_plies = 6
 	nb_wrinkles = 0
 	Xlenght = 140.0
 	Ylenght = 5.0

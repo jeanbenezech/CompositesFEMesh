@@ -698,7 +698,7 @@ void Mesh::write_inp(const std::string& filename) {
 	}
 
 	// ~~~~~~~~~ NSET and ElSET preparation ~~~~~~~~~
-	std::vector<std::vector<int>> nsets, elsets;
+	std::vector<std::vector<int>> nsets, elsets, Coh_elsets;
 	std::vector<Vector3d> masterNodes;
 
 	// ~~~~~~~~~ NSET ~~~~~~~~~
@@ -803,6 +803,30 @@ void Mesh::write_inp(const std::string& filename) {
 		}
 	}
 
+
+	// Create an elset for each cohesive layer
+	bool is_coh=false;
+	for(auto& elem : Elements)
+		if(elem.type == "Cohesive")
+			is_coh=true;
+
+	if (is_coh){
+		Coh_elsets.resize(nb_elset-2); // -1 because {nb_ply-1 = nb_coh} and -1 because {nb_elset = nb_ply +1} to be adjust if some resin elements are in the model
+		for(auto& elem : Elements){
+			if(elem.type == "Cohesive"){
+				int cnt = 0;
+				Coh_elsets[cnt].push_back(elem.global_indices(0));
+				for (int i=1; i< elem.nb; i++){
+					if(elem.global_indices(i)-elem.global_indices(i-1)>1){
+						cnt+=1;
+					}
+					Coh_elsets[cnt].push_back(elem.global_indices(i));
+				}
+			}
+		}
+	}
+
+
 	// ~~~~~~~~~ E L S E T S ~~~~~~~~~
 	output << "******* E L E M E N T S   S E T S *************" << std::endl;
 	output << "*ELSET,ELSET=All_elements" << std::endl;
@@ -823,6 +847,18 @@ void Mesh::write_inp(const std::string& filename) {
 			if (i==elsets[j].size()-1) { output << "," << std::endl; }
 			else if ((i+1)%10 == 0) { output << "," << std::endl; }
 			else { output << ", "; }
+		}
+	}
+
+	if (is_coh){
+		for(int j=0; j< Coh_elsets.size();j++) {
+			output << "*ELSET,ELSET=cohesive_elset" << j+1 << std::endl;
+			for(int i=0; i< Coh_elsets[j].size(); ++i) {
+				output << Coh_elsets[j][i];
+				if (i==Coh_elsets[j].size()-1) { output << "," << std::endl; }
+				else if ((i+1)%10 == 0) { output << "," << std::endl; }
+				else { output << ", "; }
+			}
 		}
 	}
 
