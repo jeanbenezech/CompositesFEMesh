@@ -26,6 +26,8 @@ class GridTransformation{
 	double zmin, zmax, ymin, ymax, xmin, xmax;
 	double ymid;
 
+	double threshold_avoiding_deformation_through_thickness;
+
 	// Wrinkles parameters
 	Vector3d defect_location, damping, center_rot;
 	double wrinkleOri;
@@ -82,6 +84,7 @@ void GridTransformation::initialise(Mesh& m, Parameters& param) {
 	z4 = z3 + param.StartEndinZdir(1);
 
 	delta_max = param.rampSize;
+	threshold_avoiding_deformation_through_thickness = param.R;
 
 	ymid = (ymax-ymin)/2.0;
 
@@ -90,38 +93,53 @@ void GridTransformation::initialise(Mesh& m, Parameters& param) {
 
 void GridTransformation::ramp(Vector3d& point){
 	double ymid = (ymax+ymin)/2.0;
+	double decrease_0, decrease_1, increase_1;
 
-	std::vector<double> X = {0.0, 0.1*xmax, 0.75*xmax, xmax}; // must be increasing
+	// std::vector<double> X = {0.0, 0.1*xmax, 0.75*xmax, xmax}; // must be increasing
 
 	if (point(2)>z1 && point(2)<z4){ // section 1, 2, 3
 
 		if (point(2)>=z2 && point(2)<=z3){ // section 2
 
 			double initial_0 = point(0);
-			std::vector<double> Y = {0.0, 0.1*delta_max, 0.99*delta_max, delta_max};
-			tk::spline s(X,Y);
-			double decrease_0 = s(initial_0); // cubic
+			if (initial_0 > (xmax - threshold_avoiding_deformation_through_thickness))
+				decrease_0 = delta_max; // cnst
+			else
+				decrease_0 = initial_0 * delta_max / (xmax-threshold_avoiding_deformation_through_thickness); // Linear
+			// std::vector<double> Y = {0.0, 0.1*delta_max, 0.99*delta_max, delta_max};
+			// tk::spline s(X,Y);
+			// double decrease_0 = s(initial_0); // cubic
 			// double decrease_0 = initial_0 * delta_max / xmax; // Linear
 			// double decrease_0 = delta_max; // cnst
+			
 			point(0) -= decrease_0;
 
 			double initial_1 = point(1);
 			if(initial_1 > ymid) {
-
-				std::vector<double> A = {0.0, 0.1*(ymax-ymid), 0.75*(ymax-ymid), (ymax-ymid)}; // must be increasing
-				std::vector<double> B = {0.0, 0.1*delta_max, 0.99*delta_max, delta_max};
-				tk::spline s(A,B);
-				double decrease_1 = s(initial_1 - ymid); // cubic
-
+				// std::vector<double> A = {0.0, 0.1*(ymax-ymid), 0.75*(ymax-ymid), (ymax-ymid)}; // must be increasing
+				// std::vector<double> B = {0.0, 0.1*delta_max, 0.99*delta_max, delta_max};
+				// tk::spline s(A,B);
+				// double decrease_1 = s(initial_1 - ymid); // cubic
 				// double decrease_1 = (delta_max/(ymax-ymid)) * (initial_1 - ymid); // Linear
+
+				if (initial_1 > (ymax - threshold_avoiding_deformation_through_thickness))
+					decrease_1 = delta_max;
+				else
+					decrease_1 = (delta_max/(ymax-threshold_avoiding_deformation_through_thickness-ymid)) * (initial_1 - ymid); // Linear
+
 				point(1) -= decrease_1;
 			} else {
-				std::vector<double> A = {0.0, 0.1*(ymid-ymin), 0.75*(ymid-ymin), (ymid-ymin)}; // must be increasing
-				std::vector<double> B = {0.0, 0.1*delta_max, 0.99*delta_max, delta_max};
-				tk::spline s(A,B);
-				double increase_1 = s(ymid - initial_1); // cubic
-
+				// std::vector<double> A = {0.0, 0.1*(ymid-ymin), 0.75*(ymid-ymin), (ymid-ymin)}; // must be increasing
+				// std::vector<double> B = {0.0, 0.1*delta_max, 0.99*delta_max, delta_max};
+				// tk::spline s(A,B);
+				// double increase_1 = s(ymid - initial_1); // cubic
 				// double increase_1 = (delta_max/(ymid-ymin)) * (ymid - initial_1); // Linear
+
+				if (initial_1 < threshold_avoiding_deformation_through_thickness)
+					increase_1 = delta_max;
+				else
+					increase_1 = (delta_max/(ymid-(ymin+threshold_avoiding_deformation_through_thickness))) * (ymid - initial_1); // Linear
+
 				point(1) += increase_1;
 			}
 
@@ -131,31 +149,47 @@ void GridTransformation::ramp(Vector3d& point){
 
 			double initial_0 = point(0);
 			
-			std::vector<double> Y = {0.0, 0.1*local_delta, 0.99*local_delta, local_delta};
-			tk::spline s(X,Y);
-			double decrease_0 = s(initial_0); // cubic
+			// std::vector<double> Y = {0.0, 0.1*local_delta, 0.99*local_delta, local_delta};
+			// tk::spline s(X,Y);
+			// double decrease_0 = s(initial_0); // cubic
 			// double decrease_0 = initial_0 * local_delta / xmax; // Linear
 			// double decrease_0 = local_delta; // cnst
+
+			if (initial_0 > (xmax - threshold_avoiding_deformation_through_thickness))
+				decrease_0 = local_delta; // cnst
+			else
+				decrease_0 = initial_0 * local_delta / (xmax-threshold_avoiding_deformation_through_thickness); // Linear
+
+
 			point(0) -= decrease_0;
 
 			double initial_1 = point(1);
 			if(initial_1 > ymid) {
 
-				std::vector<double> A = {0.0, 0.1*(ymax-ymid), 0.75*(ymax-ymid), (ymax-ymid)}; // must be increasing
-				std::vector<double> B = {0.0, 0.1*local_delta, 0.99*local_delta, local_delta};
-				tk::spline s(A,B);
-				double decrease_1 = s(initial_1 - ymid); // cubic
-
+				// std::vector<double> A = {0.0, 0.1*(ymax-ymid), 0.75*(ymax-ymid), (ymax-ymid)}; // must be increasing
+				// std::vector<double> B = {0.0, 0.1*local_delta, 0.99*local_delta, local_delta};
+				// tk::spline s(A,B);
+				// double decrease_1 = s(initial_1 - ymid); // cubic
 				// double decrease_1 = (local_delta/(ymax-ymid))* (initial_1 - ymid); // Linear
+				if (initial_1 > (ymax - threshold_avoiding_deformation_through_thickness))
+					decrease_1 = local_delta;
+				else
+					decrease_1 = (local_delta/(ymax-threshold_avoiding_deformation_through_thickness-ymid)) * (initial_1 - ymid); // Linear
+
 				point(1) -= decrease_1;
 			} else {
 
-				std::vector<double> A = {0.0, 0.1*(ymid-ymin), 0.75*(ymid-ymin), (ymid-ymin)}; // must be increasing
-				std::vector<double> B = {0.0, 0.1*local_delta, 0.99*local_delta, local_delta};
-				tk::spline s(A,B);
-				double increase_1 = s(ymid - initial_1); // cubic
-
+				// std::vector<double> A = {0.0, 0.1*(ymid-ymin), 0.75*(ymid-ymin), (ymid-ymin)}; // must be increasing
+				// std::vector<double> B = {0.0, 0.1*local_delta, 0.99*local_delta, local_delta};
+				// tk::spline s(A,B);
+				// double increase_1 = s(ymid - initial_1); // cubic
 				// double increase_1 = (local_delta/(ymid-ymin))* (ymid - initial_1); // Linear
+
+				if (initial_1 < ymin + threshold_avoiding_deformation_through_thickness)
+					increase_1 = local_delta;
+				else
+					increase_1 = (local_delta/(ymid-(ymin+threshold_avoiding_deformation_through_thickness))) * (ymid - initial_1); // Linear
+
 				point(1) += increase_1;
 			}
 
@@ -165,31 +199,47 @@ void GridTransformation::ramp(Vector3d& point){
 			double local_delta = (delta_max / (z3-z4)) * point(2) + ((z4*delta_max)/(z4-z3));
 
 			double initial_0 = point(0);
-			std::vector<double> Y = {0.0, 0.1*local_delta, 0.99*local_delta, local_delta};
-			tk::spline s(X,Y);
-			double decrease_0 = s(initial_0); // cubic
+			// std::vector<double> Y = {0.0, 0.1*local_delta, 0.99*local_delta, local_delta};
+			// tk::spline s(X,Y);
+			// double decrease_0 = s(initial_0); // cubic
 			// double decrease_0 = initial_0 * local_delta / xmax; // Linear
 			// double decrease_0 = local_delta; // cnst
+
+			if (initial_0 > (xmax - threshold_avoiding_deformation_through_thickness))
+				decrease_0 = local_delta; // cnst
+			else
+				decrease_0 = initial_0 * local_delta / (xmax-threshold_avoiding_deformation_through_thickness); // Linear
+
 			point(0) -= decrease_0;
 
 			double initial_1 = point(1);
 			if(initial_1 > ymid) {
 
-				std::vector<double> A = {0.0, 0.1*(ymax-ymid), 0.75*(ymax-ymid), (ymax-ymid)}; // must be increasing
-				std::vector<double> B = {0.0, 0.1*local_delta, 0.99*local_delta, local_delta};
-				tk::spline s(A,B);
-				double decrease_1 = s(initial_1 - ymid); // cubic
-
+				// std::vector<double> A = {0.0, 0.1*(ymax-ymid), 0.75*(ymax-ymid), (ymax-ymid)}; // must be increasing
+				// std::vector<double> B = {0.0, 0.1*local_delta, 0.99*local_delta, local_delta};
+				// tk::spline s(A,B);
+				// double decrease_1 = s(initial_1 - ymid); // cubic
 				// double decrease_1 = (local_delta/(ymax-ymid))* (initial_1 - ymid); // Linear
+
+				if (initial_1 > (ymax - threshold_avoiding_deformation_through_thickness))
+					decrease_1 = local_delta;
+				else
+					decrease_1 = (local_delta/(ymax-threshold_avoiding_deformation_through_thickness-ymid)) * (initial_1 - ymid); // Linear
+
 				point(1) -= decrease_1;
 			} else {
 
-				std::vector<double> A = {0.0, 0.1*(ymid-ymin), 0.75*(ymid-ymin), (ymid-ymin)}; // must be increasing
-				std::vector<double> B = {0.0, 0.1*local_delta, 0.99*local_delta, local_delta};
-				tk::spline s(A,B);
-				double increase_1 = s(ymid - initial_1); // cubic
-
+				// std::vector<double> A = {0.0, 0.1*(ymid-ymin), 0.75*(ymid-ymin), (ymid-ymin)}; // must be increasing
+				// std::vector<double> B = {0.0, 0.1*local_delta, 0.99*local_delta, local_delta};
+				// tk::spline s(A,B);
+				// double increase_1 = s(ymid - initial_1); // cubic
 				// double increase_1 = (local_delta/(ymid-ymin))* (ymid - initial_1); // Linear
+
+				if (initial_1 < ymin + threshold_avoiding_deformation_through_thickness)
+					increase_1 = local_delta;
+				else
+					increase_1 = (local_delta/(ymid-(ymin+threshold_avoiding_deformation_through_thickness))) * (ymid - initial_1); // Linear
+
 				point(1) += increase_1;
 			}
 

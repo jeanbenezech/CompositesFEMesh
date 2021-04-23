@@ -61,6 +61,7 @@ public:
 
 	// Ramp parameters
 	double rampSize;
+	double R;
 	Vector3d StartEndinZdir;
 
 	// Path to results
@@ -116,6 +117,9 @@ void Parameters::read(const std::string& filename) {
 		if (line.find("Ramp(b)")!=std::string::npos)
 			add_ramp = std::stoi(extract(line));
 
+		if (line.find("R(f)")!=std::string::npos)
+			R = std::stod(extract(line));
+
 		if (line.find("StartEndinZdir(f)")!=std::string::npos)
 			StartEndinZdir = vectorExtract(line);
 
@@ -126,7 +130,7 @@ void Parameters::read(const std::string& filename) {
 			Dune_output = std::stoi(extract(line));
 
 		if (line.find("Rsize(f)")!=std::string::npos)
-			rampSize = std::stof(extract(line));
+			rampSize = std::stod(extract(line));
 
 		if (line.find("WID(s)")!=std::string::npos)
 			WID = extract(line);
