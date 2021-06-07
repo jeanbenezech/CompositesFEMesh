@@ -66,7 +66,8 @@ if __name__ == '__main__':
 	# Csection
 	f.write('*MATERIAL, name=CZ \n')
 	f.write('*ELASTIC, TYPE=TRACTION \n')
-	f.write(' 7612.,1370.,1370.\n')
+	# f.write(' 7612.,1370.,1370.\n')
+	f.write(' 2244898.,1250000.,754841.\n')
 	f.write('*DAMAGE INITIATION, CRITERION=QUADS \n')
 	f.write(' 74.2, 110.4, 110.4 \n')
 	f.write('*DAMAGE EVOLUTION, TYPE=ENERGY, MIXED MODE BEHAVIOR=BK, POWER=1.45 \n')

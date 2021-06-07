@@ -64,6 +64,9 @@ public:
 	double R;
 	Vector3d StartEndinZdir;
 
+	// Geometric parameters
+	double X, Y, Height;
+
 	// Path to results
 	std::string path_to_abaqus_result;
 	std::string AbaqusOdbName;
@@ -119,6 +122,15 @@ void Parameters::read(const std::string& filename) {
 
 		if (line.find("R(f)")!=std::string::npos)
 			R = std::stod(extract(line));
+
+		if (line.find("X(f)")!=std::string::npos)
+			X = std::stod(extract(line));
+
+		if (line.find("Y(f)")!=std::string::npos)
+			Y = std::stod(extract(line));
+
+		if (line.find("Height(f)")!=std::string::npos)
+			Height = std::stod(extract(line));
 
 		if (line.find("StartEndinZdir(f)")!=std::string::npos)
 			StartEndinZdir = vectorExtract(line);

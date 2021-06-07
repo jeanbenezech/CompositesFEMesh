@@ -29,7 +29,11 @@ int main(int argc, const char *argv[]) {
 	if(param.Shape==0)
 		localCoorSyst(m, param);
 	else
-		globalCoorSyst(m);
+		globalCoorSyst(m, param);
+
+	if (param.Dune_output){ // DUNE
+		attribute_weight(m, param);
+	}
 
 	GeometricTransformation(m, param);
 	StackingSequence(m, param);

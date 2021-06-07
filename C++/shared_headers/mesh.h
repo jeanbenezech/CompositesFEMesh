@@ -18,6 +18,7 @@ class Mesh {
 public:
 	// PRINCIPAL VARIABLES
 	Matrix<double, Dynamic, Dynamic> vertices;
+	Matrix<double, Dynamic, Dynamic> vertice_normals;
 	std::vector<Element> Elements;
 
 	std::string mesh_type;
@@ -245,6 +246,7 @@ void Mesh::read_msh(const std::string& filename, bool only_3D, int cz_id) {
 	input >> nb_vertices_;
 
 	vertices.resize(3, nb_vertices_);
+	vertice_normals.resize(3, nb_vertices_);
 	for(int i=0; i< nb_vertices_; ++i) {
 		double x, y, z, d;
 		input >> d >> x >> y >> z;
@@ -252,6 +254,11 @@ void Mesh::read_msh(const std::string& filename, bool only_3D, int cz_id) {
 		vertices(1,d-1)=y;
 		vertices(2,d-1)=z;
 		//~ if (i<10){std::cout << vertices(0,i) << ", " << vertices(1,i) << ", " << vertices(2,i) << std::endl;}
+
+		// initialize the normal to vertices at zero
+		vertice_normals(0, d-1)=0.0;
+		vertice_normals(1, d-1)=0.0;
+		vertice_normals(2, d-1)=0.0;
 	}
 	std::getline(input, ligne); // End last node line
 	std::getline(input, ligne); // $EndNodes
@@ -568,6 +575,17 @@ void Mesh::write_vtk(const std::string& filename, int verbosity=0) {
 		}
 	}
 
+	output << "SCALARS DD_weight int 1"<< std::endl;
+	output << "LOOKUP_TABLE default"<< std::endl;
+
+	for(auto& elem : Elements){
+		for (int i=0; i< elem.nb; i++) {
+			for (int j =0; j < elem.DD_weight.rows()-1; j++)
+				output << elem.DD_weight(j,i) << " ";
+			output << elem.DD_weight(elem.DD_weight.rows()-1,i) << std::endl;
+		}
+	}
+
 	if (exportDir){
 		output << "SCALARS U double 3\n";
 		output << "LOOKUP_TABLE default\n";
@@ -652,6 +670,7 @@ void Mesh::write_ori_txt(const std::string& filename) {
 		for (int i=0; i< elem.nb; i++) {
 			output << elem.global_indices(i) << " ";
 			output << elem.Markers(0, i) << " ";
+			output << elem.DD_weight(0, i) << " ";
 			output << stacking_sequence[elem.Markers(0, i) - 1] << " ";
 			output << std::setprecision(15) << elem.U(0, i) << " " << elem.U(1, i) << " " << elem.U(2, i) << " ";
 			output << std::setprecision(15) << elem.V(0, i) << " " << elem.V(1, i) << " " << elem.V(2, i) << " ";
@@ -880,243 +899,5 @@ void Mesh::write_inp(const std::string& filename) {
 		output << nb_vertices_+1+j << ", " << std::endl;
 	}
 }
-
-// void Mesh::write_abaqus_cae_input(const std::string& filename, Parameters& param) {
-// 	std::ofstream output;
-// 	output.open(filename+"_CAE.inp", std::ios::out);
-// 	if (!output.is_open()) {
-// 	std::cout << "Error: Cannot open file" << std::endl;
-// 	} else {
-// 		std::cout << "Writting " << filename+"_CAE.inp" << std::endl;
-// 	}
-
-// 	// ~~~~~~~~~ NSET and ElSET preparation ~~~~~~~~~
-// 	std::vector<std::vector<int>> nsets, elsets;
-// 	std::vector<Vector3d> masterNodes;
-
-// 	// ~~~~~~~~~ NSET ~~~~~~~~~
-// 	nb_nset=6;
-// 	nsets.resize(nb_nset);
-// 	masterNodes.resize(nb_nset);
-
-// 	double xmin, xmax, ymin, ymax, zmin, zmax;
-// 	xmin=ymin=zmin=  10000;
-// 	xmax=ymax=zmax= -10000;
-// 	for (int i=0; i<nb_vertices_;i++) {
-// 		if (xmin > vertices(0, i)) {xmin = vertices(0, i);}
-// 		if (xmax < vertices(0, i)) {xmax = vertices(0, i);}
-// 		if (ymin > vertices(1, i)) {ymin = vertices(1, i);}
-// 		if (ymax < vertices(1, i)) {ymax = vertices(1, i);}
-// 		if (zmin > vertices(2, i)) {zmin = vertices(2, i);}
-// 		if (zmax < vertices(2, i)) {zmax = vertices(2, i);}
-// 	}
-
-// 	double epsi=0.01;
-
-// 	for (int i=0; i<nb_vertices_;i++) {
-// 		if (vertices(0, i)-xmin<epsi) {nsets[0].push_back(i);}
-// 		if (xmax-vertices(0, i)<epsi) {nsets[1].push_back(i);}
-// 		if (vertices(1, i)-ymin<epsi) {nsets[2].push_back(i);}
-// 		if (ymax-vertices(1, i)<epsi) {nsets[3].push_back(i);}
-// 		if (vertices(2, i)-zmin<epsi) {nsets[4].push_back(i);}
-// 		if (zmax-vertices(2, i)<epsi) {nsets[5].push_back(i);}
-// 	}
-
-// 	for(int j=0; j< nb_nset;j++) {
-// 		masterNodes[j](0)=0.0;
-// 		masterNodes[j](1)=0.0;
-// 		masterNodes[j](2)=0.0;
-// 		for(int i=0; i<nsets[j].size(); i++) {
-// 			masterNodes[j](0) += vertices(0,nsets[j][i]);
-// 			masterNodes[j](1) += vertices(1,nsets[j][i]);
-// 			masterNodes[j](2) += vertices(2,nsets[j][i]);
-// 		}
-// 		masterNodes[j](0)/=nsets[j].size();
-// 		masterNodes[j](1)/=nsets[j].size();
-// 		masterNodes[j](2)/=nsets[j].size();
-// 	}
-
-// 	//ELSET
-// 	elsets.resize(nb_elset);
-// 	for(auto& elem : Elements){
-// 		if(elem.type != "Triangle" || elem.type != "Quadrilateral"){ // We would ony use 3D elements in Abaqus (that could change later)
-// 			for (int i=0; i< elem.nb; i++)
-// 				elsets[elem.Markers(0,i)-1].push_back(elem.global_indices(i));
-// 		}
-// 	}
-
-
-// 	std::cout << nb_nset            << " NSETs"  << std::endl;
-// 	std::cout << nb_elset           << " ELSETs"  << std::endl;
-
-// 	// Headings
-// 	output << "*Heading" << std::endl;
-// 	output << "**" << std::endl;
-// 	output << "*Preprint, echo=NO, model=NO, history=NO, contact=NO" << std::endl;
-
-// 	// ~~~~~~~~~ P A R T ~~~~~~~~~
-// 	output << "**" << std::endl;
-// 	output << "** PARTS" << std::endl;
-// 	output << "**" << std::endl;
-// 	output << "*Part, name=MAIN" << std::endl;
-
-// 	// ~~~~~~~~~ N O D E S ~~~~~~~~~
-
-// 	output << "**" << std::endl;
-// 	output << "** NODES" << std::endl;
-// 	output << "**" << std::endl;
-// 	output << "*NODE" << std::endl;
-// 	output << nb_vertices_+nb_nset << std::endl; // Plus the number of master nodes
-// 	for(int i=0; i< nb_vertices_; ++i) {
-// 		output << i+1 << ", " << vertices(0,i) << ", " << vertices(1,i) << ", " << vertices(2,i) << std::endl;
-// 	}
-// 	// Adding master nodes
-// 	for(int j=0; j< nb_nset;j++) {
-// 		output << nb_vertices_+1+j << ", " <<  masterNodes[j](0) << ", " << masterNodes[j](1) << ", " << masterNodes[j](2) << std::endl;
-// 	}
-
-// 	// ~~~~~~~~~ E L E M E N T S ~~~~~~~~~
-
-// 	output << "**" << std::endl;
-// 	output << "** ELEMENTS" << std::endl;
-// 	output << "**" << std::endl;
-// 	// Change node ordering for cohesive
-// 	std::vector<int> cno = {2, 1, 5, 6, 3, 0, 4, 7};
-// 	for(auto& elem : Elements){
-// 	if(elem.type != "Triangle" || elem.type != "Quadrilateral"){ // We would ony use 3D elements in Abaqus (that could change later)
-// 		output << "*ELEMENT, type=" << elem.abaqus_type << ", ELSET=" << elem.type << std::endl;
-// 		for (int i=0; i< elem.nb; i++) {
-// 			output << elem.global_indices(i) << ", ";
-// 			if(elem.type == "Cohesive"){
-// 				for (int j =0; j < elem.Nodes.rows()-1; j++)
-// 					output << elem.Nodes(cno[j],i)+1 << ", ";
-// 				output << elem.Nodes(cno[elem.Nodes.rows()-1],i)+1 << std::endl;
-// 			}else{
-// 				for (int j =0; j < elem.Nodes.rows()-1; j++)
-// 					output << elem.Nodes(j,i)+1 << ", ";
-// 				output << elem.Nodes(elem.Nodes.rows()-1,i)+1 << std::endl;
-// 			}
-// 		}
-// 	}
-// 	}
-
-// 	// ~~~~~~~~~ ELSETS ~~~~~~~~~
-// 	output << "**" << std::endl;
-// 	output << "** ELEMENTS SETS" << std::endl;
-// 	output << "**" << std::endl;
-// 	output << "*ELSET,ELSET=All_elements" << std::endl;
-// 	for(auto& elem : Elements){
-// 		if(elem.type != "Triangle" || elem.type != "Quadrilateral"){ // We would ony use 3D elements in Abaqus (that could change later)
-// 			for (int i=0; i< elem.nb; i++){
-// 				output << elem.global_indices(i);
-// 				if ((i+1)%10 == 0) { output << "," << std::endl; }
-// 				else { output << ", "; }
-// 			}
-// 		}
-// 	}
-// 	output << std::endl;
-// 	for(int j=0; j< nb_elset;j++) {
-// 		output << "*ELSET,ELSET=elset" << j+1 << std::endl;
-// 		for(int i=0; i< elsets[j].size(); ++i) {
-// 			output << elsets[j][i];
-// 			if (i==elsets[j].size()-1) { output << "," << std::endl; }
-// 			else if ((i+1)%10 == 0) { output << "," << std::endl; }
-// 			else { output << ", "; }
-// 		}
-// 	}
-
-	
-// 	output << "*SOLID SECTION, ELSET= Hexahedron, ORIENTATION=ori_loc, MATERIAL=myMaterial" << std::endl;
-
-// 	if(param.isCZ){
-// 		output << "*COHESIVE SECTION, ELSET= Cohesive, MATERIAL=CZ, RESPONSE=TRACTION SEPARATION, THICKNESS=GEOMETRY" << std::endl;
-// 		// output << "*COHESIVE SECTION, ELSET= Cohesive, MATERIAL=CZ, STACK DIRECTION=1, RESPONSE=TRACTION SEPARATION, THICKNESS=GEOMETRY" << std::endl;
-// 		// output << "*COHESIVE SECTION, ELSET=Cohesive, MATERIAL=CZ, STACK DIRECTION=3, RESPONSE=TRACTION SEPARATION" << std::endl;
-// 		// output << " 0.001" << std::endl;
-// 	}
-
-// 	output << "*ORIENTATION, NAME=ori_glob" << std::endl;
-// 	output << "1., 0., 0., 0., 1., 0." << std::endl;
-// 	output << "1, 0." << std::endl;
-// 	output << "*ORIENTATION, NAME=ori_loc" << std::endl;
-// 	output << "ori_loc_distribution" << std::endl;
-// 	output << "*DISTRIBUTION, NAME=ori_loc_distribution, LOCATION=ELEMENT, TABLE=ori_tab" << std::endl;
-// 	output << ", 1.0,  0.0,  0.0,  0.0,  1.0, 0.0" << std::endl;
-// 	for(auto& elem : Elements){
-// 		for (int i=0; i< elem.nb; i++) {
-// 			output << elem.global_indices(i) << ", ";
-// 			output << elem.U(0, i) << ", " << elem.U(1, i) << ", " << elem.U(2, i) << ", ";
-// 			output << elem.V(0, i) << ", " << elem.V(1, i) << ", " << elem.V(2, i) << std::endl;
-// 		}
-// 	}
-
-
-
-// 	output << "*End Part" << std::endl;
-// 	// ~~~~~~~~~ E N D  P A R T ~~~~~~~~~
-
-
-// 	output << "**" << std::endl;
-// 	output << "** ASSEMBLY" << std::endl;
-// 	output << "**" << std::endl;
-// 	output << "*Assembly, name=Assembly" << std::endl;
-// 	output << "*Instance, name=Imain, part=MAIN" << std::endl;
-// 	output << "*End Instance" << std::endl;
-
-// 	// ~~~~~~~~~ NSET ~~~~~~~~~
-// 	output << "**" << std::endl;
-// 	output << "** NODES SETS" << std::endl;
-// 	output << "**" << std::endl;
-// 	for(int j=0; j< nb_nset;j++) {
-// 		if (nsets[j].size()>0) {
-// 			output << "*NSET,NSET=nset" << j << ", instance=Imain" << std::endl;
-// 			for(int i=0; i< nsets[j].size(); ++i) {
-// 				output << nsets[j][i]+1;
-// 				if (i==nsets[j].size()-1) { output << "," << std::endl; }
-// 				else if ((i+1)%10 == 0) { output << "," << std::endl; }
-// 				else { output << ", "; }
-// 			}
-// 		}
-// 	}
-// 	for(int j=0; j< nb_nset;j++) {
-// 		output << "*NSET,NSET=MasterNode" << j << ", instance=Imain" << std::endl;
-// 		output << nb_vertices_+1+j << ", " << std::endl;
-// 	}
-
-// 	output << "*End Assembly" << std::endl;
-
-
-// 	output << "**" << std::endl;
-// 	output << "** MATERIALS" << std::endl;
-// 	output << "**" << std::endl;
-// 	output << "*MATERIAL, NAME=myMaterial " << std::endl;
-// 	output << "*ELASTIC, TYPE=ENGINEERING CONSTANTS" << std::endl;
-// 	output << "137300., 8800., 8800., 0.314, 0.314, 0.487, 4900., 4900." << std::endl;
-// 	output << "2960." << std::endl;
-// 	// Spencer's
-// 	// output << "115000., 7500., 7500., 0.3, 0.3, 0.45, 3200., 3200." << std::endl;
-// 	// output << "3200." << std::endl;
-
-// 	if(param.isCZ){
-// 		output << "*MATERIAL, name=CZ" << std::endl;
-// 		output << "*ELASTIC, TYPE=TRACTION" << std::endl;
-// 		output << " 7612.,1370.,1370." << std::endl;
-// 		output << "*DAMAGE INITIATION, CRITERION=QUADS" << std::endl;
-// 		output << " 74.2, 110.4, 110.4" << std::endl;
-// 		output << "*DAMAGE EVOLUTION, TYPE=ENERGY, MIXED MODE BEHAVIOR=BK, POWER=1.45" << std::endl;
-// 		output << " 0.3, 0.87, 0.87" << std::endl;
-// 	}
-
-// 	if(param.isResin){
-// 		output << "*MATERIAL, name=PEEK" << std::endl;
-// 		output << "*ELASTIC" << std::endl;
-// 		output << " 2500., 0.4" << std::endl;
-// 	}
-
-// 	output << "**" << std::endl;
-// 	output << "*DISTRIBUTION TABLE, NAME=ori_tab" << std::endl;
-// 	output << "coord3d, coord3d" << std::endl;
-
-// }
 
 #endif /* end of include guard: MESH_H */

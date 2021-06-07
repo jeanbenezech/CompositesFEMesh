@@ -11,18 +11,20 @@ import matplotlib.cm as cm
 # geometry in millimeters
 
 def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
-	nb_plies = 6
+	nb_plies = 12
 	nb_wrinkles = 0
 	Xlenght = 140.0
-	Ylenght = 5.0
+	Ylenght = 5.0 # 6.48
 	Zlenght = 500.0
 	height = 35
 	r_ext = 5.0 + Ylenght # external radius
+	is_coh = 0
 
 	ply_thickness = Ylenght/(nb_plies+0.0)
 	# StackSeq = [45.0, -45.0, 90.0, 0.0, -45.0, 45.0]
 	# StackSeq = [90.0]
-	StackSeq = [90.0, 90.0, 90.0, 90.0, 90.0, 90.0]
+	StackSeq = [-45.0, 45.0, 0.0, 90.0, 45.0, -45.0, -45.0, 45.0, 0.0, 90.0, 45.0, -45.0, -45.0, 45.0, 0.0, 90.0, 45.0, -45.0, -45.0, 45.0, 0.0, 90.0, 45.0, -45.0]
+	# StackSeq = [-45.0, 45.0, 0.0, 90.0, 45.0, -45.0, -45.0, 45.0, 0.0, 90.0, 45.0, -45.0]
 
 	# WRINKLES Parameters
 	minWsize = -0.2
@@ -60,7 +62,7 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('name(s)                : Csection\n') # mesh name
 	parameters.write('Shape(i)               : 0\n')   # 0(default): Csection ; 1: flat laminate
 	parameters.write('Resin_betw_plies(b)    : 0\n')   # 1: yes ; 0: no
-	parameters.write('cohezive_elements(b)   : 1\n')   # 1: yes ; 0: no
+	parameters.write('cohezive_elements(b)   : '+str(is_coh)+'\n')   # 1: yes ; 0: no
 	parameters.write('recombine(b)           : 1\n')   # 1: recombine mesh: hex ;  0: no: only prisms
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~GEOMETRY~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -83,19 +85,19 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~MESH~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('lc(f)      : 1\n')    # mesh caracteristic size
-	parameters.write('dx(i)      : 30\n')   # discretization in X direction
-	parameters.write('dflange(i) : 12\n')    # discretization of the flange
-	parameters.write('ddy(i)     : 1\n')    # discretization of ply thickness
-	parameters.write('dz(i)      : 80\n')   # discretization in Z direction
-	parameters.write('dc(i)      : 6\n')    # discretization of corners
+	parameters.write('lc(f)      : 1\n')    #1 mesh caracteristic size
+	parameters.write('dx(i)      : 10\n')   #40 discretization in X direction
+	parameters.write('dflange(i) : 4\n')    #16 discretization of the flange
+	parameters.write('ddy(i)     : 3\n')    #2 discretization of ply thickness
+	parameters.write('dz(i)      : 20\n')   #100 discretization in Z direction
+	parameters.write('dc(i)      : 2\n')    #6 discretization of corners
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~TRANSFORMATION~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('wrinkle(i)        : '+str(nb_wrinkles)+'\n') # Do we need to add wrinkle in the gridMod (c++) code, 2+ for multiple wrinkles
 	parameters.write('Ramp(b)           : 1\n') #
-	parameters.write('Abaqus_output(b)  : 1\n') #
-	parameters.write('Dune_output(b)    : 0\n') #
+	parameters.write('Abaqus_output(b)  : 0\n') #
+	parameters.write('Dune_output(b)    : 1\n') #
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~WRINKLES~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')

@@ -26,6 +26,7 @@ public:
 	VectorXi global_indices;
 	Matrix<int, Dynamic, Dynamic> Nodes;
 	Matrix<int, Dynamic, Dynamic> Markers;
+	Matrix<int, Dynamic, Dynamic> DD_weight;
 
 	Matrix<double, Dynamic, Dynamic> U;
 	Matrix<double, Dynamic, Dynamic> V;
@@ -95,6 +96,7 @@ void Element::initialise(std::string key, int nb_elem, int nb_marker) {
 	}
 	Nodes.resize(size, nb);
 	Markers.resize(nb_marker, nb);
+	DD_weight.resize(1, nb);
 	global_indices.resize(nb);
 
 	U.resize(3, nb);
