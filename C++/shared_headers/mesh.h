@@ -670,7 +670,7 @@ void Mesh::write_ori_txt(const std::string& filename) {
 		for (int i=0; i< elem.nb; i++) {
 			output << elem.global_indices(i) << " ";
 			output << elem.Markers(0, i) << " ";
-			output << elem.DD_weight(0, i) << " ";
+			// output << elem.DD_weight(0, i) << " ";
 			output << stacking_sequence[elem.Markers(0, i) - 1] << " ";
 			output << std::setprecision(15) << elem.U(0, i) << " " << elem.U(1, i) << " " << elem.U(2, i) << " ";
 			output << std::setprecision(15) << elem.V(0, i) << " " << elem.V(1, i) << " " << elem.V(2, i) << " ";
