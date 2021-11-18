@@ -14,6 +14,7 @@ using namespace Eigen;
 class Element {
 public:
 
+	bool isShell = false;
 	std::string type;
 	int nb;
 	int msh_type;
@@ -39,7 +40,7 @@ public:
 	Matrix<double, Dynamic, Dynamic> QUADSCRT;
 
 	// FUNCTION
-	void initialise(std::string type, int nb_elem, int nb_marker);
+	void initialise(std::string type, int nb_elem, int nb_marker, bool isShell_);
 	void fill(std::vector<std::vector<int>> l, int& nb_elset);
 
 	//~Element();
@@ -48,9 +49,11 @@ private:
 
 // ~~~~~~~~~~~~~~ INIT ~~~~~~~~~~~~~~
 
-void Element::initialise(std::string key, int nb_elem, int nb_marker) {
+void Element::initialise(std::string key, int nb_elem, int nb_marker, bool isShell_=false) {
 	type = key;
 	nb = nb_elem;
+	isShell = isShell_;
+	std::cout << isShell << " in element initializer" << std::endl;
 	if(type=="Triangle"){
 		size = 3;
 		msh_type = 2;
@@ -75,6 +78,9 @@ void Element::initialise(std::string key, int nb_elem, int nb_marker) {
 		vtk_type = 12;
 		inria_mesh_name = "Hexahedra";
 		abaqus_type = "C3D8";
+		if(isShell){
+			abaqus_type = "SC8R";
+		}
 	} else if(type=="Cohesive"){
 		size = 8;
 		msh_type = 5;

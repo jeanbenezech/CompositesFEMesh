@@ -13,6 +13,7 @@ int main(int argc, const char *argv[]) {
 
 	Parameters param;
 	param.read("parameters.txt");
+	// param.read("parameters_wrinkles.txt");
 	// param.read("parameters_"+std::to_string(i)+".txt");
 
 	// read & initialisation du mesh
@@ -20,9 +21,12 @@ int main(int argc, const char *argv[]) {
 	m.mesh_type="gmsh";
 	size_t lastindex = param.meshname.find_last_of(".");
 	std::string mesh_name = param.meshname.substr(0, lastindex);
+	m.isShell = param.isShell;
 	m.read_msh(mesh_name+".msh", true, param.cz_id);
 
 	m.initialise(param);
+	
+
 	m.read_points("input.txt");
 	m.exportDir = true;
 

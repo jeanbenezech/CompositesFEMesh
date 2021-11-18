@@ -44,8 +44,8 @@ class parameters():
 		self.nbp = nbp
 		self.theta=0
 
-	def init(self):
-		read_parameters(self)
+	def init(self, filename):
+		read_parameters(self, filename)
 
 		self.refOriPoint= []
 		self.substr = []
@@ -94,9 +94,9 @@ class parameters():
 			f.write(str(point[0])+' '+str(point[1])+'\n')
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-def read():
+def read(filename):
 	parameters = {}
-	f=open('parameters.txt', 'r')
+	f=open(filename+'.txt', 'r')
 	line=f.readline()
 	while line!='':
 		if line[0]!='~':
@@ -106,8 +106,8 @@ def read():
 	return parameters
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-def read_parameters(param):
-	dico = read()
+def read_parameters(param, filename):
+	dico = read(filename)
 
 	param.Shape = int(dico['Shape'])
 	param.resin = int(dico['Resin_betw_plies'])

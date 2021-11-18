@@ -4,14 +4,15 @@ import random
 # geometry in millimeters
 
 def write_parameters():
-	nb_plies = 20
-	nb_wrinkles = 30
-	Xlenght = 25.0
-	Ylenght = 7.0
-	Zlenght = 10.0
+	nb_plies = 2
+	nb_wrinkles = 0
+	Xlenght = 140.0
+	Ylenght = 10.00
+	Zlenght = 500.0
 	height = 0.0
 
-	ply_thickness = 0.355# Ylenght/(nb_plies+0.0)
+	ply_thickness = Ylenght/(nb_plies+0.0)
+	StackSeq = [0.0, 90.0] #, 0.0, 90.0]
 
 	# WRINKLES Parameters
 	minWsize = -0.5
@@ -44,10 +45,10 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('name(s)                : laminate\n') # mesh name
+	parameters.write('name(s)                : beam_resin\n') # mesh name
 	parameters.write('Shape(i)               : 1\n')   # 0(default): Csection ; 1: flat laminate
-	parameters.write('Resin_betw_plies(b)    : 0\n')   # 1: yes ; 0: no
-	parameters.write('cohezive_elements(b)   : 1\n')   # 1: yes ; 0: no
+	parameters.write('Resin_betw_plies(b)    : 1\n')   # 1: yes ; 0: no
+	parameters.write('cohezive_elements(b)   : 0\n')   # 1: yes ; 0: no
 	parameters.write('recombine(b)           : 1\n')   # 1: recombine mesh: hex ;  0: no: only prisms
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~GEOMETRY~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -62,30 +63,35 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~STACKSEQ~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	for i in range(8):
+	for i in range(nb_plies):
 		if i<10:
-			parameters.write('p'+str(i)+'(f,f)   : 0.0,'+str(ply_thickness)+'\n')
+			parameters.write('p'+str(i)+'(f,f)   : '+str(StackSeq[i])+','+str(ply_thickness)+'\n')
 		else:
-			parameters.write('p'+str(i)+'(f,f)  : 0.0,'+str(ply_thickness)+'\n')
-	parameters.write('p8(f,f)   : 0.0,0.31\n')
-	for i in range(9,17):
-		if i<10:
-			parameters.write('p'+str(i)+'(f,f)   : 0.0,'+str(ply_thickness)+'\n')
-		else:
-			parameters.write('p'+str(i)+'(f,f)  : 0.0,'+str(ply_thickness)+'\n')
-	parameters.write('p17(f,f)  : 0.0,0.31\n')
-	for i in range(18,20):
-		if i<10:
-			parameters.write('p'+str(i)+'(f,f)   : 0.0,'+str(ply_thickness)+'\n')
-		else:
-			parameters.write('p'+str(i)+'(f,f)  : 0.0,'+str(ply_thickness)+'\n')
+			parameters.write('p'+str(i)+'(f,f)  : '+str(StackSeq[i])+','+str(ply_thickness)+'\n')
+	# for i in range(8):
+	# 	if i<10:
+	# 		parameters.write('p'+str(i)+'(f,f)   : 0.0,'+str(ply_thickness)+'\n')
+	# 	else:
+	# 		parameters.write('p'+str(i)+'(f,f)  : 0.0,'+str(ply_thickness)+'\n')
+	# parameters.write('p8(f,f)   : 0.0,0.31\n')
+	# for i in range(9,17):
+	# 	if i<10:
+	# 		parameters.write('p'+str(i)+'(f,f)   : 0.0,'+str(ply_thickness)+'\n')
+	# 	else:
+	# 		parameters.write('p'+str(i)+'(f,f)  : 0.0,'+str(ply_thickness)+'\n')
+	# parameters.write('p17(f,f)  : 0.0,0.31\n')
+	# for i in range(18,20):
+	# 	if i<10:
+	# 		parameters.write('p'+str(i)+'(f,f)   : 0.0,'+str(ply_thickness)+'\n')
+	# 	else:
+	# 		parameters.write('p'+str(i)+'(f,f)  : 0.0,'+str(ply_thickness)+'\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~MESH~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('lc(f)    : 1\n')        # mesh caracteristic size
-	parameters.write('dx(i)    : 50\n')       #
-	parameters.write('ddy(i)   : 2\n')        #
-	parameters.write('dz(i)    : 15\n')       #
+	parameters.write('dx(i)    : 30\n')       #
+	parameters.write('ddy(i)   : 4\n')        #
+	parameters.write('dz(i)    : 80\n')       #
 	parameters.write('dc(i)    : 0\n')        #
 	parameters.write('dflange(i) : 0\n')     # discretization of the flange
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -93,8 +99,8 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('wrinkle(i)        : '+str(nb_wrinkles)+'\n') # Do we need to add wrinkle in the gridMod (c++) code, 2+ for multiple wrinkles
 	parameters.write('Ramp(b)           : 0\n') #
-	parameters.write('Abaqus_output(b)  : 1\n') #
-	parameters.write('Dune_output(b)    : 0\n') #
+	parameters.write('Abaqus_output(b)  : 0\n') #
+	parameters.write('Dune_output(b)    : 1\n') #
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~WRINKLES~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')

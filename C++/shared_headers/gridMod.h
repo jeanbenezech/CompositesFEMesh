@@ -28,6 +28,10 @@ class GridTransformation{
 	double zmin, zmax, ymin, ymax, xmin, xmax;
 	double ymid;
 
+	double local_xmax;
+	double local_ymin;
+	double local_ymax;
+
 	double threshold_avoiding_deformation_through_thickness;
 
 	// Wrinkles parameters
@@ -35,6 +39,7 @@ class GridTransformation{
 	double wrinkleOri;
 	double ref_lenght;
 	double defect_size;
+	double interior_radius;
 
 	// General parameters
 	int verbosity = 0;
@@ -85,10 +90,52 @@ void GridTransformation::initialise(Mesh& m, Parameters& param) {
 	z3 = z2 + param.StartEndinZdir(2);
 	z4 = z3 + param.StartEndinZdir(1);
 
+	local_xmax = param.Height;
+	local_ymin = param.R-param.Y;
+	local_ymax = param.X+local_ymin;
+
 	delta_max = param.rampSize;
 	threshold_avoiding_deformation_through_thickness = param.R;
 
+	interior_radius = param.R - param.Y;
+
 	ymid = (ymax-ymin)/2.0;
+
+
+	size_t lastindex = param.meshname.find_last_of(".");
+	std::string mesh_name = param.meshname.substr(0, lastindex);
+	/* Write C-spar parameters to be able to use them in DUNE */
+	std::string filename= "DUNE/"+mesh_name+"_ParamForWrinklesRepresentationInCspar.txt";
+	std::ofstream output;
+	output.open(filename, std::ios::out);
+	if (!output.is_open()) {
+		std::cout << "Error: Cannot open file" << filename << std::endl;
+	}
+	output << "Global boundaries of the C-spar (xmin, xmax, ymin, ymax, zmin, zmax):" << std::endl;
+	output << xmin << std::endl;
+	output << xmax << std::endl;
+	output << ymin << std::endl;
+	output << ymax << std::endl;
+	output << zmin << std::endl;
+	output << zmax << std::endl;
+
+	output << std::endl;
+	output << "Ramp parameters of the C-spar (delta_max, z1, z2, z3, z4):" << std::endl;
+	output << delta_max << std::endl;
+	output << z1 << std::endl;
+	output << z2 << std::endl;
+	output << z3 << std::endl;
+	output << z4 << std::endl;
+
+	output << std::endl;
+	output << "Wrinkles creation specific parameters of the C-spar (localXmax, localYmin, localYmax, threshold_avoiding_deformation_through_thickness, interior_radius, big_radius, Cspar_width):" << std::endl;
+	output << local_xmax << std::endl;
+	output << local_ymin << std::endl;
+	output << local_ymax << std::endl;
+	output << threshold_avoiding_deformation_through_thickness << std::endl;
+	output << interior_radius << std::endl;
+	output << param.R << std::endl;
+	output << param.X << std::endl;
 
 	// std::cout << "Ymid : " << ymid << std::endl;
 }
@@ -202,15 +249,12 @@ std::tuple<double,double,double> GridTransformation::ramp(Vector3d& point){
 
 void GridTransformation::Csection_wrinkles(Vector3d& point, Vector3d& normal, int number, Parameters& param, std::tuple<double,double,double>& ramp_param){
 
-	double xmax = param.Height;
-	double ymin = param.R-param.Y;
-	double ymax = param.X+ymin;
-	double ymid = (ymin+ymax)/2.0;
+	double local_ymid = (local_ymin+local_ymax)/2.0;
 
 	Vector3d ramp;
 	ramp[2] = 0.0;
 	ramp[0] = -std::get<0>(ramp_param);
-	if(point[1]>=ymid)
+	if(point[1]>=local_ymid)
 		ramp[1] = -std::get<1>(ramp_param);
 	else
 		ramp[1] = std::get<2>(ramp_param);
@@ -220,7 +264,7 @@ void GridTransformation::Csection_wrinkles(Vector3d& point, Vector3d& normal, in
 	defect_location = param.wrinklePos[number];
 	wrinkleOri = param.wrinkleOri[number];
 	defect_size = param.wrinkleSize[number];
-	damping = {param.wrinkleDamp[number](0)/(xmax-xmin), param.wrinkleDamp[number](1)/(ymax-ymin), param.wrinkleDamp[number](2)/(zmax-zmin)}; // the more damping is big the small is the wrinkle in that direction
+	damping = {param.wrinkleDamp[number](0)/(local_xmax-xmin), param.wrinkleDamp[number](1)/(local_ymax-local_ymin), param.wrinkleDamp[number](2)/(zmax-zmin)}; // the more damping is big the small is the wrinkle in that direction
 
 	Matrix3d B;
 	B(0,0)=1.0;
@@ -235,20 +279,19 @@ void GridTransformation::Csection_wrinkles(Vector3d& point, Vector3d& normal, in
 
 	Vector3d ref, moved;
 	double dist_from_bottom_surf;
-	double interior_radius = param.R - param.Y;
 	moved = init;
-	if (init[1]>=ymax){
-		if(init[0]<=xmax){
-			dist_from_bottom_surf = (init[1] - ymax) - interior_radius;
+	if (init[1]>=local_ymax){
+		if(init[0]<=local_xmax){
+			dist_from_bottom_surf = (init[1] - local_ymax) - interior_radius;
 		} else {
-			dist_from_bottom_surf = sqrt((init[1]-ymax)*(init[1]-ymax)+(init[0]-xmax)*(init[0]-xmax))-interior_radius;
+			dist_from_bottom_surf = sqrt((init[1]-local_ymax)*(init[1]-local_ymax)+(init[0]-local_xmax)*(init[0]-local_xmax))-interior_radius;
 		}
-		ref[0] = param.Height + interior_radius + dist_from_bottom_surf;
+		ref[0] = local_xmax + interior_radius + dist_from_bottom_surf;
 		ref[1] = param.X + interior_radius;
 		moved[0] = ref[0];
 		double local_radius = interior_radius + dist_from_bottom_surf;
 
-		if(init[0]<=xmax){
+		if(init[0]<=local_xmax){
 			double theta = PI/2.0;
 			moved[1] = ref[1] + param.R*theta + abs(init[0]-ref[0])-local_radius;
 		} else {
@@ -258,18 +301,18 @@ void GridTransformation::Csection_wrinkles(Vector3d& point, Vector3d& normal, in
 			moved[1] = ref[1] + theta*param.R;
 		}
 	}
-	else if (init[1]<=ymin){
-		if(init[0]<=xmax){
-			dist_from_bottom_surf = - init[1] + ymin - interior_radius;
+	else if (init[1]<=local_ymin){
+		if(init[0]<=local_xmax){
+			dist_from_bottom_surf = - init[1] + local_ymin - interior_radius;
 		} else {
-			dist_from_bottom_surf = sqrt((init[1]-ymin)*(init[1]-ymin)+(init[0]-xmax)*(init[0]-xmax))-interior_radius;
+			dist_from_bottom_surf = sqrt((init[1]-local_ymin)*(init[1]-local_ymin)+(init[0]-local_xmax)*(init[0]-local_xmax))-interior_radius;
 		}
-		ref[0] = param.Height + interior_radius + dist_from_bottom_surf;
+		ref[0] = local_xmax + interior_radius + dist_from_bottom_surf;
 		ref[1] = interior_radius;
 		moved[0] = ref[0];
 		double local_radius = interior_radius + dist_from_bottom_surf;
 
-		if(init[0]<=xmax){
+		if(init[0]<=local_xmax){
 			double theta = PI/2.0;
 			moved[1] = ref[1] - (param.R*theta + abs(init[0]-ref[0])-local_radius);
 		} else {
@@ -341,7 +384,7 @@ void find_U(Parameters& param, Vector3d& u, Vector3d bary) {
 			u(0) = -1.0;
 		}
 	} else {
-		if (ymin < bary(1) && bary(1) < ymax) {
+		if (ymin <= bary(1) && bary(1) <= ymax) {
 			u(1) = 1.0;
 		} else if (bary(1) < ymin) {
 			Vector3d tmp (0.0, 0.0, 0.0);

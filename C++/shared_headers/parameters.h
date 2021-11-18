@@ -48,7 +48,7 @@ public:
 	int nb_plies;
 
 	int cz_id, resin_id;
-	bool isResin, isCZ;
+	bool isResin, isCZ, isShell;
 
 	std::vector<Vector2d> StackSeq;
 
@@ -98,6 +98,10 @@ void Parameters::read(const std::string& filename) {
 	wrinkleOri.resize(0);
 
 	while(!line.empty()){
+
+		if (line.find("Shell")!=std::string::npos){
+			isShell = std::stoi(extract(line));
+		}
 
 		if (line.find("Shape")!=std::string::npos)
 			Shape = std::stoi(extract(line));
@@ -183,12 +187,12 @@ void Parameters::read(const std::string& filename) {
 
 	cz_id = -1;
 	resin_id = -1;
-	if (isResin && isCZ){
+	if (isResin==1 && isCZ==1){
 		cz_id = nb_plies+2;
 		resin_id = nb_plies+1;
-	} else if (isResin && !isCZ) {
+	} else if (isResin==1 && !isCZ==1) {
 		resin_id = nb_plies+1;
-	} else if (!isResin && isCZ) {
+	} else if (!isResin==1 && isCZ==1) {
 		cz_id = nb_plies+1;
 	}
 }

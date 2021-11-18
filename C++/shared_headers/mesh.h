@@ -26,6 +26,8 @@ public:
 	int nb_nset=0;
 	int nb_elset=0;
 
+	bool isShell=false;
+
 	std::vector<double> stacking_sequence;
 	int nb_corner, type;
 	std::vector<Vector2f> P;
@@ -73,9 +75,11 @@ private:
 
 void Mesh::initialise(Parameters& param) {
 
-	stacking_sequence.resize(param.nb_plies);
+	nb_plies_=param.nb_plies;
 
-	for(int i=0; i<param.nb_plies; i++)
+	stacking_sequence.resize(nb_plies_);
+
+	for(int i=0; i<nb_plies_; i++)
 		stacking_sequence[i] = param.StackSeq[i](0);
 
 
@@ -342,7 +346,7 @@ void Mesh::read_msh(const std::string& filename, bool only_3D, int cz_id) {
 		incr_elem += 1;
 	}
 	if(ishex){
-		Elements[incr_elem].initialise("Hexahedron", lhex.size(), 1);//lhex[0][2]-1);
+		Elements[incr_elem].initialise("Hexahedron", lhex.size(), 1, isShell);//lhex[0][2]-1);
 		Elements[incr_elem].fill(lhex, nb_elset);
 		incr_elem += 1;
 	}
@@ -575,16 +579,16 @@ void Mesh::write_vtk(const std::string& filename, int verbosity=0) {
 		}
 	}
 
-	output << "SCALARS DD_weight int 1"<< std::endl;
-	output << "LOOKUP_TABLE default"<< std::endl;
+	// output << "SCALARS DD_weight int 1"<< std::endl;
+	// output << "LOOKUP_TABLE default"<< std::endl;
 
-	for(auto& elem : Elements){
-		for (int i=0; i< elem.nb; i++) {
-			for (int j =0; j < elem.DD_weight.rows()-1; j++)
-				output << elem.DD_weight(j,i) << " ";
-			output << elem.DD_weight(elem.DD_weight.rows()-1,i) << std::endl;
-		}
-	}
+	// for(auto& elem : Elements){
+	// 	for (int i=0; i< elem.nb; i++) {
+	// 		for (int j =0; j < elem.DD_weight.rows()-1; j++)
+	// 			output << elem.DD_weight(j,i) << " ";
+	// 		output << elem.DD_weight(elem.DD_weight.rows()-1,i) << std::endl;
+	// 	}
+	// }
 
 	if (exportDir){
 		output << "SCALARS U double 3\n";
@@ -659,22 +663,30 @@ void Mesh::write_ori_txt(const std::string& filename) {
 	std::ofstream output;
 	output.open(filename+"_ori.txt", std::ios::out);
 	if (!output.is_open()) {
-	std::cout << "Error: Cannot open file" << filename << std::endl;
+		std::cout << "Error: Cannot open file" << filename << std::endl;
 	}
 	std::cout << "Writting " << filename+"_ori.txt" << std::endl;
 
 	// En-tete
 	output << Tot_cells_ << std::endl;
+	// std::cout << "nb_plies_: " << nb_plies_ << std::endl;
 
 	for(auto& elem : Elements){
 		for (int i=0; i< elem.nb; i++) {
 			output << elem.global_indices(i) << " ";
-			output << elem.Markers(0, i) << " ";
+			
 			// output << elem.DD_weight(0, i) << " ";
-			output << stacking_sequence[elem.Markers(0, i) - 1] << " ";
-			output << std::setprecision(15) << elem.U(0, i) << " " << elem.U(1, i) << " " << elem.U(2, i) << " ";
-			output << std::setprecision(15) << elem.V(0, i) << " " << elem.V(1, i) << " " << elem.V(2, i) << " ";
-			output << std::setprecision(15) << elem.W(0, i) << " " << elem.W(1, i) << " " << elem.W(2, i) << std::endl;
+			
+			if (elem.Markers(0, i) <= nb_plies_){
+				output << elem.Markers(0, i) << " ";
+				output << stacking_sequence[elem.Markers(0, i) - 1] << " ";
+			}
+			else{
+				output << "-1 0 ";
+			}
+			output << std::setprecision(15) <<  elem.U(0, i) << " " <<  elem.U(1, i) << " " <<  elem.U(2, i) << " ";
+			output << std::setprecision(15) << -elem.W(0, i) << " " << -elem.W(1, i) << " " << -elem.W(2, i) << " ";
+			output << std::setprecision(15) <<  elem.V(0, i) << " " <<  elem.V(1, i) << " " <<  elem.V(2, i) << std::endl;
 		}
 	}
 }
@@ -698,8 +710,13 @@ void Mesh::write_ori_inp(const std::string& filename) {
 	for(auto& elem : Elements){
 		for (int i=0; i< elem.nb; i++) {
 			output << elem.global_indices(i) << ", ";
-			output << std::setprecision(15) <<  elem.U(0, i) << ", " <<  elem.U(1, i) << ", " <<  elem.U(2, i) << ", ";
-			output << std::setprecision(15) << -elem.W(0, i) << ", " << -elem.W(1, i) << ", " << -elem.W(2, i) << std::endl;
+			if(!isShell){
+				output << std::setprecision(15) <<  elem.U(0, i) << ", " <<  elem.U(1, i) << ", " <<  elem.U(2, i) << ", ";
+				output << std::setprecision(15) << -elem.W(0, i) << ", " << -elem.W(1, i) << ", " << -elem.W(2, i) << std::endl;
+			} else {
+				output << std::setprecision(15) <<  elem.V(0, i) << ", " <<  elem.V(1, i) << ", " <<  elem.V(2, i) << ", ";
+				output << std::setprecision(15) <<  elem.W(0, i) << ", " <<  elem.W(1, i) << ", " <<  elem.W(2, i) << std::endl;
+			}
 		}
 	}
 
@@ -793,9 +810,15 @@ void Mesh::write_inp(const std::string& filename) {
 					output << elem.Nodes(cno[j],i)+1 << ", ";
 				output << elem.Nodes(cno[elem.Nodes.rows()-1],i)+1 << std::endl;
 			}else{
-				for (int j =0; j < elem.Nodes.rows()-1; j++)
-					output << elem.Nodes(j,i)+1 << ", ";
-				output << elem.Nodes(elem.Nodes.rows()-1,i)+1 << std::endl;
+				if(!isShell){
+					for (int j =0; j < elem.Nodes.rows()-1; j++)
+						output << elem.Nodes(j,i)+1 << ", ";
+					output << elem.Nodes(elem.Nodes.rows()-1,i)+1 << std::endl;
+				} else {
+					for (int j =0; j < elem.Nodes.rows()-1; j++)
+						output << elem.Nodes(cno[j],i)+1 << ", ";
+					output << elem.Nodes(cno[elem.Nodes.rows()-1],i)+1 << std::endl;
+				}
 			}
 		}
 	}

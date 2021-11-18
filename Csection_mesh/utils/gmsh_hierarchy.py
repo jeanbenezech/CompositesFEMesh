@@ -28,7 +28,8 @@ def add_y_lines(geo, param, cntL, Ylines, layer_type=0):
 	if layer_type==0: # ply layer
 		val=param.ddy
 	elif layer_type==1: # resin layer
-		val=param.ddy
+		val=2
+		# val=param.ddy
 	elif layer_type==2: # Cohezive layer
 		val=1
 

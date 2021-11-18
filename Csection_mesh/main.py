@@ -7,8 +7,10 @@ from utils.geometry import *
 
 if __name__ == '__main__':
 
+	# filename_param = 'parameters_wrinkles'
+	filename_param = 'parameters'
 	param = parameters()
-	param.init()
+	param.init(filename_param)
 
 	geo = geometry()
 	geo.init(param)
