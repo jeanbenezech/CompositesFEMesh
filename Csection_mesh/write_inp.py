@@ -7,7 +7,7 @@ from utils.parameters import *
 if __name__ == '__main__':
 
 	param = parameters()
-	param.init()
+	param.init('parameters')
 
 	nb_ply=param.nbp
 	name=param.AbaqusName
@@ -31,9 +31,11 @@ if __name__ == '__main__':
 	f.write('*INCLUDE, INPUT='+param.name+'_mesh.inp\n')
 	f.write('*INCLUDE, INPUT='+param.name+'_ori.inp\n')
 	# ~~~~~~ MATERIAL ASSIGNEMENT ~~~~~~
-	# Csection
+	# Layer section
 	f.write('*SOLID SECTION, ELSET=Hexahedra, ORIENTATION=ori_loc, MATERIAL=AS4-8552\n')
-	f.write('*COHESIVE SECTION, ELSET=Cohesive, MATERIAL=CZ, RESPONSE=TRACTION SEPARATION, THICKNESS=GEOMETRY \n')
+	# Cohesive section
+	# f.write('*COHESIVE SECTION, ELSET=Cohesive, MATERIAL=CZ, RESPONSE=TRACTION SEPARATION, THICKNESS=GEOMETRY \n')
+
 	# Laminate
 	# for i in range(1,nb_ply+1):
 	# 	f.write('*SOLID SECTION, ELSET=elset'+str(i)+', ORIENTATION=ori_loc, MATERIAL=D-8552\n')
@@ -41,10 +43,6 @@ if __name__ == '__main__':
 
 	# ~~~~~~ KINEMATIC COUPLING ~~~~~~
 	# Csection
-	f.write('*KINEMATIC COUPLING, REF NODE=MasterNode4\n')
-	f.write('nset4, 1, 6\n')
-	f.write('*KINEMATIC COUPLING, REF NODE=MasterNode5\n')
-	f.write('nset5, 1, 6\n')
 	f.write('*end part\n')
 	# Laminate
 	# f.write('*KINEMATIC COUPLING, REF NODE=MasterNode'+str(fi)+'\n')
@@ -63,15 +61,15 @@ if __name__ == '__main__':
 	f.write('{}, {}, {}, {}, {}, {}, {}, {}\n'.format(137300., 8800., 8800., 0.314, 0.314, 0.487, 4900., 4900.))
 	f.write('{}\n'.format(2960.))
 
-	# Csection
-	f.write('*MATERIAL, name=CZ \n')
-	f.write('*ELASTIC, TYPE=TRACTION \n')
-	# f.write(' 7612.,1370.,1370.\n')
-	f.write(' 2244898.,1250000.,754841.\n')
-	f.write('*DAMAGE INITIATION, CRITERION=QUADS \n')
-	f.write(' 74.2, 110.4, 110.4 \n')
-	f.write('*DAMAGE EVOLUTION, TYPE=ENERGY, MIXED MODE BEHAVIOR=BK, POWER=1.45 \n')
-	f.write(' 0.3, 0.87, 0.87 \n')
+	# Cohesive behavior
+	# f.write('*MATERIAL, name=CZ \n')
+	# f.write('*ELASTIC, TYPE=TRACTION \n')
+	# # f.write(' 7612.,1370.,1370.\n')
+	# f.write(' 2244898.,1250000.,754841.\n')
+	# f.write('*DAMAGE INITIATION, CRITERION=QUADS \n')
+	# f.write(' 74.2, 110.4, 110.4 \n')
+	# f.write('*DAMAGE EVOLUTION, TYPE=ENERGY, MIXED MODE BEHAVIOR=BK, POWER=1.45 \n')
+	# f.write(' 0.3, 0.87, 0.87 \n')
 
 	# ~~~~~~~~~~~~~ ASSEMBLY ~~~~~~~~~~~~~
 	f.write('**\n')
@@ -79,6 +77,19 @@ if __name__ == '__main__':
 	f.write('*assembly, name=assembly\n')
 	f.write('*instance, name=m, part=main\n')
 	f.write('*end instance\n')
+
+
+	# ~~~~~~ KINEMATIC COUPLING ~~~~~~
+	# Csection
+	f.write('*SURFACE, TYPE=NODE, NAME=surface_nset4, internal\n')
+	f.write('m.nset4, 1.\n')
+	f.write('*COUPLING, CONSTRAINT NAME=BotSurfKC, REF NODE=m.MasterNode4, SURFACE=surface_nset4\n')
+	f.write('*KINEMATIC\n')
+	f.write('*SURFACE, TYPE=NODE, NAME=surface_nset5, internal\n')
+	f.write('m.nset5, 1.\n')
+	f.write('*COUPLING, CONSTRAINT NAME=TopSurfKC, REF NODE=m.MasterNode5, SURFACE=surface_nset5\n')
+	f.write('*KINEMATIC\n')
+
 	f.write('*end assembly\n')
 
 	# ~~~~~~~~~~~~~ INITIAL BOUNDARIES ~~~~~~~~~~~~~
@@ -97,8 +108,8 @@ if __name__ == '__main__':
 	# ~~~~~~~~~~~~~ STEP ~~~~~~~~~~~~~
 	f.write('**\n')
 	f.write('**---------- STEP ---------- \n')
-	f.write('*STEP, NAME=Step-1, SOLVER=ITERATIVE, inc=5000\n')
-	f.write('*STATIC, stabilize, factor=1e-2\n')
+	f.write('*STEP, NAME=Step-1, NLGEOM=YES, SOLVER=ITERATIVE, inc=5000\n')
+	f.write('*STATIC\n')
 	# f.write('0.1, 1.0, 1e-03, 1.0\n')
 	f.write('1e-02, 1.0, 1e-06, 5e-01\n')
 	f.write('*BOUNDARY, TYPE=DISPLACEMENT\n')
@@ -113,8 +124,8 @@ if __name__ == '__main__':
 	f.write('U, RF\n')
 	f.write('*ELEMENT OUTPUT, elset=m.All_elements\n')
 	f.write('EVOL, E, S\n')
-	f.write('*ELEMENT OUTPUT, elset=m.Cohesive\n')
-	f.write('SDEG, QUADSCRT\n')
+	# f.write('*ELEMENT OUTPUT, elset=m.Cohesive\n')
+	# f.write('SDEG, QUADSCRT\n')
 
 	f.write('*OUTPUT, HISTORY\n')
 	f.write('*CONTROLS, PARAMETERS=FIELD\n')

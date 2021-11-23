@@ -50,6 +50,9 @@ public:
 	int cz_id, resin_id;
 	bool isResin, isCZ, isShell;
 
+	bool GaussianThickness;
+	double sigma, length;
+
 	std::vector<Vector2d> StackSeq;
 
 	// Wrinkle parameters
@@ -102,6 +105,15 @@ void Parameters::read(const std::string& filename) {
 		if (line.find("Shell")!=std::string::npos){
 			isShell = std::stoi(extract(line));
 		}
+
+		if (line.find("GaussianThickness")!=std::string::npos){
+			GaussianThickness = std::stoi(extract(line));
+		}
+
+		if (line.find("Sigma(d)")!=std::string::npos)
+			sigma = std::stod(extract(line));
+		if (line.find("Length(d)")!=std::string::npos)
+			length = std::stod(extract(line));
 
 		if (line.find("Shape")!=std::string::npos)
 			Shape = std::stoi(extract(line));

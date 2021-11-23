@@ -13,6 +13,9 @@
 #include <Eigen/LU>
 #include <Eigen/Geometry>
 
+#include <random>
+#include <map> // for visualization
+
 #include <algorithm>
 
 #define PI 3.14159265
@@ -41,12 +44,24 @@ class GridTransformation{
 	double defect_size;
 	double interior_radius;
 
+
+	// Gaussian random field
+	MatrixXd K, L;
+	std::vector<Vector2d> N;
+	VectorXd Z, Y;
+	std::vector<int> indices_map;
+
 	// General parameters
 	int verbosity = 0;
 
 	void initialise(Mesh& m, Parameters& param);
 	std::tuple<double,double,double> ramp(Vector3d& point);
 	void Csection_wrinkles(Vector3d& point, Vector3d& normal, int number, Parameters& param, std::tuple<double,double,double>& ramp_param);
+
+	void Gaussian_random_field_N_initialisation(int& node, Vector3d& point, Parameters& param, std::tuple<double,double,double>& ramp_param);
+	void Gaussian_random_field_K_initialisation(Parameters& param);
+	void Apply_Gaussian_random_field(Vector3d& point, Vector3d& normal, int index);
+
 	void wrinkles(Vector3d& point);
 
 	private:
@@ -138,6 +153,132 @@ void GridTransformation::initialise(Mesh& m, Parameters& param) {
 	output << param.X << std::endl;
 
 	// std::cout << "Ymid : " << ymid << std::endl;
+}
+
+void GridTransformation::Gaussian_random_field_N_initialisation(int& node, Vector3d& point, Parameters& param, std::tuple<double,double,double>& ramp_param){
+	double local_ymid = (local_ymin+local_ymax)/2.0;
+
+	Vector3d ramp;
+	ramp[2] = 0.0;
+	ramp[0] = -std::get<0>(ramp_param);
+	if(point[1]>=local_ymid)
+		ramp[1] = -std::get<1>(ramp_param);
+	else
+		ramp[1] = std::get<2>(ramp_param);
+
+	Vector3d init = point-ramp;
+
+	Vector3d ref, moved;
+	double dist_from_bottom_surf=0.0;
+	moved = init;
+	if (init[1]>=local_ymax){
+		if(init[0]<=local_xmax){
+			dist_from_bottom_surf = (init[1] - local_ymax) - interior_radius;
+		} else {
+			dist_from_bottom_surf = sqrt((init[1]-local_ymax)*(init[1]-local_ymax)+(init[0]-local_xmax)*(init[0]-local_xmax))-interior_radius;
+		}
+		ref[0] = local_xmax + interior_radius + dist_from_bottom_surf;
+		ref[1] = param.X + interior_radius;
+		moved[0] = ref[0];
+		double local_radius = interior_radius + dist_from_bottom_surf;
+
+		if(init[0]<=local_xmax){
+			double theta = PI/2.0;
+			moved[1] = ref[1] + param.R*theta + abs(init[0]-ref[0])-local_radius;
+		} else {
+			double d = sqrt((init[1]-ref[1])*(init[1]-ref[1])+(init[0]-ref[0])*(init[0]-ref[0]));
+			double theta = 2*asin(d/2.0/local_radius);
+
+			moved[1] = ref[1] + theta*param.R;
+		}
+	}
+	else if (init[1]<=local_ymin){
+		if(init[0]<=local_xmax){
+			dist_from_bottom_surf = - init[1] + local_ymin - interior_radius;
+		} else {
+			dist_from_bottom_surf = sqrt((init[1]-local_ymin)*(init[1]-local_ymin)+(init[0]-local_xmax)*(init[0]-local_xmax))-interior_radius;
+		}
+		ref[0] = local_xmax + interior_radius + dist_from_bottom_surf;
+		ref[1] = interior_radius;
+		moved[0] = ref[0];
+		double local_radius = interior_radius + dist_from_bottom_surf;
+
+		if(init[0]<=local_xmax){
+			double theta = PI/2.0;
+			moved[1] = ref[1] - (param.R*theta + abs(init[0]-ref[0])-local_radius);
+		} else {
+			double d = sqrt((init[1]-ref[1])*(init[1]-ref[1])+(init[0]-ref[0])*(init[0]-ref[0]));
+			double theta = 2*asin(d/2.0/local_radius);
+
+			moved[1] = ref[1] - theta*param.R;
+		}
+	} else {
+		dist_from_bottom_surf = init[0] - local_xmax - interior_radius;
+	}
+
+	if (dist_from_bottom_surf>1){
+		Vector2d tmp;
+		tmp[0]=moved[1];
+		tmp[1]=moved[2];
+		N.push_back(tmp);
+		indices_map.push_back(node);
+
+		// std::cout << "[ " << moved[0] << " ; " << moved[1] << " ]" << std::endl;
+		// std::cout << dist_from_bottom_surf << std::endl;
+	}
+}
+
+void GridTransformation::Gaussian_random_field_K_initialisation(Parameters& param){
+	K.resize(N.size(), N.size());
+	Z.resize(N.size());
+	Y.resize(N.size());
+
+	for(int i=0; i< N.size(); i++){
+		for(int j=0; j< N.size(); j++){
+			double dist2 = (N[i](1)-N[j](1))*(N[i](1)-N[j](1))+(N[i](0)-N[j](0))*(N[i](0)-N[j](0));
+			K(i,j) = pow(param.sigma,2) * exp( - dist2 / (2.0*pow(param.length,2)) );
+			if(i==j){
+				K(i,j) += 1e-8;
+			}
+		}
+	}
+
+	LLT<MatrixXd> lltOfA(K); // compute the Cholesky decomposition of K
+	L = lltOfA.matrixL(); // retrieve factor L in the decomposition
+
+	std::random_device rd;
+	std::normal_distribution<> d{0,1};
+	std::map<int, int> hist{};
+
+	for(int n=0; n<N.size(); ++n) {
+		Z(n) = d(rd);
+		// ++hist[std::round(d(rd))];
+		// std::cout << Z[n] << std::endl;
+	}
+
+	/* Plot the histogram */
+	// for(int n=0; n<10000; ++n) {
+    //     ++hist[std::round(d(rd))];
+    // }
+
+	// for(auto p : hist) {
+	// 	std::cout << std::setw(2)
+	// 				<< p.first << ' ' << std::string(p.second/200, '*') << '\n';
+	// }
+
+	Y = L*Z;
+}
+
+void GridTransformation::Apply_Gaussian_random_field(Vector3d& point, Vector3d& normal, int index){
+
+	// std::cout << Y(index) << std::endl;
+	// std::cout << normal[0] << std::endl;
+	// std::cout << normal[1] << std::endl;
+	// std::cout << normal[2] << std::endl;
+
+	point[0] += normal[0]*Y(index);
+	point[1] += normal[1]*Y(index);
+	point[2] += normal[2]*Y(index);
 }
 
 std::tuple<double,double,double> GridTransformation::ramp(Vector3d& point){
@@ -278,7 +419,7 @@ void GridTransformation::Csection_wrinkles(Vector3d& point, Vector3d& normal, in
 	B(2,2)=cos(wrinkleOri*PI/180.0);
 
 	Vector3d ref, moved;
-	double dist_from_bottom_surf;
+	double dist_from_bottom_surf = 0.0;
 	moved = init;
 	if (init[1]>=local_ymax){
 		if(init[0]<=local_xmax){
@@ -452,9 +593,8 @@ void localCoorSyst(Mesh& m, Parameters& param) {
 					elem.W(i,l) = w(i);
 				}
 
-
 				// orientation for the wrinkles
-				if(param.add_wrinkles)
+				if(param.add_wrinkles || param.GaussianThickness)
 					for(int nodeId=0; nodeId<elem.size; nodeId++)
 						m.vertice_normals.col(elem.Nodes(nodeId,l)) += v;
 
@@ -463,7 +603,7 @@ void localCoorSyst(Mesh& m, Parameters& param) {
 	}
 
 	// orientation for the wrinkles
-	if(param.add_wrinkles)
+	if(param.add_wrinkles || param.GaussianThickness)
 		for(int nodeId=0; nodeId<m.vertice_normals.size(); nodeId++)
 			m.vertice_normals.col(nodeId).normalize();
 
@@ -488,9 +628,10 @@ void globalCoorSyst(Mesh& m, Parameters& param) {
 			elem.W(2,l) = 1.0;
 
 			// orientation for the wrinkles
-			if(param.add_wrinkles)
+			if(param.add_wrinkles){
 				for(int nodeId=0; nodeId<elem.size; nodeId++)
 					m.vertice_normals.col(elem.Nodes(nodeId,l)) += elem.V.col(l);
+			}
 		}
 	}
 
@@ -622,6 +763,19 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 	double no_ramp=0.0;
 	std::tuple<double, double, double> ramp_param = std::make_tuple(no_ramp,no_ramp,no_ramp);
 
+	if(param.GaussianThickness){
+		GT.N.resize(0);
+		for(int node=0; node < m.Nb_vertices(); ++node) {
+			Vector3d point;
+			point(0) = m.vertices(0, node);
+			point(1) = m.vertices(1, node);
+			point(2) = m.vertices(2, node);
+			
+			GT.Gaussian_random_field_N_initialisation(node, point, param, ramp_param);
+		}
+		GT.Gaussian_random_field_K_initialisation(param);
+	}
+
 	for(int node=0; node < m.Nb_vertices(); ++node) {
 
 		Vector3d point;
@@ -637,6 +791,15 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 			for(int i=0; i<param.add_wrinkles;i++)
 				GT.Csection_wrinkles(point, normal, i, param, ramp_param);
 
+		// std::cout << "Point 0 before : " << point(0) << std::endl;
+		if(param.GaussianThickness){
+			auto iter = std::find (GT.indices_map.begin(), GT.indices_map.end(), node);
+			if(iter != GT.indices_map.end()){
+				int index = iter - GT.indices_map.begin();
+				GT.Apply_Gaussian_random_field(point, normal, index);
+			}
+		}
+		// std::cout << "Point 0 after : " << point(0) << std::endl;
 
 		m.vertices(0, node) = point(0);
 		m.vertices(1, node) = point(1);

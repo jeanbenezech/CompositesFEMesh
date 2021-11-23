@@ -20,8 +20,10 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	r_ext = 5.0 + Ylenght # external radius
 	is_coh = 0 # Not for shell
 
+	is_GaussianThickness = 1
+
 	ply_thickness = Ylenght/(nb_plies+0.0)
-	StackSeq = [90.0]
+	StackSeq = [0.0]
 
 	# WRINKLES Parameters
 	minWsize = -0.2
@@ -56,12 +58,13 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('name(s)                : Sample\n') # mesh name
+	parameters.write('name(s)                : C-spar_continuum_shell\n') # mesh name
 	parameters.write('Shape(i)               : 0\n')   # 0(default): Csection ; 1: flat laminate
 	parameters.write('Resin_betw_plies(b)    : 0\n')   # 1: yes ; 0: no
 	parameters.write('cohezive_elements(b)   : '+str(is_coh)+'\n')   # 1: yes ; 0: no
 	parameters.write('recombine(b)           : 1\n')   # 1: recombine mesh: hex ;  0: no: only prisms
 	parameters.write('Shell(b)               : 1\n')   # 1: shell ;  0: not shell
+	parameters.write('GaussianThickness(b)   : '+str(is_GaussianThickness)+'\n')   # 1: gridtrans ;  0: flat
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~GEOMETRY~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -77,18 +80,18 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	for i in range(nb_plies):
 		if i<10:
-			parameters.write('p'+str(i)+'(f,f)   : '+str(StackSeq[i])+','+str(ply_thickness)+'\n')
+			parameters.write('p'+str(i)+'(f,f)   : '+str(StackSeq[i]+90.0)+','+str(ply_thickness)+'\n')
 		else:
-			parameters.write('p'+str(i)+'(f,f)  : '+str(StackSeq[i])+','+str(ply_thickness)+'\n')
+			parameters.write('p'+str(i)+'(f,f)  : '+str(StackSeq[i]+90.0)+','+str(ply_thickness)+'\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~MESH~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('lc(f)      : 1\n')    #1 mesh caracteristic size
-	parameters.write('dx(i)      : 20\n')   #20 discretization in X direction
-	parameters.write('dflange(i) : 10\n')    #16 discretization of the flange
-	parameters.write('ddy(i)     : 2\n')    #2 discretization of ply thickness --> no discretization of the layer
+	parameters.write('dx(i)      : 10\n')   #40 discretization in X direction
+	parameters.write('dflange(i) : 4\n')    #16 discretization of the flange
+	parameters.write('ddy(i)     : 2\n')    #2 discretization of ply thickness
 	parameters.write('dz(i)      : 40\n')   #100 discretization in Z direction
-	parameters.write('dc(i)      : 5\n')    #6 discretization of corners
+	parameters.write('dc(i)      : 6\n')    #12 discretization of corners
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~TRANSFORMATION~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -121,11 +124,17 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('Rsize(f)          : 6.25\n')
 	parameters.write('StartEndinZdir(f) : 100.0,125.0,50.0\n') # 1: starting of the ramp; 2: lenght of the ramp; 3: lenght of the middle section;
+	if (is_GaussianThickness):
+		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
+		parameters.write('~~~~~~~~~~~~~~~~~~~~GAUSSIAN~~~~~~~~~~~~~~~~~~~~~~\n')
+		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
+		parameters.write('Sigma(d)          : 1\n') #
+		parameters.write('Length(d)         : 10\n') #
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~ABAQUS~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('Path2result(s)    : Abaqus/results/\n')
-	parameters.write('AbaqusOdbName(s)  : model\n')
+	parameters.write('AbaqusOdbName(s)  : C-spar_continuum_shell\n')
 
 
 	parameters.close()

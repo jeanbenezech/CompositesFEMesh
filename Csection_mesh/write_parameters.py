@@ -11,7 +11,7 @@ import matplotlib.cm as cm
 # geometry in millimeters
 
 def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
-	nb_plies = 1
+	nb_plies = 24
 	nb_wrinkles = 0
 	Xlenght = 140.0
 	Ylenght = 5.0 #6.48
@@ -20,13 +20,11 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	r_ext = 5.0 + Ylenght # external radius
 	is_coh = 0
 
+	is_GaussianThickness = 0
+
 	ply_thickness = Ylenght/(nb_plies+0.0)
-	# StackSeq = [0.0, 90.0, 0.0, 90.0]
-	# StackSeq = [45.0, -45.0, 90.0, 0.0, -45.0, 45.0]
-	StackSeq = [90.0]
-	# StackSeq = [-45.0, 45.0, 0.0, 90.0, 45.0, -45.0, -45.0, 45.0, 0.0, 90.0, 45.0, -45.0, -45.0, 45.0, 0.0, 90.0, 45.0, -45.0, -45.0, 45.0, 0.0, 90.0, 45.0, -45.0]
-	# StackSeq = [-45.0, 45.0, 0.0, 90.0, 45.0, -45.0, -45.0, 45.0, 0.0, 90.0, 45.0, -45.0, -45.0, 45.0, 0.0, 90.0, 45.0, -45.0, -45.0, 45.0, 0.0, 90.0, 45.0, -45.0]
-	# StackSeq = [-45.0, 45.0, 0.0, 90.0, 45.0, -45.0, -45.0, 45.0, 0.0, 90.0, 45.0, -45.0]
+	# StackSeq = [0.0, 0.0, 0.0]
+	StackSeq = [45.0, -45.0, 45.0, -45.0, 45.0, -45.0, 0.0, 90.0, 0.0, 90.0, 0.0, 90.0, 90.0, 0.0, 90.0, 0.0, 90.0, 0.0, -45.0, 45.0, -45.0, 45.0, -45.0, 45.0]
 
 	# WRINKLES Parameters
 	minWsize = -0.2
@@ -63,10 +61,11 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('name(s)                : C-spar_'+str(nb_plies)+'plies\n') # mesh name
 	parameters.write('Shape(i)               : 0\n')   # 0(default): Csection ; 1: flat laminate
-	parameters.write('Resin_betw_plies(b)    : 1\n')   # 1: yes ; 0: no
+	parameters.write('Resin_betw_plies(b)    : 0\n')   # 1: yes ; 0: no
 	parameters.write('cohezive_elements(b)   : '+str(is_coh)+'\n')   # 1: yes ; 0: no
 	parameters.write('recombine(b)           : 1\n')   # 1: recombine mesh: hex ;  0: no: only prisms
 	parameters.write('Shell(b)               : 0\n')   # 1: recombine mesh: hex ;  0: no: only prisms
+	parameters.write('GaussianThickness(b)   : '+str(is_GaussianThickness)+'\n')   # 1: gridtrans ;  0: flat
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~GEOMETRY~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -82,25 +81,25 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	for i in range(nb_plies):
 		if i<10:
-			parameters.write('p'+str(i)+'(f,f)   : '+str(StackSeq[i])+','+str(ply_thickness)+'\n')
+			parameters.write('p'+str(i)+'(f,f)   : '+str(StackSeq[i]+90.0)+','+str(ply_thickness)+'\n')
 		else:
-			parameters.write('p'+str(i)+'(f,f)  : '+str(StackSeq[i])+','+str(ply_thickness)+'\n')
+			parameters.write('p'+str(i)+'(f,f)  : '+str(StackSeq[i]+90.0)+','+str(ply_thickness)+'\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~MESH~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('lc(f)      : 1\n')    #1 mesh caracteristic size
-	parameters.write('dx(i)      : 20\n')   #40 discretization in X direction
-	parameters.write('dflange(i) : 10\n')    #16 discretization of the flange
-	parameters.write('ddy(i)     : 3\n')    #2 discretization of ply thickness
-	parameters.write('dz(i)      : 40\n')   #100 discretization in Z direction
-	parameters.write('dc(i)      : 5\n')    #6 discretization of corners
+	parameters.write('dx(i)      : 40\n')   #40 discretization in X direction
+	parameters.write('dflange(i) : 16\n')    #16 discretization of the flange
+	parameters.write('ddy(i)     : 2\n')    #2 discretization of ply thickness
+	parameters.write('dz(i)      : 100\n')   #100 discretization in Z direction
+	parameters.write('dc(i)      : 12\n')    #6 discretization of corners
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~TRANSFORMATION~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('wrinkle(i)        : '+str(nb_wrinkles)+'\n') # Do we need to add wrinkle in the gridMod (c++) code, 2+ for multiple wrinkles
 	parameters.write('Ramp(b)           : 1\n') #
-	parameters.write('Abaqus_output(b)  : 0\n') #
-	parameters.write('Dune_output(b)    : 1\n') #
+	parameters.write('Abaqus_output(b)  : 1\n') #
+	parameters.write('Dune_output(b)    : 0\n') #
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~WRINKLES~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -121,15 +120,22 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 			parameters.write('Wpos'+str(i)+'(f)    : '+str(random.uniform(minWposX, maxWposX))+','+str(random.uniform(minWposY, maxWposY))+','+str(random.uniform(minWposZ, maxWposZ))+'\n') # center
 			parameters.write('Wori'+str(i)+'(f)    : '+str(random.uniform(minWori, maxWori))+'\n') # Orientation in degree
 			parameters.write('Wdamp'+str(i)+'(f)   : '+str(random.uniform(minWdampX, maxWdampX))+','+str(random.uniform(minWdampY, maxWdampY))+','+str(random.uniform(minWdampZ, maxWdampZ))+'\n') # reduction of the amplitude through each direction
+	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~RAMP~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('Rsize(f)          : 6.25\n')
 	parameters.write('StartEndinZdir(f) : 100.0,125.0,50.0\n')
+	if (is_GaussianThickness):
+		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
+		parameters.write('~~~~~~~~~~~~~~~~~~~~GAUSSIAN~~~~~~~~~~~~~~~~~~~~~~\n')
+		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
+		parameters.write('Sigma(d)          : 1\n') #
+		parameters.write('Length(d)         : 10\n') #
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~ABAQUS~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('Path2result(s)    : Abaqus/results/\n')
-	parameters.write('AbaqusOdbName(s)  : model\n')
+	parameters.write('AbaqusOdbName(s)  : C-spar_'+str(nb_plies)+'plies\n')
 
 
 	parameters.close()
