@@ -62,6 +62,8 @@ class GridTransformation{
 	void Gaussian_random_field_K_initialisation(Parameters& param);
 	void Apply_Gaussian_random_field(Vector3d& point, Vector3d& normal, int index);
 
+	void Corner_thickness(Vector3d& point, Vector3d& normal, Parameters& param, std::tuple<double,double,double>& ramp_param);
+
 	void wrinkles(Vector3d& point);
 
 	private:
@@ -279,6 +281,47 @@ void GridTransformation::Apply_Gaussian_random_field(Vector3d& point, Vector3d& 
 	point[0] += normal[0]*Y(index);
 	point[1] += normal[1]*Y(index);
 	point[2] += normal[2]*Y(index);
+}
+
+void GridTransformation::Corner_thickness(Vector3d& point, Vector3d& normal, Parameters& param, std::tuple<double,double,double>& ramp_param){
+
+	double local_ymid = (local_ymin+local_ymax)/2.0;
+
+	Vector3d ramp;
+	ramp[2] = 0.0;
+	ramp[0] = -std::get<0>(ramp_param);
+	if(point[1]>=local_ymid)
+		ramp[1] = -std::get<1>(ramp_param);
+	else
+		ramp[1] = std::get<2>(ramp_param);
+
+	Vector3d init = point-ramp;
+
+	double angle = 0.0;
+	double sign=0.0;
+	if (init[1]>=local_ymax){ // Flange + right corner
+		if(init[0]>=local_xmax){ // right corner
+			angle = atan((init[1]-local_ymax)/(init[0]-local_xmax));// * PI / 180.0;
+			sign = -1;
+		}
+	}
+	else if (init[1]<=local_ymin){ // Flange + left corner
+		if(init[0]>=local_xmax){ // left corner
+			angle = atan((init[1]-local_ymin)/(init[0]-local_xmax));// * PI / 180.0;
+			sign = 1;
+		}
+	}
+
+
+	double delta_val = param.ThicknessVar * sign * sin(2*angle);
+
+	// std::cout << "[ " << moved[0] << " ; " << moved[1] << " ]" << std::endl;
+
+	point[0] += normal[0]*delta_val;
+	point[1] += normal[1]*delta_val;
+	point[2] += normal[2]*delta_val;
+
+	return;
 }
 
 std::tuple<double,double,double> GridTransformation::ramp(Vector3d& point){
@@ -603,10 +646,11 @@ void localCoorSyst(Mesh& m, Parameters& param) {
 	}
 
 	// orientation for the wrinkles
-	if(param.add_wrinkles || param.GaussianThickness)
-		for(int nodeId=0; nodeId<m.vertice_normals.size(); nodeId++)
+	if(param.add_wrinkles || param.GaussianThickness){
+		for(int nodeId=0; nodeId<m.vertice_normals.cols(); nodeId++){
 			m.vertice_normals.col(nodeId).normalize();
-
+		}
+	}
 
 }
 
@@ -637,7 +681,7 @@ void globalCoorSyst(Mesh& m, Parameters& param) {
 
 	// orientation for the wrinkles
 	if(param.add_wrinkles)
-		for(int nodeId=0; nodeId<m.vertice_normals.size(); nodeId++)
+		for(int nodeId=0; nodeId<m.vertice_normals.cols(); nodeId++)
 			m.vertice_normals.col(nodeId).normalize();
 
 }
@@ -763,15 +807,15 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 	double no_ramp=0.0;
 	std::tuple<double, double, double> ramp_param = std::make_tuple(no_ramp,no_ramp,no_ramp);
 
-	if(param.GaussianThickness){
+	if(param.GaussianThickness || param.CornerThickness){
 		GT.N.resize(0);
 		for(int node=0; node < m.Nb_vertices(); ++node) {
 			Vector3d point;
 			point(0) = m.vertices(0, node);
 			point(1) = m.vertices(1, node);
 			point(2) = m.vertices(2, node);
-			
-			GT.Gaussian_random_field_N_initialisation(node, point, param, ramp_param);
+
+			GT.Gaussian_random_field_N_initialisation(node, point, param, ramp_param); // TODO: ramp_param is null here
 		}
 		GT.Gaussian_random_field_K_initialisation(param);
 	}
@@ -791,15 +835,14 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 			for(int i=0; i<param.add_wrinkles;i++)
 				GT.Csection_wrinkles(point, normal, i, param, ramp_param);
 
-		// std::cout << "Point 0 before : " << point(0) << std::endl;
-		if(param.GaussianThickness){
+		if(param.GaussianThickness || param.CornerThickness){
 			auto iter = std::find (GT.indices_map.begin(), GT.indices_map.end(), node);
 			if(iter != GT.indices_map.end()){
 				int index = iter - GT.indices_map.begin();
+				GT.Corner_thickness(point, normal, param, ramp_param);
 				GT.Apply_Gaussian_random_field(point, normal, index);
 			}
 		}
-		// std::cout << "Point 0 after : " << point(0) << std::endl;
 
 		m.vertices(0, node) = point(0);
 		m.vertices(1, node) = point(1);
@@ -869,7 +912,6 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 					GT.Csection_wrinkles(baryPw, normal, i, param, ramp_param);
 				for(int i=0; i<param.add_wrinkles;i++)
 					GT.Csection_wrinkles(baryMw, normal, i, param, ramp_param);
-
 			}
 
 

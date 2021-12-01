@@ -21,6 +21,7 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	is_coh = 0 # Not for shell
 
 	is_GaussianThickness = 1
+	is_CornerThickness = 1
 
 	ply_thickness = Ylenght/(nb_plies+0.0)
 	StackSeq = [0.0]
@@ -65,6 +66,7 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('recombine(b)           : 1\n')   # 1: recombine mesh: hex ;  0: no: only prisms
 	parameters.write('Shell(b)               : 1\n')   # 1: shell ;  0: not shell
 	parameters.write('GaussianThickness(b)   : '+str(is_GaussianThickness)+'\n')   # 1: gridtrans ;  0: flat
+	parameters.write('CornerThickness(b)     : '+str(is_CornerThickness)+'\n')   # 1: variation ;  0: flat
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~GEOMETRY~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -99,10 +101,10 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('Ramp(b)           : 1\n') #
 	parameters.write('Abaqus_output(b)  : 1\n') #
 	parameters.write('Dune_output(b)    : 0\n') #
-	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('~~~~~~~~~~~~~~~~~~~~WRINKLES~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	if (nb_wrinkles>0):
+		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
+		parameters.write('~~~~~~~~~~~~~~~~~~~~WRINKLES~~~~~~~~~~~~~~~~~~~~~~\n')
+		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('WID(s)    : Defect_'+str(cnt)+'\n')
 	# parameters.write('Wsize(f)    : '+str(p1)+'\n') # Amplitude max
 	# parameters.write('Wpos(f)     : 84.0,73.3,207.7\n') # center
@@ -129,7 +131,12 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 		parameters.write('~~~~~~~~~~~~~~~~~~~~GAUSSIAN~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('Sigma(d)          : 1\n') #
-		parameters.write('Length(d)         : 10\n') #
+		parameters.write('Length(d)         : 20\n') #
+	if (is_CornerThickness):
+		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
+		parameters.write('~~~~~~~~~~~~~~~~CORNER THICKNESS~~~~~~~~~~~~~~~~~~\n')
+		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
+		parameters.write('ThicknessVar(d)   : 2\n') #
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~ABAQUS~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')

@@ -25,7 +25,6 @@ int main(int argc, const char *argv[]) {
 	m.read_msh(mesh_name+".msh", true, param.cz_id);
 
 	m.initialise(param);
-	
 
 	m.read_points("input.txt");
 	m.exportDir = true;

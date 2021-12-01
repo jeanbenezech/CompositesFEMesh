@@ -50,8 +50,8 @@ public:
 	int cz_id, resin_id;
 	bool isResin, isCZ, isShell;
 
-	bool GaussianThickness;
-	double sigma, length;
+	bool GaussianThickness, CornerThickness;
+	double sigma, length, ThicknessVar;
 
 	std::vector<Vector2d> StackSeq;
 
@@ -109,11 +109,17 @@ void Parameters::read(const std::string& filename) {
 		if (line.find("GaussianThickness")!=std::string::npos){
 			GaussianThickness = std::stoi(extract(line));
 		}
+		if (line.find("CornerThickness")!=std::string::npos){
+			CornerThickness = std::stoi(extract(line));
+		}
 
 		if (line.find("Sigma(d)")!=std::string::npos)
 			sigma = std::stod(extract(line));
 		if (line.find("Length(d)")!=std::string::npos)
 			length = std::stod(extract(line));
+
+		if (line.find("ThicknessVar(d)")!=std::string::npos)
+			ThicknessVar = std::stod(extract(line));
 
 		if (line.find("Shape")!=std::string::npos)
 			Shape = std::stoi(extract(line));

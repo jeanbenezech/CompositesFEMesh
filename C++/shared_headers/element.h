@@ -53,7 +53,7 @@ void Element::initialise(std::string key, int nb_elem, int nb_marker, bool isShe
 	type = key;
 	nb = nb_elem;
 	isShell = isShell_;
-	std::cout << isShell << " in element initializer" << std::endl;
+
 	if(type=="Triangle"){
 		size = 3;
 		msh_type = 2;
