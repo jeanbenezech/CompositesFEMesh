@@ -313,7 +313,8 @@ void GridTransformation::Corner_thickness(Vector3d& point, Vector3d& normal, Par
 	}
 
 
-	double delta_val = param.ThicknessVar * sign * sin(2*angle);
+	// double delta_val = param.ThicknessVar * sign * sin(2*angle);
+	double delta_val = param.ThicknessVar * sign * (1 – cos(4*angle))/2;
 
 	// std::cout << "[ " << moved[0] << " ; " << moved[1] << " ]" << std::endl;
 

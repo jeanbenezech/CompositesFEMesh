@@ -4,15 +4,15 @@ import random
 # geometry in millimeters
 
 def write_parameters():
-	nb_plies = 2
+	nb_plies = 4
 	nb_wrinkles = 0
 	Xlenght = 140.0
-	Ylenght = 10.00
+	Ylenght = 5.00
 	Zlenght = 500.0
 	height = 0.0
 
 	ply_thickness = Ylenght/(nb_plies+0.0)
-	StackSeq = [0.0, 90.0] #, 0.0, 90.0]
+	StackSeq = [0.0, 90.0, 0.0, 90.0]
 
 	# WRINKLES Parameters
 	minWsize = -0.5
@@ -45,11 +45,14 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('name(s)                : beam_resin\n') # mesh name
+	parameters.write('name(s)                : beam\n') # mesh name
 	parameters.write('Shape(i)               : 1\n')   # 0(default): Csection ; 1: flat laminate
 	parameters.write('Resin_betw_plies(b)    : 1\n')   # 1: yes ; 0: no
 	parameters.write('cohezive_elements(b)   : 0\n')   # 1: yes ; 0: no
 	parameters.write('recombine(b)           : 1\n')   # 1: recombine mesh: hex ;  0: no: only prisms
+	parameters.write('Shell(b)               : 0\n')   # 1: recombine mesh: hex ;  0: no: only prisms
+	parameters.write('GaussianThickness(b)   : 0\n')   # 1: gridtrans ;  0: flat
+	parameters.write('CornerThickness(b)     : 0\n')   # 1: variation ;  0: flat
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~GEOMETRY~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -89,9 +92,9 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~MESH~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('lc(f)    : 1\n')        # mesh caracteristic size
-	parameters.write('dx(i)    : 30\n')       #
-	parameters.write('ddy(i)   : 4\n')        #
-	parameters.write('dz(i)    : 80\n')       #
+	parameters.write('dx(i)    : 40\n')       #
+	parameters.write('ddy(i)   : 3\n')        #
+	parameters.write('dz(i)    : 100\n')       #
 	parameters.write('dc(i)    : 0\n')        #
 	parameters.write('dflange(i) : 0\n')     # discretization of the flange
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -101,11 +104,11 @@ def write_parameters():
 	parameters.write('Ramp(b)           : 0\n') #
 	parameters.write('Abaqus_output(b)  : 0\n') #
 	parameters.write('Dune_output(b)    : 1\n') #
-	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('~~~~~~~~~~~~~~~~~~~~WRINKLES~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('WID(s)             : Defect0\n')
 	for i in range(nb_wrinkles):
+		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
+		parameters.write('~~~~~~~~~~~~~~~~~~~~WRINKLES~~~~~~~~~~~~~~~~~~~~~~\n')
+		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
+		parameters.write('WID(s)             : Defect0\n')
 		if i<10:
 			parameters.write('Wsize'+str(i)+'(f)    : '+str(random.uniform(minWsize, maxWsize))+'\n') # Amplitude max
 			parameters.write('Wpos'+str(i)+'(f)     : '+str(random.uniform(minWposX, maxWposX))+','+str(random.uniform(minWposY, maxWposY))+','+str(random.uniform(minWposZ, maxWposZ))+'\n') # center
