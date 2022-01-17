@@ -14,7 +14,7 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	nb_plies = 1
 	nb_wrinkles = 0 # let it to 0
 	Xlenght = 140.0
-	Ylenght = 5.0 #6.48
+	Ylenght = 10.0 #6.48
 	Zlenght = 500.0
 	height = 35 # height of the flanges
 	r_ext = 5.0 + Ylenght # external radius

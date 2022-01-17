@@ -4,8 +4,8 @@ np.random.seed(123)
 import sys
 import random
 import matplotlib.pyplot as plt
-from skopt.space import Space
-from skopt.sampler import Lhs
+# from skopt.space import Space
+# from skopt.sampler import Lhs
 import matplotlib.cm as cm
 
 # geometry in millimeters
@@ -14,7 +14,7 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	nb_plies = 24
 	nb_wrinkles = 0
 	Xlenght = 140.0
-	Ylenght = 5.0 #6.48
+	Ylenght = 10.0 #6.48
 	Zlenght = 500.0
 	height = 35
 	r_ext = 5.0 + Ylenght # external radius
@@ -90,18 +90,18 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~MESH~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('lc(f)      : 1\n')    #1 mesh caracteristic size
-	parameters.write('dx(i)      : 40\n')   #40 discretization in X direction
-	parameters.write('dflange(i) : 16\n')    #16 discretization of the flange
+	parameters.write('dx(i)      : 60\n')   #40 discretization in X direction
+	parameters.write('dflange(i) : 25\n')    #16 discretization of the flange
 	parameters.write('ddy(i)     : 2\n')    #2 discretization of ply thickness
-	parameters.write('dz(i)      : 100\n')   #100 discretization in Z direction
-	parameters.write('dc(i)      : 12\n')    #6 discretization of corners
+	parameters.write('dz(i)      : 120\n')   #100 discretization in Z direction
+	parameters.write('dc(i)      : 15\n')    #6 discretization of corners
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~TRANSFORMATION~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('wrinkle(i)        : '+str(nb_wrinkles)+'\n') # Do we need to add wrinkle in the gridMod (c++) code, 2+ for multiple wrinkles
 	parameters.write('Ramp(b)           : 1\n') #
-	parameters.write('Abaqus_output(b)  : 1\n') #
-	parameters.write('Dune_output(b)    : 0\n') #
+	parameters.write('Abaqus_output(b)  : 0\n') #
+	parameters.write('Dune_output(b)    : 1\n') #
 	if (nb_wrinkles>0):
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~WRINKLES~~~~~~~~~~~~~~~~~~~~~~\n')

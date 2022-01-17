@@ -108,13 +108,13 @@ void GridTransformation::initialise(Mesh& m, Parameters& param) {
 	z4 = z3 + param.StartEndinZdir(1);
 
 	local_xmax = param.Height;
-	local_ymin = param.R-param.Y;
+	local_ymin = param.R;//-param.Y;
 	local_ymax = param.X+local_ymin;
 
 	delta_max = param.rampSize;
 	threshold_avoiding_deformation_through_thickness = param.R;
 
-	interior_radius = param.R - param.Y;
+	interior_radius = param.R;// - param.Y;
 
 	ymid = (ymax-ymin)/2.0;
 
@@ -302,7 +302,7 @@ void GridTransformation::Corner_thickness(Vector3d& point, Vector3d& normal, Par
 	if (init[1]>=local_ymax){ // Flange + right corner
 		if(init[0]>=local_xmax){ // right corner
 			angle = atan((init[1]-local_ymax)/(init[0]-local_xmax));// * PI / 180.0;
-			sign = -1;
+			sign = 1;
 		}
 	}
 	else if (init[1]<=local_ymin){ // Flange + left corner
@@ -314,7 +314,8 @@ void GridTransformation::Corner_thickness(Vector3d& point, Vector3d& normal, Par
 
 
 	// double delta_val = param.ThicknessVar * sign * sin(2*angle);
-	double delta_val = param.ThicknessVar * sign * (1 – cos(4*angle))/2;
+	// double delta_val = param.ThicknessVar * sign * (1 - cos(4*angle))/2;
+	double delta_val = - param.ThicknessVar * (1 - cos(4*angle))/2;
 
 	// std::cout << "[ " << moved[0] << " ; " << moved[1] << " ]" << std::endl;
 

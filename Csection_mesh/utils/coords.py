@@ -10,7 +10,7 @@ def curve_point(param, dt, rep, stype):
 
 	if param.substr[stype].Ori>0:
 		theta =  np.pi/2.0
-		radius = param.substr[stype].L-param.R + param.substr[stype].thick
+		radius = param.substr[stype].L-param.Y + param.substr[stype].thick
 	else:
 		theta =  -np.pi/2.0
 		radius = param.substr[stype].L - param.substr[stype].thick

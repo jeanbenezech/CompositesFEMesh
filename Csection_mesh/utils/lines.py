@@ -13,7 +13,7 @@ def Clines(param, geo, rep):
 
 	ptype=0
 
-	delta_R = param.R/(param.nbp) # Ply thickness
+	# delta_R = param.R/(param.nbp) # Ply thickness
 
 
 	Ylines=[np.zeros(len(param.substr)+1, dtype=int),np.zeros(len(param.substr)+1, dtype=int)]

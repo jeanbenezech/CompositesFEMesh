@@ -4,7 +4,7 @@ import random
 # geometry in millimeters
 
 def write_parameters():
-	nb_plies = 4
+	nb_plies = 3
 	nb_wrinkles = 0
 	Xlenght = 140.0
 	Ylenght = 5.00
@@ -12,7 +12,7 @@ def write_parameters():
 	height = 0.0
 
 	ply_thickness = Ylenght/(nb_plies+0.0)
-	StackSeq = [0.0, 90.0, 0.0, 90.0]
+	StackSeq = [0.0, 45.0, -45.0]
 
 	# WRINKLES Parameters
 	minWsize = -0.5
@@ -45,7 +45,7 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('name(s)                : beam\n') # mesh name
+	parameters.write('name(s)                : beam3P\n') # mesh name
 	parameters.write('Shape(i)               : 1\n')   # 0(default): Csection ; 1: flat laminate
 	parameters.write('Resin_betw_plies(b)    : 1\n')   # 1: yes ; 0: no
 	parameters.write('cohezive_elements(b)   : 0\n')   # 1: yes ; 0: no
@@ -93,7 +93,7 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('lc(f)    : 1\n')        # mesh caracteristic size
 	parameters.write('dx(i)    : 40\n')       #
-	parameters.write('ddy(i)   : 3\n')        #
+	parameters.write('ddy(i)   : 2\n')        #
 	parameters.write('dz(i)    : 100\n')       #
 	parameters.write('dc(i)    : 0\n')        #
 	parameters.write('dflange(i) : 0\n')     # discretization of the flange
