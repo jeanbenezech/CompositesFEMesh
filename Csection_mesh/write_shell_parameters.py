@@ -17,7 +17,7 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	Ylenght = 10.0 #6.48
 	Zlenght = 500.0
 	height = 35 # height of the flanges
-	r_ext = 5.0 + Ylenght # external radius
+	r_int = 5.0 # internal radius
 	is_coh = 0 # Not for shell
 
 	is_GaussianThickness = 1
@@ -73,7 +73,7 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('np(i)         : '+str(nb_plies)+'\n')     # 6, 12 or 24 # TODO: find a clever way of setting stacking sequence
 	parameters.write('X(f)          : '+str(Xlenght)+'\n')   #
 	parameters.write('Y(f)          : '+str(Ylenght)+'\n')  #
-	parameters.write('R(f)          : '+str(r_ext)+'\n')    #
+	parameters.write('R(f)          : '+str(r_int)+'\n')    #
 	parameters.write('Height(f)     : '+str(height)+'\n')    #
 	parameters.write('Z(f)          : '+str(Zlenght)+'\n')   #
 	parameters.write('e(f)          : 0.01\n')  # Resin layer thickness
