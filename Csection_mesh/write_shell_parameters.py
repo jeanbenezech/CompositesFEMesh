@@ -4,40 +4,40 @@ np.random.seed(123)
 import sys
 import random
 import matplotlib.pyplot as plt
-from skopt.space import Space
-from skopt.sampler import Lhs
+#from skopt.space import Space
+#from skopt.sampler import Lhs
 import matplotlib.cm as cm
 
 # geometry in millimeters
 
-def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
+def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, Ylength=7.0, ThicknessVar=2.0, Sigma=0.1, Length=10, is_GaussianThickness=1, is_CornerThickness=1):
 	nb_plies = 1
 	nb_wrinkles = 0 # let it to 0
-	Xlenght = 140.0
-	Ylenght = 10.0 #6.48
-	Zlenght = 500.0
+	Xlength = 140.0
+	#Ylength = 5.0 #6.48
+	Zlength = 500.0
 	height = 35 # height of the flanges
 	r_int = 5.0 # internal radius
 	is_coh = 0 # Not for shell
 
-	is_GaussianThickness = 1
-	is_CornerThickness = 1
+# 	is_GaussianThickness = 1
+# 	is_CornerThickness = 1
 
-	ply_thickness = Ylenght/(nb_plies+0.0)
+	ply_thickness = Ylength/(nb_plies+0.0)
 	StackSeq = [0.0]
 
 	# WRINKLES Parameters
 	minWsize = -0.2
 	maxWsize = 0.2
 
-	minWposX = 0.11*Xlenght
-	maxWposX = 0.89*Xlenght
+	minWposX = 0.11*Xlength
+	maxWposX = 0.89*Xlength
 
-	minWposY = height - 0.31*Ylenght
+	minWposY = height - 0.31*Ylength
 	maxWposY = height + 0.0
 
-	minWposZ = 0.11*Zlenght
-	maxWposZ = 0.89*Zlenght
+	minWposZ = 0.11*Zlength
+	maxWposZ = 0.89*Zlength
 
 	minWdampX = 2.0
 	maxWdampX = 9.0
@@ -71,11 +71,11 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~GEOMETRY~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('np(i)         : '+str(nb_plies)+'\n')     # 6, 12 or 24 # TODO: find a clever way of setting stacking sequence
-	parameters.write('X(f)          : '+str(Xlenght)+'\n')   #
-	parameters.write('Y(f)          : '+str(Ylenght)+'\n')  #
+	parameters.write('X(f)          : '+str(Xlength)+'\n')   #
+	parameters.write('Y(f)          : '+str(Ylength)+'\n')  #
 	parameters.write('R(f)          : '+str(r_int)+'\n')    #
 	parameters.write('Height(f)     : '+str(height)+'\n')    #
-	parameters.write('Z(f)          : '+str(Zlenght)+'\n')   #
+	parameters.write('Z(f)          : '+str(Zlength)+'\n')   #
 	parameters.write('e(f)          : 0.01\n')  # Resin layer thickness
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~STACKSEQ~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -130,13 +130,16 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~GAUSSIAN~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-		parameters.write('Sigma(d)          : 1\n') #
-		parameters.write('Length(d)         : 20\n') #
+		#parameters.write('Sigma(d)          : 0.1\n') #
+		#parameters.write('Length(d)         : 20\n') #
+		parameters.write('Sigma(d)          : '+str(Sigma)+'\n') #
+		parameters.write('Length(d)         : '+str(Length)+'\n') #
 	if (is_CornerThickness):
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~CORNER THICKNESS~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-		parameters.write('ThicknessVar(d)   : 2\n') #
+		#parameters.write('ThicknessVar(d)   : 2\n') #
+		parameters.write('ThicknessVar(d)   : '+str(ThicknessVar)+'\n') #
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~ABAQUS~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')

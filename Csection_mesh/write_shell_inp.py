@@ -4,8 +4,10 @@ import glob
 from utils.parameters import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-if __name__ == '__main__':
-
+# if __name__ == '__main__':
+def write_inp_parameters(Ylength=7.0):
+	ply_thickness = Ylength/24 # 24 plies in total
+	
 	param = parameters()
 	param.init('parameters')
 
@@ -34,18 +36,18 @@ if __name__ == '__main__':
 	# Csection
 	# MUST BE CHANGED
 	f.write('*SHELL SECTION, ELSET=All_elements, COMPOSITE, ORIENTATION=ori_loc , OFFSET=0, LAYUP="Inner Skin", SYMMETRIC\n')
-	f.write('0.20833333333333334, 3, AS4-8552, 45., Ply1\n')
-	f.write('0.20833333333333334, 3, AS4-8552, -45., Ply2\n')
-	f.write('0.20833333333333334, 3, AS4-8552, 45., Ply3\n')
-	f.write('0.20833333333333334, 3, AS4-8552, -45., Ply4\n')
-	f.write('0.20833333333333334, 3, AS4-8552, 45., Ply5\n')
-	f.write('0.20833333333333334, 3, AS4-8552, -45., Ply6\n')
-	f.write('0.20833333333333334, 3, AS4-8552, 0., Ply7\n')
-	f.write('0.20833333333333334, 3, AS4-8552, 90., Ply8\n')
-	f.write('0.20833333333333334, 3, AS4-8552, 0., Ply9\n')
-	f.write('0.20833333333333334, 3, AS4-8552, 90., Ply10\n')
-	f.write('0.20833333333333334, 3, AS4-8552, 0., Ply11\n')
-	f.write('0.20833333333333334, 3, AS4-8552, 90., Ply12\n')
+	f.write(str(ply_thickness)+', 3, AS4-8552, 45., Ply1\n')
+	f.write(str(ply_thickness)+', 3, AS4-8552, -45., Ply2\n')
+	f.write(str(ply_thickness)+', 3, AS4-8552, 45., Ply3\n')
+	f.write(str(ply_thickness)+', 3, AS4-8552, -45., Ply4\n')
+	f.write(str(ply_thickness)+', 3, AS4-8552, 45., Ply5\n')
+	f.write(str(ply_thickness)+', 3, AS4-8552, -45., Ply6\n')
+	f.write(str(ply_thickness)+', 3, AS4-8552, 0., Ply7\n')
+	f.write(str(ply_thickness)+', 3, AS4-8552, 90., Ply8\n')
+	f.write(str(ply_thickness)+', 3, AS4-8552, 0., Ply9\n')
+	f.write(str(ply_thickness)+', 3, AS4-8552, 90., Ply10\n')
+	f.write(str(ply_thickness)+', 3, AS4-8552, 0., Ply11\n')
+	f.write(str(ply_thickness)+', 3, AS4-8552, 90., Ply12\n')
 	f.write('*end part\n')
 
 	# ~~~~~~~~~~~~~ MATERIAL ~~~~~~~~~~~~~
@@ -120,3 +122,6 @@ if __name__ == '__main__':
 	f.write('10,,,,\n')
 
 	f.write('*End Step\n')
+
+if __name__ == '__main__':
+    write_inp_parameters()

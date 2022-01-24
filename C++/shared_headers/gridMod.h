@@ -218,7 +218,7 @@ void GridTransformation::Gaussian_random_field_N_initialisation(int& node, Vecto
 		dist_from_bottom_surf = init[0] - local_xmax - interior_radius;
 	}
 
-	if (dist_from_bottom_surf>1){
+	if (dist_from_bottom_surf>0.01){
 		Vector2d tmp;
 		tmp[0]=moved[1];
 		tmp[1]=moved[2];
@@ -240,7 +240,7 @@ void GridTransformation::Gaussian_random_field_K_initialisation(Parameters& para
 			double dist2 = (N[i](1)-N[j](1))*(N[i](1)-N[j](1))+(N[i](0)-N[j](0))*(N[i](0)-N[j](0));
 			K(i,j) = pow(param.sigma,2) * exp( - dist2 / (2.0*pow(param.length,2)) );
 			if(i==j){
-				K(i,j) += 1e-8;
+				K(i,j) += 1e-15;
 			}
 		}
 	}
@@ -248,15 +248,15 @@ void GridTransformation::Gaussian_random_field_K_initialisation(Parameters& para
 	LLT<MatrixXd> lltOfA(K); // compute the Cholesky decomposition of K
 	L = lltOfA.matrixL(); // retrieve factor L in the decomposition
 
-	std::random_device rd;
-	std::normal_distribution<> d{0,1};
-	std::map<int, int> hist{};
+/*	std::random_device rd;*/
+/*	std::normal_distribution<> d{0,1};*/
+/*	std::map<int, int> hist{};*/
 
-	for(int n=0; n<N.size(); ++n) {
-		Z(n) = d(rd);
-		// ++hist[std::round(d(rd))];
-		// std::cout << Z[n] << std::endl;
-	}
+/*	for(int n=0; n<N.size(); ++n) {*/
+/*		Z(n) = d(rd);*/
+/*		// ++hist[std::round(d(rd))];*/
+/*		// std::cout << Z[n] << std::endl;*/
+/*	}*/
 
 	/* Plot the histogram */
 	// for(int n=0; n<10000; ++n) {
@@ -267,7 +267,20 @@ void GridTransformation::Gaussian_random_field_K_initialisation(Parameters& para
 	// 	std::cout << std::setw(2)
 	// 				<< p.first << ' ' << std::string(p.second/200, '*') << '\n';
 	// }
-
+	std::ifstream white_noise;
+	// "white_noise.txt" contains the pre-generated Gaussian white nosie samples
+	white_noise.open("white_noise.txt", std::ios::in);
+	if (!white_noise.is_open()) {
+		std::cout << "Error: Cannot open file white_noise.txt" << std::endl;
+	}
+	else {
+	    for (int n=0; n<N.size(); ++n){
+	        white_noise >> Z(n);
+	        //std::cout << Z(n) << std::endl;
+	    }
+	    white_noise.close();
+	}
+    std::cout << "size: " << N.size() << std::endl;
 	Y = L*Z;
 }
 
@@ -639,7 +652,7 @@ void localCoorSyst(Mesh& m, Parameters& param) {
 				}
 
 				// orientation for the wrinkles
-				if(param.add_wrinkles || param.GaussianThickness)
+				if(param.add_wrinkles || param.CornerThickness || param.GaussianThickness)
 					for(int nodeId=0; nodeId<elem.size; nodeId++)
 						m.vertice_normals.col(elem.Nodes(nodeId,l)) += v;
 
@@ -648,7 +661,7 @@ void localCoorSyst(Mesh& m, Parameters& param) {
 	}
 
 	// orientation for the wrinkles
-	if(param.add_wrinkles || param.GaussianThickness){
+	if(param.add_wrinkles || param.CornerThickness || param.GaussianThickness){
 		for(int nodeId=0; nodeId<m.vertice_normals.cols(); nodeId++){
 			m.vertice_normals.col(nodeId).normalize();
 		}
@@ -798,7 +811,7 @@ void attribute_weight(Mesh& m, Parameters& param) {
 
 void GeometricTransformation(Mesh& m, Parameters& param) {
 
-	if(param.add_ramp==false && param.add_wrinkles==0){
+	if(param.add_ramp==false && param.add_wrinkles==0 && param.CornerThickness==false && param.GaussianThickness==false){
 		std::cout << "GeoTransformation is used for nothing." << std::endl;
 		return;
 	}
@@ -819,6 +832,9 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 
 			GT.Gaussian_random_field_N_initialisation(node, point, param, ramp_param); // TODO: ramp_param is null here
 		}
+	}
+	
+	if(param.GaussianThickness){
 		GT.Gaussian_random_field_K_initialisation(param);
 	}
 
@@ -836,12 +852,18 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 		if(param.add_wrinkles)
 			for(int i=0; i<param.add_wrinkles;i++)
 				GT.Csection_wrinkles(point, normal, i, param, ramp_param);
+				
+		if(param.CornerThickness){
+		    auto iter = std::find(GT.indices_map.begin(), GT.indices_map.end(), node);
+			if(iter != GT.indices_map.end()){
+			    GT.Corner_thickness(point, normal, param, ramp_param);
+			}
+		}
 
-		if(param.GaussianThickness || param.CornerThickness){
-			auto iter = std::find (GT.indices_map.begin(), GT.indices_map.end(), node);
+		if(param.GaussianThickness){
+			auto iter = std::find(GT.indices_map.begin(), GT.indices_map.end(), node);
 			if(iter != GT.indices_map.end()){
 				int index = iter - GT.indices_map.begin();
-				GT.Corner_thickness(point, normal, param, ramp_param);
 				GT.Apply_Gaussian_random_field(point, normal, index);
 			}
 		}
