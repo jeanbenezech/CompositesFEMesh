@@ -3,6 +3,7 @@
 
 #include "utils.h"
 #include "element.h"
+#include "vertice.h"
 #include "parameters.h"
 #include <iostream>
 #include <fstream>
@@ -17,8 +18,7 @@ using namespace Eigen;
 class Mesh {
 public:
 	// PRINCIPAL VARIABLES
-	Matrix<double, Dynamic, Dynamic> vertices;
-	Matrix<double, Dynamic, Dynamic> vertice_normals;
+	std::vector<Vertice> Vertices;
 	std::vector<Element> Elements;
 
 	std::string mesh_type;
@@ -31,9 +31,6 @@ public:
 	std::vector<double> stacking_sequence;
 	int nb_corner, type;
 	std::vector<Vector2f> P;
-
-	// ABAQUS FIELDS
-	Matrix<double, Dynamic, Dynamic> X;
 
 
 	// FUNCTION
@@ -48,6 +45,7 @@ public:
 	bool exportDir=false;
 	bool exportAbaqusFields=false;
 	bool exportAbaqusDisplacement=false;
+	bool exportRandomFieldOnElement=false;
 	void write_vtk(const std::string& filename, int verbosity);
 	void write_inp(const std::string& filename);
 	void write_ori_txt(const std::string& filename);
@@ -82,27 +80,6 @@ void Mesh::initialise(Parameters& param) {
 	for(int i=0; i<nb_plies_; i++)
 		stacking_sequence[i] = param.StackSeq[i](0);
 
-
-	// stacking_sequence[0] =  45.0;
-	// stacking_sequence[1] = -45.0;
-	// stacking_sequence[2] =  90.0;
-	// stacking_sequence[3] =   0.0;
-	// stacking_sequence[4] = -45.0;
-	// stacking_sequence[5] =  45.0;
-	// if (nb_plies>6){
-	// 	stacking_sequence[6] =  45.0;
-	// 	stacking_sequence[7] = -45.0;
-	// 	stacking_sequence[8] =  90.0;
-	// 	stacking_sequence[9] =   0.0;
-	// 	stacking_sequence[10]= -45.0;
-	// 	stacking_sequence[11]=  45.0;
-	// }
-	// if (nb_plies>12){
-	// 	for(int i=0; i< 12;i++){
-	// 		stacking_sequence[12+i] = stacking_sequence[11-i];
-	// 	}
-	// }
-
 }
 
 // ~~~~~~~~~~~~~~ PRINT ~~~~~~~~~~~~~~
@@ -112,9 +89,9 @@ void Mesh::print(std::string type, int number) {
 		if(elem.type != "Triangle" || elem.type != "Quadrilateral"){
 			for(int n = 0; n < elem.Nodes.rows(); n++) {
 				std::cout << n << " : ";
-				std::cout << vertices(0, elem.Nodes(n, number)) << ", ";
-				std::cout << vertices(1, elem.Nodes(n, number)) << ", ";
-				std::cout << vertices(2, elem.Nodes(n, number)) << std::endl;
+				std::cout << Vertices[elem.Nodes(n, number)].coord(0) << ", ";
+				std::cout << Vertices[elem.Nodes(n, number)].coord(1) << ", ";
+				std::cout << Vertices[elem.Nodes(n, number)].coord(2) << std::endl;
 			}
 		}
 	}
@@ -140,14 +117,15 @@ void Mesh::read_mesh(const std::string& filename) {
 
 	// Vertices
 	input >> nb_vertices_;
-	vertices.resize(3, nb_vertices_);
+	Vertices.resize(nb_vertices_);
+	
 	//std::cout << nb_vertices_ << std::endl;
 	for(int i=0; i< nb_vertices_; ++i) {
 		double x, y, z, d;
 		input >> x >> y >> z >> d;
-		vertices(0,i)=x;
-		vertices(1,i)=y;
-		vertices(2,i)=z;
+		Vertices[i].coord(0)=x;
+		Vertices[i].coord(1)=y;
+		Vertices[i].coord(2)=z;
 	}
 	std::string ligne {};
 
@@ -249,20 +227,24 @@ void Mesh::read_msh(const std::string& filename, bool only_3D, int cz_id) {
 	std::getline(input, ligne); // $Nodes
 	input >> nb_vertices_;
 
-	vertices.resize(3, nb_vertices_);
-	vertice_normals.resize(3, nb_vertices_);
+	// vertice_parents.resize(nb_vertices_);
+	// for(int i=0; i< nb_vertices_; ++i) {
+	// 	vertice_parents[i].resize(0);
+	// }
+
+	Vertices.resize(nb_vertices_);
+
 	for(int i=0; i< nb_vertices_; ++i) {
 		double x, y, z, d;
 		input >> d >> x >> y >> z;
-		vertices(0,d-1)=x;
-		vertices(1,d-1)=y;
-		vertices(2,d-1)=z;
-		//~ if (i<10){std::cout << vertices(0,i) << ", " << vertices(1,i) << ", " << vertices(2,i) << std::endl;}
+		Vertices[d-1].coord(0)=x;
+		Vertices[d-1].coord(1)=y;
+		Vertices[d-1].coord(2)=z;
+		//~ if (i<10){std::cout << Vertices[i].coord(0) << ", " << Vertices[i].coord(1) << ", " << Vertices[i].coord(2) << std::endl;}
 
 		// initialize the normal to vertices at zero
-		vertice_normals(0, d-1)=0.0;
-		vertice_normals(1, d-1)=0.0;
-		vertice_normals(2, d-1)=0.0;
+		Vertices[d-1].normal = Vector3d::Zero();
+
 	}
 	std::getline(input, ligne); // End last node line
 	std::getline(input, ligne); // $EndNodes
@@ -366,6 +348,28 @@ void Mesh::read_msh(const std::string& filename, bool only_3D, int cz_id) {
 		incr_elem += 1;
 	}
 
+	// Initial barycenter
+	for(auto& elem : Elements){
+		for(int l=0; l < elem.nb; ++l) {
+			elem.Initial_barycenter.col(l) = Vector3d::Zero();
+			for(int i=0; i<elem.size; i++)
+				elem.Initial_barycenter.col(l) += Vertices[elem.Nodes(i,l)].coord;
+			elem.Initial_barycenter.col(l) *= 1.0 / (elem.size+0.0);
+		}
+	}
+
+	// Vectices element_ids
+	// for(auto& elem : Elements){
+	// 	for(int l=0; l < elem.nb; ++l) {
+	// 		for(int i=0; i<elem.size; i++){
+	// 			Vector2i tmp;
+	// 			tmp(0)=i;
+	// 			tmp(1)=l;
+	// 			Vertices[elem.Nodes(i,l)].element_ids.push_back(tmp);
+	// 		}
+	// 	}
+	// }
+
 }
 
 void Mesh::read_points(const std::string& filename) {
@@ -430,11 +434,11 @@ void Mesh::read_node_fields(const std::string& filename) {
 	std::string ligne {};
 	std::getline(input, ligne); // Commentaires
 
-	X.resize(3,nb_vertices_);
+	// X.resize(3,nb_vertices_);
 
 	for(int i = 0; i < nb_vertices_; i++) {
 		int num;
-		input >> num >> X(0, i) >> X(1, i) >> X(2, i);
+		input >> num >> Vertices[i].X(0) >> Vertices[i].X(1) >> Vertices[i].X(2);
 	}
 
 }
@@ -458,7 +462,7 @@ void Mesh::write_mesh(const std::string& filename) {
 	output << "Vertices" << std::endl;
 	output << nb_vertices_ << std::endl;
 	for(int i=0; i< nb_vertices_; i++) {
-		output << vertices(0,i) << " " << vertices(1,i) << " " << vertices(2,i) << " " << i << std::endl;
+		output << Vertices[i].coord(0) << " " << Vertices[i].coord(1) << " " << Vertices[i].coord(2) << " " << i << std::endl;
 	}
 
 	for(auto& elem : Elements){
@@ -501,7 +505,7 @@ void Mesh::write_msh(const std::string& filename, int verbosity=1) {
 	output << "$Nodes" << std::endl;
 	output << nb_vertices_ << std::endl;
 	for(int i=0; i< nb_vertices_; ++i) {
-		output << std::setprecision(15) << i+1 << " " << vertices(0,i) << " " << vertices(1,i) << " " << vertices(2,i) << std::endl;
+		output << std::setprecision(15) << i+1 << " " << Vertices[i].coord(0) << " " << Vertices[i].coord(1) << " " << Vertices[i].coord(2) << std::endl;
 	}
 	output << "$EndNodes" << std::endl;
 	output << "$Elements" << std::endl;
@@ -543,7 +547,7 @@ void Mesh::write_vtk(const std::string& filename, int verbosity=0) {
 
 	output << "POINTS " << nb_vertices_ << " double" << std::endl;
 	for (int i=0; i< nb_vertices_; i++) {
-		output << vertices(0,i) << " " << vertices(1,i) << " " << vertices(2,i) << std::endl;
+		output << Vertices[i].coord(0) << " " << Vertices[i].coord(1) << " " << Vertices[i].coord(2) << std::endl;
 	}
 
 	int second_number = 0;
@@ -589,6 +593,16 @@ void Mesh::write_vtk(const std::string& filename, int verbosity=0) {
 	// 		output << elem.DD_weight(elem.DD_weight.rows()-1,i) << std::endl;
 	// 	}
 	// }
+
+	if (exportRandomFieldOnElement){
+		output << "SCALARS Random_Field double 1\n";
+		output << "LOOKUP_TABLE default\n";
+		for(auto& elem : Elements){
+			for (int i=0; i< elem.nb; i++) {
+				output << elem.Random_Field[i].average << std::endl;
+			}
+		}
+	}
 
 	if (exportDir){
 		output << "SCALARS U double 3\n";
@@ -652,8 +666,15 @@ void Mesh::write_vtk(const std::string& filename, int verbosity=0) {
 		output << "SCALARS U double 3\n";
 		output << "LOOKUP_TABLE default\n";
 		for (int i=0; i< nb_vertices_; i++) {
-			output << X(0, i) << " " << X(1, i) << " " << X(2, i) << std::endl;
+			output << Vertices[i].X(0) << " " << Vertices[i].X(1) << " " << Vertices[i].X(2) << std::endl;
 		}
+	}
+
+	output << "POINT_DATA " << nb_vertices_ << std::endl;
+	output << "SCALARS extra double 2\n";
+	output << "LOOKUP_TABLE default\n";
+	for (int i=0; i< nb_vertices_; i++) {
+		output << Vertices[i].top_surf_indice << " " << Vertices[i].weight << std::endl;
 	}
 
 	output.close();
@@ -746,23 +767,23 @@ void Mesh::write_inp(const std::string& filename) {
 	xmin=ymin=zmin=  10000;
 	xmax=ymax=zmax= -10000;
 	for (int i=0; i<nb_vertices_;i++) {
-		if (xmin > vertices(0, i)) {xmin = vertices(0, i);}
-		if (xmax < vertices(0, i)) {xmax = vertices(0, i);}
-		if (ymin > vertices(1, i)) {ymin = vertices(1, i);}
-		if (ymax < vertices(1, i)) {ymax = vertices(1, i);}
-		if (zmin > vertices(2, i)) {zmin = vertices(2, i);}
-		if (zmax < vertices(2, i)) {zmax = vertices(2, i);}
+		if (xmin > Vertices[i].coord(0)) {xmin = Vertices[i].coord(0);}
+		if (xmax < Vertices[i].coord(0)) {xmax = Vertices[i].coord(0);}
+		if (ymin > Vertices[i].coord(1)) {ymin = Vertices[i].coord(1);}
+		if (ymax < Vertices[i].coord(1)) {ymax = Vertices[i].coord(1);}
+		if (zmin > Vertices[i].coord(2)) {zmin = Vertices[i].coord(2);}
+		if (zmax < Vertices[i].coord(2)) {zmax = Vertices[i].coord(2);}
 	}
 
 	double epsi=0.01;
 
 	for (int i=0; i<nb_vertices_;i++) {
-		if (vertices(0, i)-xmin<epsi) {nsets[0].push_back(i);}
-		if (xmax-vertices(0, i)<epsi) {nsets[1].push_back(i);}
-		if (vertices(1, i)-ymin<epsi) {nsets[2].push_back(i);}
-		if (ymax-vertices(1, i)<epsi) {nsets[3].push_back(i);}
-		if (vertices(2, i)-zmin<epsi) {nsets[4].push_back(i);}
-		if (zmax-vertices(2, i)<epsi) {nsets[5].push_back(i);}
+		if (Vertices[i].coord(0)-xmin<epsi) {nsets[0].push_back(i);}
+		if (xmax-Vertices[i].coord(0)<epsi) {nsets[1].push_back(i);}
+		if (Vertices[i].coord(1)-ymin<epsi) {nsets[2].push_back(i);}
+		if (ymax-Vertices[i].coord(1)<epsi) {nsets[3].push_back(i);}
+		if (Vertices[i].coord(2)-zmin<epsi) {nsets[4].push_back(i);}
+		if (zmax-Vertices[i].coord(2)<epsi) {nsets[5].push_back(i);}
 	}
 
 	for(int j=0; j< nb_nset;j++) {
@@ -770,9 +791,9 @@ void Mesh::write_inp(const std::string& filename) {
 		masterNodes[j](1)=0.0;
 		masterNodes[j](2)=0.0;
 		for(int i=0; i<nsets[j].size(); i++) {
-			masterNodes[j](0) += vertices(0,nsets[j][i]);
-			masterNodes[j](1) += vertices(1,nsets[j][i]);
-			masterNodes[j](2) += vertices(2,nsets[j][i]);
+			masterNodes[j](0) += Vertices[nsets[j][i]].coord(0);
+			masterNodes[j](1) += Vertices[nsets[j][i]].coord(1);
+			masterNodes[j](2) += Vertices[nsets[j][i]].coord(2);
 		}
 		masterNodes[j](0)/=nsets[j].size();
 		masterNodes[j](1)/=nsets[j].size();
@@ -788,7 +809,7 @@ void Mesh::write_inp(const std::string& filename) {
 	output << "*NODE" << std::endl;
 	output << nb_vertices_+nb_nset << std::endl; // Plus the number of master nodes
 	for(int i=0; i< nb_vertices_; ++i) {
-		output << i+1 << ", " << vertices(0,i) << ", " << vertices(1,i) << ", " << vertices(2,i) << std::endl;
+		output << i+1 << ", " << Vertices[i].coord(0) << ", " << Vertices[i].coord(1) << ", " << Vertices[i].coord(2) << std::endl;
 	}
 	// Adding master nodes
 	for(int j=0; j< nb_nset;j++) {

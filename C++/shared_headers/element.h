@@ -11,6 +11,13 @@
 
 using namespace Eigen;
 
+class Random_field_parameters {
+	public:
+	std::vector<Vector3d> nodes;
+	std::vector<double> values;
+	double average;
+};
+
 class Element {
 public:
 
@@ -28,6 +35,10 @@ public:
 	Matrix<int, Dynamic, Dynamic> Nodes;
 	Matrix<int, Dynamic, Dynamic> Markers;
 	Matrix<int, Dynamic, Dynamic> DD_weight;
+
+	Matrix<double, Dynamic, Dynamic> Initial_barycenter;
+
+	std::vector<Random_field_parameters> Random_Field;
 
 	Matrix<double, Dynamic, Dynamic> U;
 	Matrix<double, Dynamic, Dynamic> V;
@@ -104,6 +115,10 @@ void Element::initialise(std::string key, int nb_elem, int nb_marker, bool isShe
 	Markers.resize(nb_marker, nb);
 	DD_weight.resize(1, nb);
 	global_indices.resize(nb);
+
+	Initial_barycenter.resize(3, nb);
+
+	Random_Field.resize(nb);
 
 	U.resize(3, nb);
 	V.resize(3, nb);

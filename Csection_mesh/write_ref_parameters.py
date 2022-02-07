@@ -11,7 +11,7 @@ import matplotlib.cm as cm
 # geometry in millimeters
 
 def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
-	nb_plies = 1
+	nb_plies = 10
 	nb_wrinkles = 0 # let it to 0
 	Xlenght = 140.0
 	Ylenght = 6.48 #6.48
@@ -24,7 +24,7 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	is_CornerThickness = 1
 
 	ply_thickness = Ylenght/(nb_plies+0.0)
-	StackSeq = [0.0]
+	StackSeq = [0.0, 90.0, 0.0, 90.0, 0.0, 90.0, 0.0, 90.0, 0.0, 90.0]
 
 	# WRINKLES Parameters
 	minWsize = -0.2
@@ -59,7 +59,7 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('name(s)                : C-spar_continuum_shell\n') # mesh name
+	parameters.write('name(s)                : C-spar_ref\n') # mesh name
 	parameters.write('Shape(i)               : 0\n')   # 0(default): Csection ; 1: flat laminate
 	parameters.write('Resin_betw_plies(b)    : 0\n')   # 1: yes ; 0: no
 	parameters.write('cohezive_elements(b)   : '+str(is_coh)+'\n')   # 1: yes ; 0: no
@@ -130,13 +130,13 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~GAUSSIAN~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-		parameters.write('Sigma(d)          : 0\n') #
+		parameters.write('Sigma(d)          : 1\n') #
 		parameters.write('Length(d)         : 20\n') #
 	if (is_CornerThickness):
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~CORNER THICKNESS~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-		parameters.write('ThicknessVar(d)   : 2\n') #
+		parameters.write('ThicknessVar(d)   : 1\n') #
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~ABAQUS~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
