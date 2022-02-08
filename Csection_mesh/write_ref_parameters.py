@@ -64,7 +64,7 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('Resin_betw_plies(b)    : 0\n')   # 1: yes ; 0: no
 	parameters.write('cohezive_elements(b)   : '+str(is_coh)+'\n')   # 1: yes ; 0: no
 	parameters.write('recombine(b)           : 1\n')   # 1: recombine mesh: hex ;  0: no: only prisms
-	parameters.write('Shell(b)               : 1\n')   # 1: shell ;  0: not shell
+	parameters.write('Shell(b)               : 0\n')   # 1: shell ;  0: not shell
 	parameters.write('GaussianThickness(b)   : '+str(is_GaussianThickness)+'\n')   # 1: gridtrans ;  0: flat
 	parameters.write('CornerThickness(b)     : '+str(is_CornerThickness)+'\n')   # 1: variation ;  0: flat
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')

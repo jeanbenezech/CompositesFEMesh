@@ -910,15 +910,13 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 			for(int i=0; i<param.add_wrinkles;i++)
 				GT.Csection_wrinkles(point, normal, i, param, ramp_param);
 
-		// if(param.GaussianThickness || param.CornerThickness){
-
-		if(param.GaussianThickness){
+		if(param.CornerThickness){
 			// double tmp = pow(GT.weight[node],2)*param.ThicknessVar;
 			double tmp = GT.weight[node]*param.ThicknessVar;
 			GT.Corner_thickness(point, normal, param, ramp_param, tmp);
 		}
 
-		if(param.CornerThickness){
+		if(param.GaussianThickness){
 			auto iter = std::find (GT.indices_map_top_surf.begin(), GT.indices_map_top_surf.end(), GT.associated_top_surf_node[node]);
 			if(iter != GT.indices_map_top_surf.end()){
 				int index = iter - GT.indices_map_top_surf.begin();	
@@ -927,7 +925,6 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 				GT.Apply_Gaussian_random_field(point, normal, tmp);
 			}
 		}
-		// }
 
 		m.Vertices[node].coord(0) = point(0);
 		m.Vertices[node].coord(1) = point(1);
