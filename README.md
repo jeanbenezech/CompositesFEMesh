@@ -1,6 +1,6 @@
 A first rough explanation:
 
-This repository provide a tool-box (in **pyhton** and **C++**) for composite laminate FE mesh creation, mainly using [gmsh](https://gmsh.info/) (for mesh creation) and [Eigen](https://Eigen.tuxfamily.org/index.php?title=Main_Page) (for **C++** Matrix classes) libraries.\
+This repository provide a tool-box (in **python** and **C++**) for composite laminate FE mesh creation, mainly using [gmsh](https://gmsh.info/) (for mesh creation) and [Eigen](https://Eigen.tuxfamily.org/index.php?title=Main_Page) (for **C++** Matrix classes) libraries.\
 The VTK format is mainly used so the user could use [paraview](https://www.paraview.org/) for visualisation.\
 The objective is to provide inputs for [Abaqus](https://www.technia.co.uk/software/simulia/abaqus/) and [Dune-composites](https://gitlab.dune-project.org/anne.reinarz/dune-composites).
 
