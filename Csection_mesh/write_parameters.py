@@ -14,8 +14,11 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	nb_plies = 24
 	nb_wrinkles = 0
 	Xlenght = 140.0
-	Ylenght = 10.0 #6.48
+	Ylenght = 5 # 6.48
+	# Zlenght = 2000
+	# start = 850
 	Zlenght = 500.0
+	start = 100.0
 	height = 35
 	r_ext = 5.0 + Ylenght # external radius
 	is_coh = 0
@@ -23,32 +26,30 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	is_GaussianThickness = 0
 	is_CornerThickness = 0
 
-	ply_thickness = Ylenght/(nb_plies+0.0)
+	
+	
 	# StackSeq = [0.0, 0.0, 0.0]
 	StackSeq = [45.0, -45.0, 45.0, -45.0, 45.0, -45.0, 0.0, 90.0, 0.0, 90.0, 0.0, 90.0, 90.0, 0.0, 90.0, 0.0, 90.0, 0.0, -45.0, 45.0, -45.0, 45.0, -45.0, 45.0]
+	# StackSeq = [45.0, -45.0, 0.0, 90.0, 90.0, 0.0, -45.0, 45.0]
+
+	ply_thickness = np.full_like(StackSeq, Ylenght/(nb_plies+0.0))
+	ply_type = np.full_like(StackSeq, 0) # Only plies, resin is done via auto resin
 
 	# WRINKLES Parameters
 	minWsize = -0.2
 	maxWsize = 0.2
-
 	minWposX = 0.11*Xlenght
 	maxWposX = 0.89*Xlenght
-
 	minWposY = height - 0.31*Ylenght
 	maxWposY = height + 0.0
-
 	minWposZ = 0.11*Zlenght
 	maxWposZ = 0.89*Zlenght
-
 	minWdampX = 2.0
 	maxWdampX = 9.0
-
 	minWdampY = 0.6
 	maxWdampY = 1.0
-
 	minWdampZ = 1.5
 	maxWdampZ = 2.5
-
 	minWori = -20
 	maxWori = 20
 
@@ -60,14 +61,15 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('name(s)                : C-spar_'+str(nb_plies)+'plies\n') # mesh name
-	parameters.write('Shape(i)               : 0\n')   # 0(default): Csection ; 1: flat laminate
-	parameters.write('Resin_betw_plies(b)    : 0\n')   # 1: yes ; 0: no
-	parameters.write('cohezive_elements(b)   : '+str(is_coh)+'\n')   # 1: yes ; 0: no
-	parameters.write('recombine(b)           : 1\n')   # 1: recombine mesh: hex ;  0: no: only prisms
-	parameters.write('Shell(b)               : 0\n')   # 1: recombine mesh: hex ;  0: no: only prisms
-	parameters.write('GaussianThickness(b)   : '+str(is_GaussianThickness)+'\n')   # 1: gridtrans ;  0: flat
-	parameters.write('CornerThickness(b)     : '+str(is_CornerThickness)+'\n')   # 1: variation ;  0: flat
+	parameters.write('name(s)                  : PAPER\n') # mesh name
+	# parameters.write('name(s)                : '+str(int(Zlenght))+'mm_Cspar\n') # mesh name
+	parameters.write('Shape(i)                 : 0\n')   # 0(default): Csection ; 1: flat laminate
+	parameters.write('Auto_Resin_betw_plies(b) : 1\n')   # 1: yes ; 0: no
+	parameters.write('cohezive_elements(b)     : '+str(is_coh)+'\n')   # 1: yes ; 0: no
+	parameters.write('recombine(b)             : 1\n')   # 1: recombine mesh: hex ;  0: no: only prisms
+	parameters.write('Shell(b)                 : 0\n')   # 1: recombine mesh: hex ;  0: no: only prisms
+	parameters.write('GaussianThickness(b)     : '+str(is_GaussianThickness)+'\n')   # 1: gridtrans ;  0: flat
+	parameters.write('CornerThickness(b)       : '+str(is_CornerThickness)+'\n')   # 1: variation ;  0: flat
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~GEOMETRY~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -83,18 +85,18 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	for i in range(nb_plies):
 		if i<10:
-			parameters.write('p'+str(i)+'(f,f)   : '+str(StackSeq[i]+90.0)+','+str(ply_thickness)+'\n')
+			parameters.write('p'+str(i)+'(f,f,b)   : '+str(StackSeq[i]+90.0)+','+str(ply_thickness[i])+','+str(ply_type[i])+'\n')
 		else:
-			parameters.write('p'+str(i)+'(f,f)  : '+str(StackSeq[i]+90.0)+','+str(ply_thickness)+'\n')
+			parameters.write('p'+str(i)+'(f,f,b)  : '+str(StackSeq[i]+90.0)+','+str(ply_thickness[i])+','+str(ply_type[i])+'\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~MESH~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('lc(f)      : 1\n')    #1 mesh caracteristic size
-	parameters.write('dx(i)      : 60\n')   #40 discretization in X direction
-	parameters.write('dflange(i) : 25\n')    #16 discretization of the flange
+	parameters.write('dx(i)      : 50\n')   #50 discretization in X direction
+	parameters.write('dflange(i) : 16\n')    #16 discretization of the flange
 	parameters.write('ddy(i)     : 2\n')    #2 discretization of ply thickness
-	parameters.write('dz(i)      : 120\n')   #100 discretization in Z direction
-	parameters.write('dc(i)      : 15\n')    #6 discretization of corners
+	parameters.write('dz(i)      : 150\n')   #150 discretization in Z direction (for the 500mm long spar)
+	parameters.write('dc(i)      : 12\n')    #12 discretization of corners
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~TRANSFORMATION~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -126,23 +128,23 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~RAMP~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('Rsize(f)          : 6.25\n')
-	parameters.write('StartEndinZdir(f) : 100.0,125.0,50.0\n')
+	parameters.write('StartEndinZdir(f) : '+str(start)+','+str(125.0)+','+str(50.0)+'\n')
 	if (is_GaussianThickness):
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~GAUSSIAN~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-		parameters.write('Sigma(d)          : 1\n') #
+		parameters.write('Sigma(d)          : 0.1\n') #
 		parameters.write('Length(d)         : 10\n') #
 	if (is_CornerThickness):
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~CORNER THICKNESS~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-		parameters.write('ThicknessVar(d)   : 2\n') #
+		parameters.write('ThicknessVar(d)   : 1\n') #
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~ABAQUS~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('Path2result(s)    : Abaqus/results/\n')
-	parameters.write('AbaqusOdbName(s)  : C-spar_'+str(nb_plies)+'plies\n')
+	parameters.write('AbaqusOdbName(s)  : C-spar_FINE_'+str(nb_plies)+'plies\n')
 
 
 	parameters.close()

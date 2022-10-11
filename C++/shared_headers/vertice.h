@@ -22,8 +22,9 @@ public:
 	int top_surf_indice;
 	int weight;
 
-	Vector3d X;
+	double thickness;
 
+	Vector3d X;
 
 	// FUNCTION
 	// void initialise(std::string type, int nb_elem, int nb_marker, bool isShell_);

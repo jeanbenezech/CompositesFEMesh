@@ -65,6 +65,13 @@ class geometry():
 
 		len_PG=param.nbp
 
+		resin_from_StackSeq = 0;
+		for v in param.StackSeq:
+			if v[2] == 1:
+				resin_from_StackSeq = 1;
+		if resin_from_StackSeq== 1:
+			len_PG+=1 # +1 for the resin layer group
+
 		if param.resin==1:
 			len_PG+=1 # +1 for the resin layer group
 		if param.CZ==1:

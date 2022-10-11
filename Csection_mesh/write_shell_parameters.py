@@ -23,8 +23,12 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	is_GaussianThickness = 1
 	is_CornerThickness = 1
 
-	ply_thickness = Ylenght/(nb_plies+0.0)
+	# ply_thickness = Ylenght/(nb_plies+0.0)
 	StackSeq = [0.0]
+
+	ply_thickness = np.full_like(StackSeq, Ylenght/(nb_plies+0.0))
+	ply_type = np.full_like(StackSeq, 0) # Only plies, resin is done via auto resin
+
 
 	# WRINKLES Parameters
 	minWsize = -0.2
@@ -59,14 +63,14 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('name(s)                : C-spar_continuum_shell\n') # mesh name
-	parameters.write('Shape(i)               : 0\n')   # 0(default): Csection ; 1: flat laminate
-	parameters.write('Resin_betw_plies(b)    : 0\n')   # 1: yes ; 0: no
-	parameters.write('cohezive_elements(b)   : '+str(is_coh)+'\n')   # 1: yes ; 0: no
-	parameters.write('recombine(b)           : 1\n')   # 1: recombine mesh: hex ;  0: no: only prisms
-	parameters.write('Shell(b)               : 1\n')   # 1: shell ;  0: not shell
-	parameters.write('GaussianThickness(b)   : '+str(is_GaussianThickness)+'\n')   # 1: gridtrans ;  0: flat
-	parameters.write('CornerThickness(b)     : '+str(is_CornerThickness)+'\n')   # 1: variation ;  0: flat
+	parameters.write('name(s)                  : C-spar_continuum_shell\n') # mesh name
+	parameters.write('Shape(i)                 : 0\n')   # 0(default): Csection ; 1: flat laminate
+	parameters.write('Auto_Resin_betw_plies(b) : 0\n')   # 1: yes ; 0: no
+	parameters.write('cohezive_elements(b)     : '+str(is_coh)+'\n')   # 1: yes ; 0: no
+	parameters.write('recombine(b)             : 1\n')   # 1: recombine mesh: hex ;  0: no: only prisms
+	parameters.write('Shell(b)                 : 1\n')   # 1: shell ;  0: not shell
+	parameters.write('GaussianThickness(b)     : '+str(is_GaussianThickness)+'\n')   # 1: gridtrans ;  0: flat
+	parameters.write('CornerThickness(b)       : '+str(is_CornerThickness)+'\n')   # 1: variation ;  0: flat
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~GEOMETRY~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -82,9 +86,9 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	for i in range(nb_plies):
 		if i<10:
-			parameters.write('p'+str(i)+'(f,f)   : '+str(StackSeq[i]+90.0)+','+str(ply_thickness)+'\n')
+			parameters.write('p'+str(i)+'(f,f)   : '+str(StackSeq[i]+90.0)+','+str(ply_thickness[i])+','+str(ply_type[i])+'\n')
 		else:
-			parameters.write('p'+str(i)+'(f,f)  : '+str(StackSeq[i]+90.0)+','+str(ply_thickness)+'\n')
+			parameters.write('p'+str(i)+'(f,f)  : '+str(StackSeq[i]+90.0)+','+str(ply_thickness[i])+','+str(ply_type[i])+'\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~MESH~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')

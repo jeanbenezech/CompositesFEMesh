@@ -53,7 +53,8 @@ public:
 	bool GaussianThickness, CornerThickness;
 	double sigma, length, ThicknessVar;
 
-	std::vector<Vector2d> StackSeq;
+	// std::vector<Vector2d> StackSeq;
+	std::vector<Vector3d> StackSeq;
 
 	// Wrinkle parameters
 	std::string WID;
@@ -102,9 +103,8 @@ void Parameters::read(const std::string& filename) {
 
 	while(!line.empty()){
 
-		if (line.find("Shell")!=std::string::npos){
+		if (line.find("Shell")!=std::string::npos)
 			isShell = std::stoi(extract(line));
-		}
 
 		if (line.find("GaussianThickness")!=std::string::npos){
 			GaussianThickness = std::stoi(extract(line));
@@ -124,7 +124,7 @@ void Parameters::read(const std::string& filename) {
 		if (line.find("Shape")!=std::string::npos)
 			Shape = std::stoi(extract(line));
 
-		if (line.find("Resin_betw_plies")!=std::string::npos)
+		if (line.find("Auto_Resin_betw_plies")!=std::string::npos)
 			isResin = std::stoi(extract(line));
 
 		if (line.find("cohezive_elements")!=std::string::npos)
@@ -195,10 +195,14 @@ void Parameters::read(const std::string& filename) {
 		if (line.find("AbaqusOdbName(s)")!=std::string::npos)
 			AbaqusOdbName = extract(line);
 
-		if (line.find("(f,f)")!=std::string::npos){
-			Vector2d tmp = ExtractV2d(line);
+		if (line.find("f,f,b")!=std::string::npos){
+			Vector3d tmp = vectorExtract(line);
 			StackSeq.push_back(tmp);
 		}
+		// if (line.find("f,f,b")!=std::sf,f,btring::npos){
+		// 	Vector2d tmp = ExtractV2d(line);
+		// 	StackSeq.push_back(tmp);
+		// }
 
 		std::getline(input, line);
 	}
@@ -213,6 +217,7 @@ void Parameters::read(const std::string& filename) {
 	} else if (!isResin==1 && isCZ==1) {
 		cz_id = nb_plies+1;
 	}
+
 }
 
 

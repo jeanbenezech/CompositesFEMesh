@@ -32,7 +32,7 @@ if __name__ == '__main__':
 	f.write('*INCLUDE, INPUT='+param.name+'_ori.inp\n')
 	# ~~~~~~ MATERIAL ASSIGNEMENT ~~~~~~
 	# Layer section
-	f.write('*SOLID SECTION, ELSET=Hexahedra, ORIENTATION=ori_loc, MATERIAL=AS4-8552\n')
+	f.write('*SOLID SECTION, ELSET=Hexahedra, ORIENTATION=ori_loc, MATERIAL=ALU\n')
 	# Cohesive section
 	# f.write('*COHESIVE SECTION, ELSET=Cohesive, MATERIAL=CZ, RESPONSE=TRACTION SEPARATION, THICKNESS=GEOMETRY \n')
 
@@ -56,10 +56,14 @@ if __name__ == '__main__':
 	# Csection
 	f.write('**\n')
 	f.write('**---------- MATERIALS ---------- \n')
-	f.write('*MATERIAL, NAME=AS4-8552 \n')
-	f.write('*ELASTIC, TYPE=ENGINEERING CONSTANTS \n')
-	f.write('{}, {}, {}, {}, {}, {}, {}, {}\n'.format(137300., 8800., 8800., 0.314, 0.314, 0.487, 4900., 4900.))
-	f.write('{}\n'.format(2960.))
+	f.write('*MATERIAL, NAME=ALU \n')
+	f.write('*ELASTIC, TYPE=ISOTROPIC \n')
+	f.write('{}, {}\n'.format(70000., 0.3))
+
+	# f.write('*MATERIAL, NAME=AS4-8552 \n')
+	# f.write('*ELASTIC, TYPE=ENGINEERING CONSTANTS \n')
+	# f.write('{}, {}, {}, {}, {}, {}, {}, {}\n'.format(137300., 8800., 8800., 0.314, 0.314, 0.487, 4900., 4900.))
+	# f.write('{}\n'.format(2960.))
 
 	# Cohesive behavior
 	# f.write('*MATERIAL, name=CZ \n')
@@ -83,12 +87,12 @@ if __name__ == '__main__':
 	# Csection
 	f.write('*SURFACE, TYPE=NODE, NAME=surface_nset4, internal\n')
 	f.write('m.nset4, 1.\n')
-	f.write('*COUPLING, CONSTRAINT NAME=BotSurfKC, REF NODE=m.MasterNode4, SURFACE=surface_nset4\n')
-	f.write('*KINEMATIC\n')
-	f.write('*SURFACE, TYPE=NODE, NAME=surface_nset5, internal\n')
-	f.write('m.nset5, 1.\n')
-	f.write('*COUPLING, CONSTRAINT NAME=TopSurfKC, REF NODE=m.MasterNode5, SURFACE=surface_nset5\n')
-	f.write('*KINEMATIC\n')
+	# f.write('*COUPLING, CONSTRAINT NAME=BotSurfKC, REF NODE=m.MasterNode4, SURFACE=surface_nset4\n')
+	# f.write('*KINEMATIC\n')
+	# f.write('*SURFACE, TYPE=NODE, NAME=surface_nset5, internal\n')
+	# f.write('m.nset5, 1.\n')
+	# f.write('*COUPLING, CONSTRAINT NAME=TopSurfKC, REF NODE=m.MasterNode5, SURFACE=surface_nset5\n')
+	# f.write('*KINEMATIC\n')
 
 	f.write('*end assembly\n')
 
@@ -97,11 +101,17 @@ if __name__ == '__main__':
 	f.write('**---------- INIT BOUND ---------- \n')
 	f.write('*BOUNDARY, TYPE=DISPLACEMENT\n')
 	# Csection
-	f.write('m.MasterNode4, 1, 1, 0.0\n')
-	f.write('m.MasterNode4, 2, 2, 0.0\n')
-	f.write('m.MasterNode4, 3, 3, 0.0\n')
-	f.write('m.MasterNode5, 1, 1, 0.0\n')
-	f.write('m.MasterNode5, 2, 2, 0.0\n')
+	f.write('m.nset4, 1, 1, 0.0\n')
+	f.write('m.nset4, 2, 2, 0.0\n')
+	f.write('m.nset4, 3, 3, 0.0\n')
+	# f.write('m.MasterNode4, 1, 1, 0.0\n')
+	# f.write('m.MasterNode4, 2, 2, 0.0\n')
+	# f.write('m.MasterNode4, 3, 3, 0.0\n')
+
+	# f.write('m.nset5, 1, 1, 0.0\n')
+	# f.write('m.nset5, 2, 2, 0.0\n')
+	# f.write('m.MasterNode5, 1, 1, 0.0\n')
+	# f.write('m.MasterNode5, 2, 2, 0.0\n')
 	# Laminate
 
 
@@ -112,9 +122,9 @@ if __name__ == '__main__':
 	f.write('*STATIC\n')
 	# f.write('0.1, 1.0, 1e-03, 1.0\n')
 	f.write('1e-02, 1.0, 1e-06, 5e-01\n')
-	f.write('*BOUNDARY, TYPE=DISPLACEMENT\n')
+	f.write('*BOUNDARY, TYPE=LOAD\n')
 	# Csection
-	f.write('m.MasterNode5, 3, 3, -2\n')
+	f.write('m.nset5, 3, 3, -100\n')
 	# Laminate
 	# ~~~~~~~~~~~~~ OUTPUT ~~~~~~~~~~~~~
 	f.write('**\n')

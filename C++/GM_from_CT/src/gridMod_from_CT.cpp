@@ -1,5 +1,6 @@
 #include <CTData.h>
 #include <gridMod.h>
+#include <gridTransformation.h>
 #include <mesh.h>
 #include <parameters.h>
 #include <utils.h>
@@ -7,51 +8,48 @@
 #include <string>
 #include <sstream>
 
+// #include <filesystem>
+
 using namespace Eigen;
 
 int main(int argc, const char *argv[]) {
+
+	// std::filesystem::create_directories("DUNE");
 	
-	CT_DATA test;
-	test.readMeasurements("InnerSurf.txt");
-	// Parameters param;
-	// param.read("parameters.txt");
+	std::string dataname = argv[1];
+	CT_DATA ct;
+	ct.readMeasurements(dataname);
 
-	// // read & initialisation du mesh
-	// Mesh m;
-	// m.mesh_type="gmsh";
-	// size_t lastindex = param.meshname.find_last_of(".");
-	// std::string mesh_name = param.meshname.substr(0, lastindex);
-	// m.read_msh(mesh_name+".msh", true, param.cz_id);
+	// std::cout << ct.data[0].Coord(2) << std::endl;
 
-	// m.initialise(param.nb_plies);
-	// m.read_points("input.txt");
-	// m.exportDir = true;
+	Parameters param;
+	param.read("parameters.txt");
+	// param.add_wrinkles = true;
 
-	// if(param.Shape==0)
-	// 	localCoorSyst(m);
-	// else
-	// 	globalCoorSyst(m);
+	// read & initialisation du mesh
+	Mesh m;
+	m.mesh_type="gmsh";
+	size_t lastindex = param.meshname.find_last_of(".");
+	std::string mesh_name = param.meshname.substr(0, lastindex);
+	m.isShell = param.isShell;
+	m.read_msh(mesh_name+".msh", true, param.cz_id);
 
-	// GeometricTransformation(m, param);
-	// StackingSequence(m);
+	m.initialise(param);
 
-	// if (param.Abaqus_output){ // ABAQUS
-	// 	m.write_ori_inp("Abaqus/"+mesh_name);
-	// 	m.write_inp("Abaqus/"+mesh_name);
-	// 	m.write_abaqus_cae_input("Abaqus/"+mesh_name);
-	// }
+	m.read_points("input.txt");
+	m.exportDir = true;
 
-	// if (param.Dune_output){ // DUNE
-	// 	if (param.add_wrinkles==1){
-	// 		m.write_ori_txt("DUNE/"+param.WID+"_"+mesh_name);
-	// 		m.write_msh("DUNE/"+param.WID+"_"+mesh_name);
-	// 	} else {
-	// 		m.write_ori_txt("DUNE/"+mesh_name);
-	// 		m.write_msh("DUNE/"+mesh_name);
-	// 	}
-	// }
 
-	// m.write_vtk(mesh_name);
+	globalCoorSyst(m, param);
+
+
+	CT_GeometricTransformation(m, ct, param);
+	// StackingSequence(m, param);
+
+
+	m.write_vtk(mesh_name);
+
+
 
 	return 0;
 }

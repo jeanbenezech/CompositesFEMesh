@@ -110,7 +110,7 @@ def read_parameters(param, filename):
 	dico = read(filename)
 
 	param.Shape = int(dico['Shape'])
-	param.resin = int(dico['Resin_betw_plies'])
+	param.resin = int(dico['Auto_Resin_betw_plies'])
 	param.recombine = int(dico['recombine'])
 	param.CZ = int(dico['cohezive_elements'])
 	# if param.resin==0:
@@ -138,8 +138,8 @@ def read_parameters(param, filename):
 
 	param.StackSeq = []
 	for i in range(param.nbp):
-		lpair=dico['p'+str(i)]
-		pair = np.asarray([float(lpair.strip().split(',')[0]),float(lpair.strip().split(',')[1])])
-		param.StackSeq.append(pair)
+		lplies=dico['p'+str(i)]
+		tmp = np.asarray([float(lplies.strip().split(',')[0]),float(lplies.strip().split(',')[1]),float(lplies.strip().split(',')[2])])
+		param.StackSeq.append(tmp)
 
 	return param

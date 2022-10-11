@@ -39,6 +39,7 @@ public:
 	Matrix<double, Dynamic, Dynamic> Initial_barycenter;
 
 	std::vector<Random_field_parameters> Random_Field;
+	std::vector<Random_field_parameters> CT_Field;
 
 	Matrix<double, Dynamic, Dynamic> U;
 	Matrix<double, Dynamic, Dynamic> V;
@@ -119,6 +120,7 @@ void Element::initialise(std::string key, int nb_elem, int nb_marker, bool isShe
 	Initial_barycenter.resize(3, nb);
 
 	Random_Field.resize(nb);
+	CT_Field.resize(nb);
 
 	U.resize(3, nb);
 	V.resize(3, nb);
