@@ -19,10 +19,14 @@ The objective is to provide inputs for [Abaqus](https://www.technia.co.uk/softwa
 
 Procedure to compile any C++ code in this repository:
 
-For windows, all cmake command have to be followed by:
+For windows:
+all cmake command have to be followed by:
 ```
 -G "Unix Makefiles"
 ```
+You might need to install make and cmake and add them to path
+
+---
 
 * [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) installation (as provided by Eigen doc) and linkage to these tools:
 
