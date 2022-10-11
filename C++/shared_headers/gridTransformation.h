@@ -307,8 +307,8 @@ void GridTransformation::prepare_GT_for_Flat_model(int& node, Vector3d& point, P
 
 void GridTransformation::AssociatedtoTopSurfaceNode(Mesh& m, Parameters& param){
 
-	omp_set_dynamic(0);
-	omp_set_num_threads(10);
+	// omp_set_dynamic(0);
+	// omp_set_num_threads(10);
 
 	int nb_vertice_top_plan = m.Nb_vertices()/(m.Nb_plies()+1);
 	Vector3d ext;
@@ -324,7 +324,7 @@ void GridTransformation::AssociatedtoTopSurfaceNode(Mesh& m, Parameters& param){
 	// std::cout << " Flat_map size : " << Flat_map.size() << std::endl;
 	// std::cout << " distFBS size : " << distFBS.size() << std::endl;
 
-	#pragma omp parallel for schedule(guided)
+	// #pragma omp parallel for schedule(guided)
 	for(int i=0; i<m.Nb_vertices(); i++){
 		Vector3d proj2topSurf = Flat_map[i] + (param.Y-distFBS[i])*ext;
 		// std::cout << "i : " << i << std::endl;
