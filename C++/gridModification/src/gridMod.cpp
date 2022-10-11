@@ -6,6 +6,9 @@
 #include <string>
 #include <sstream>
 
+// #include <experimental/filesystem> // TODO:: No working with ARM os
+// namespace fs = std::experimental::filesystem; // TODO:: No working with ARM os
+
 using namespace Eigen;
 
 int main(int argc, const char *argv[]) {
@@ -42,6 +45,7 @@ int main(int argc, const char *argv[]) {
 	StackingSequence(m, param);
 
 	if (param.Abaqus_output){ // ABAQUS
+		// fs::create_directories("Abaqus"); // TODO:: No working with ARM os
 		// m.write_msh("Abaqus/results/"+mesh_name); // for visualisation: mesh with in it wrinkle
 		m.write_ori_inp("Abaqus/"+mesh_name);
 		m.write_inp("Abaqus/"+mesh_name);
@@ -49,6 +53,7 @@ int main(int argc, const char *argv[]) {
 	}
 
 	if (param.Dune_output){ // DUNE
+		// fs::create_directories("DUNE"); // TODO:: No working with ARM os
 		if (param.add_wrinkles>=1){
 			m.write_ori_txt("DUNE/"+param.WID+"_"+mesh_name);
 			m.write_msh("DUNE/"+param.WID+"_"+mesh_name);
