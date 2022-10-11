@@ -92,11 +92,11 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~MESH~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('lc(f)      : 1\n')    #1 mesh caracteristic size
-	parameters.write('dx(i)      : 50\n')   #50 discretization in X direction
-	parameters.write('dflange(i) : 16\n')    #16 discretization of the flange
+	parameters.write('dx(i)      : 30\n')   #50 discretization in X direction
+	parameters.write('dflange(i) : 10\n')    #16 discretization of the flange
 	parameters.write('ddy(i)     : 2\n')    #2 discretization of ply thickness
-	parameters.write('dz(i)      : 150\n')   #150 discretization in Z direction (for the 500mm long spar)
-	parameters.write('dc(i)      : 12\n')    #12 discretization of corners
+	parameters.write('dz(i)      : 75\n')   #150 discretization in Z direction (for the 500mm long spar)
+	parameters.write('dc(i)      : 8\n')    #12 discretization of corners
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~TRANSFORMATION~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
