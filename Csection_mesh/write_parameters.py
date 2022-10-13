@@ -11,16 +11,17 @@ import matplotlib.cm as cm
 # geometry in millimeters
 
 def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
+	# cnt appears to be used to keep track of if parameters are written for multiple cases, which could be useful
 	nb_plies = 24
+	t_ply = 0.196 # Define scalar ply thickness value, which will be duplicated later into an array containing thicknesses for each ply
+
 	nb_wrinkles = 0
-	Xlenght = 140.0
-	Ylenght = 5 # 6.48
-	# Zlenght = 2000
-	# start = 850
-	Zlenght = 500.0
-	start = 100.0
-	height = 35
-	r_ext = 5.0 + Ylenght # external radius
+	Xlength = 140.0 # This is the distance along the web of the outer section of the spar between the radii. 140mm is correct for 5mm internal radii
+	Ylength = nb_plies*t_ply # laminate thickness
+	Zlength = 420.0 # effective length of the spar (between end blocks)
+	start = Zlength/2.0 - 150 # assumes the end blocks have been placed such that the feature is exactly central
+	r_int = 5.0 # internal radius
+	height = 55.0 - Ylength - r_int # flange length
 	is_coh = 0
 
 	is_GaussianThickness = 0
@@ -28,22 +29,20 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 
 	
 	
-	# StackSeq = [0.0, 0.0, 0.0]
 	StackSeq = [45.0, -45.0, 45.0, -45.0, 45.0, -45.0, 0.0, 90.0, 0.0, 90.0, 0.0, 90.0, 90.0, 0.0, 90.0, 0.0, 90.0, 0.0, -45.0, 45.0, -45.0, 45.0, -45.0, 45.0]
-	# StackSeq = [45.0, -45.0, 0.0, 90.0, 90.0, 0.0, -45.0, 45.0]
-
-	ply_thickness = np.full_like(StackSeq, Ylenght/(nb_plies+0.0))
+	
+	ply_thickness = np.full_like(StackSeq, t_ply) # duplicate ply thickness into an array with the same dimensions as StackSeq
 	ply_type = np.full_like(StackSeq, 0) # Only plies, resin is done via auto resin
 
 	# WRINKLES Parameters
 	minWsize = -0.2
 	maxWsize = 0.2
-	minWposX = 0.11*Xlenght
-	maxWposX = 0.89*Xlenght
-	minWposY = height - 0.31*Ylenght
+	minWposX = 0.11*Xlength
+	maxWposX = 0.89*Xlength
+	minWposY = height - 0.31*Ylength
 	maxWposY = height + 0.0
-	minWposZ = 0.11*Zlenght
-	maxWposZ = 0.89*Zlenght
+	minWposZ = 0.11*Zlength
+	maxWposZ = 0.89*Zlength
 	minWdampX = 2.0
 	maxWdampX = 9.0
 	minWdampY = 0.6
@@ -61,10 +60,10 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('name(s)                  : PAPER\n') # mesh name
+	parameters.write('name(s)                  : CSPAR\n') # mesh name
 	# parameters.write('name(s)                : '+str(int(Zlenght))+'mm_Cspar\n') # mesh name
 	parameters.write('Shape(i)                 : 0\n')   # 0(default): Csection ; 1: flat laminate
-	parameters.write('Auto_Resin_betw_plies(b) : 1\n')   # 1: yes ; 0: no
+	parameters.write('Auto_Resin_betw_plies(b) : 1\n')   # 1: yes ; 0: no (Do I want this to be on?????)
 	parameters.write('cohezive_elements(b)     : '+str(is_coh)+'\n')   # 1: yes ; 0: no
 	parameters.write('recombine(b)             : 1\n')   # 1: recombine mesh: hex ;  0: no: only prisms
 	parameters.write('Shell(b)                 : 0\n')   # 1: recombine mesh: hex ;  0: no: only prisms
@@ -74,15 +73,16 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~GEOMETRY~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('np(i)         : '+str(nb_plies)+'\n')     # 6, 12 or 24 # TODO: find a clever way of setting stacking sequence
-	parameters.write('X(f)          : '+str(Xlenght)+'\n')   #
-	parameters.write('Y(f)          : '+str(Ylenght)+'\n')  #
-	parameters.write('R(f)          : '+str(r_ext)+'\n')    #
+	parameters.write('X(f)          : '+str(Xlength)+'\n')   #
+	parameters.write('Y(f)          : '+str(Ylength)+'\n')  #
+	parameters.write('R(f)          : '+str(r_int)+'\n')    #
 	parameters.write('Height(f)     : '+str(height)+'\n')    #
-	parameters.write('Z(f)          : '+str(Zlenght)+'\n')   #
+	parameters.write('Z(f)          : '+str(Zlength)+'\n')   #
 	parameters.write('e(f)          : 0.01\n')  # Resin layer thickness
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~STACKSEQ~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
+	# Note - the below if statement is just for neat formatting of the parameter file. Presumably also gmsh defines the coordinate system at 90 degrees to the way we do. Check this
 	for i in range(nb_plies):
 		if i<10:
 			parameters.write('p'+str(i)+'(f,f,b)   : '+str(StackSeq[i]+90.0)+','+str(ply_thickness[i])+','+str(ply_type[i])+'\n')
@@ -92,18 +92,18 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~MESH~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('lc(f)      : 1\n')    #1 mesh caracteristic size
-	parameters.write('dx(i)      : 30\n')   #50 discretization in X direction
-	parameters.write('dflange(i) : 10\n')    #16 discretization of the flange
-	parameters.write('ddy(i)     : 2\n')    #2 discretization of ply thickness
-	parameters.write('dz(i)      : 75\n')   #150 discretization in Z direction (for the 500mm long spar)
-	parameters.write('dc(i)      : 8\n')    #12 discretization of corners
+	parameters.write('dx(i)      : 29\n')   #50 discretization in X direction (plus one)
+	parameters.write('dflange(i) : 10\n')    #16 discretization of the flange (plus one)
+	parameters.write('ddy(i)     : 2\n')    #2 discretization of ply thickness (plus one)
+	parameters.write('dz(i)      : 84\n')   #150 discretization in Z direction (must be a multiple of 84 for ramps to be in the correct place for the 420mm long spar).
+	parameters.write('dc(i)      : 5\n')    #12 discretization of corners (plus one)
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~TRANSFORMATION~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('wrinkle(i)        : '+str(nb_wrinkles)+'\n') # Do we need to add wrinkle in the gridMod (c++) code, 2+ for multiple wrinkles
 	parameters.write('Ramp(b)           : 1\n') #
-	parameters.write('Abaqus_output(b)  : 0\n') #
-	parameters.write('Dune_output(b)    : 1\n') #
+	parameters.write('Abaqus_output(b)  : 1\n') #
+	parameters.write('Dune_output(b)    : 0\n') #
 	if (nb_wrinkles>0):
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~WRINKLES~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -144,7 +144,8 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~ABAQUS~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('Path2result(s)    : Abaqus/results/\n')
-	parameters.write('AbaqusOdbName(s)  : C-spar_FINE_'+str(nb_plies)+'plies\n')
+	# parameters.write('AbaqusOdbName(s)  : C-spar_FINE_'+str(nb_plies)+'plies\n')
+	parameters.write('AbaqusOdbName(s)  : CSPAR\n')
 
 
 	parameters.close()
