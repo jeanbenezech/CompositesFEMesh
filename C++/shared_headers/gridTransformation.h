@@ -470,7 +470,7 @@ std::tuple<double,double,double> GridTransformation::ramp(Vector3d& point){
 				point(1) -= decrease_1;
 			} else {
 
-				if (initial_1 < threshold_avoiding_deformation_of_corners)
+				if (initial_1 < ymin + threshold_avoiding_deformation_of_corners)
 					increase_1 = delta_max;
 				else
 					increase_1 = (delta_max/(ymid-(ymin+threshold_avoiding_deformation_of_corners))) * (ymid - initial_1); // Linear
