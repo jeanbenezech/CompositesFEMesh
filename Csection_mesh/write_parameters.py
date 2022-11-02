@@ -14,8 +14,8 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	# cnt appears to be used to keep track of if parameters are written for multiple cases, which could be useful
 	nb_plies = 24
 	# nb_plies = 12 # large model paper off/on
-	t_ply = 0.4 # Define scalar ply thickness value, which will be duplicated later into an array containing thicknesses for each ply
-	# t_ply = 0.196 # Define scalar ply thickness value, which will be duplicated later into an array containing thicknesses for each ply
+	# t_ply = 0.4 # large model paper off/on
+	t_ply = 0.196 # Define scalar ply thickness value, which will be duplicated later into an array containing thicknesses for each ply
 
 	nb_wrinkles = 0
 	Xlength = 140.0 # This is the distance along the web of the outer section of the spar between the radii. 140mm is correct for 5mm internal radii
