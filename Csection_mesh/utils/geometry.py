@@ -151,7 +151,25 @@ class geometry():
 		for i in range(1, len(self.Surfaces)):
 			if len(self.Surfaces[i]) > 1:
 				f.write('; Surface{'+str(i+1)+'}')
-		f.write('; Layers{'+str(param.dz)+'}; Recombine; }\n')
+		if len(param.dz)==1:
+			f.write('; Layers{'+str(param.dz[0])+'}; Recombine; }\n')
+		elif param.ramp==0:
+			f.write('; Layers{ {'+str(param.dz[0]))
+			for dz in param.dz[1:]:
+				f.write(', '+str(dz))
+			f.write('}, {'+str(1/len(param.dz)))
+			for dz in param.dz[1:-1]:
+				f.write(', '+str(1/len(param.dz)))
+			f.write(', 1} }; Recombine; }\n')
+		else: # Param + len(dz)>1
+			assert len(param.dz) == len(param.dz_intervals)
+			f.write('; Layers{ {'+str(param.dz[0]))
+			for dz in param.dz[1:]:
+				f.write(', '+str(dz))
+			f.write('}, {'+str(param.dz_intervals[0]))
+			for interval in param.dz_intervals[1:]:
+				f.write(', '+str(interval))
+			f.write('} }; Recombine; }\n')
 
 		# # ~~~~~~~~~ PHYSICAL GROUPS ~~~~~~~~~
 

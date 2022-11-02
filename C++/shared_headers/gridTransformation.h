@@ -354,7 +354,7 @@ void GridTransformation::Gaussian_random_field_K_initialisation(Parameters& para
 
 	for(int i=0; i< N.size(); i++){
 		for(int j=0; j< N.size(); j++){
-			double dist2 = (N[i](1)-N[j](1))*(N[i](1)-N[j](1))+(N[i](0)-N[j](0))*(N[i](0)-N[j](0));
+			double dist2 = pow(N[i](1)-N[j](1),2) + pow(N[i](0)-N[j](0),2);
 			K(i,j) = pow(param.sigma,2) * exp( - dist2 / (2.0*pow(param.length,2)) );
 			if(i==j){
 				K(i,j) += 1e-8;

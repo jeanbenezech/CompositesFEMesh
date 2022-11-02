@@ -9,11 +9,11 @@ def write_parameters():
 	nb_wrinkles = 0
 	# Xlenght = 500.0
 	# Xlenght = 50.0
-	Xlenght = 28.0
+	Xlenght = 140.0
 	# Ylenght = 50.0
 	# Ylenght = 50.0
 	Ylenght = 6.0
-	Zlenght = 100.0
+	Zlenght = 500.0
 	# Zlenght = 100.0
 	# Zlenght = 30.0
 	height = 0.0
@@ -69,9 +69,9 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('name(s)                  : Beam_AR1_test\n') # mesh name
+	parameters.write('name(s)                  : Beam_AR1_resin\n') # mesh name
 	parameters.write('Shape(i)                 : 1\n')   # 0(default): Csection ; 1: flat laminate
-	parameters.write('Auto_Resin_betw_plies(b) : 0\n')   # 1: yes ; 0: no
+	parameters.write('Auto_Resin_betw_plies(b) : 1\n')   # 1: yes ; 0: no
 	parameters.write('cohezive_elements(b)     : 0\n')   # 1: yes ; 0: no
 	parameters.write('recombine(b)             : 1\n')   # 1: recombine mesh: hex ;  0: no: only prisms
 	parameters.write('Shell(b)                 : 0\n')   # 1: recombine mesh: hex ;  0: no: only prisms
@@ -116,9 +116,9 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~MESH~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('lc(f)    : 1\n')        # mesh caracteristic size
-	parameters.write('dx(i)    : 14\n')       #
+	parameters.write('dx(i)    : 35\n')       #
 	parameters.write('ddy(i)   : 2\n')        #
-	parameters.write('dz(i)    : 50\n')       #
+	parameters.write('dz(i)    : 125\n')       #
 	parameters.write('dc(i)    : 0\n')        #
 	parameters.write('dflange(i) : 0\n')      # discretization of the flange
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')

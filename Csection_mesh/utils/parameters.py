@@ -26,6 +26,7 @@ class parameters():
 				 ddy=None,
 				 dflange=None,
 				 dz=None,
+				 dz_intervals=None,
 				 dc=None,
 				 nbp_by_surf=None,
 				 nbl_by_surf=None,
@@ -40,7 +41,8 @@ class parameters():
 				 lc=None,
 				 refOriPoint=None,
 				 substr=None,
-				 StackSeq=None):
+				 StackSeq=None,
+				 ramp=None):
 		self.nbp = nbp
 		self.theta=0
 
@@ -133,8 +135,37 @@ def read_parameters(param, filename):
 	param.dx = int(dico['dx'])
 	param.ddy = int(dico['ddy'])
 	param.dflange = int(dico['dflange'])
-	param.dz = int(dico['dz'])
 	param.dc = int(dico['dc'])
+
+	string_dz = dico['dz']
+	if ',' not in string_dz:
+		param.dz = np.asarray([int(dico['dz'])])
+	else:
+		param.dz = []
+		print (string_dz.strip().split(','))
+		for string_value in string_dz.strip().split(','):
+			param.dz.append(int(string_value))
+
+	param.ramp = int(dico['Ramp'])
+	if param.ramp:
+		string_StartEndinZdir = dico['StartEndinZdir']
+		val = []
+		for string_value in string_StartEndinZdir.strip().split(','):
+			val.append(float(string_value))
+
+		print (val)
+
+		param.dz_intervals = []
+		interval = val[0]/float(param.Z) # start of the ramp in term of perone of the ful length
+		param.dz_intervals.append(interval)
+		interval += (2*val[1]+val[2])/float(param.Z) # length of the joggle region
+		param.dz_intervals.append(interval)
+		param.dz_intervals.append(1.)
+
+		
+
+
+
 
 	param.StackSeq = []
 	for i in range(param.nbp):

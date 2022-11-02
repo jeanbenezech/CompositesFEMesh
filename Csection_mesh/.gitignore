@@ -8,7 +8,8 @@
 
 *.txt
 
-utils/__pycache__
+utils/__pycache__/
+
 utils/*.pyc
 
 DUNE/*
