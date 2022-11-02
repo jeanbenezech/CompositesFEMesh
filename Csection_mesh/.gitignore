@@ -2,9 +2,14 @@
 
 *.vtk
 
+*.png
+
 *.msh
 
-*input.txt
+*.txt
+
+utils/__pycache__
+utils/*.pyc
 
 DUNE/*
 
