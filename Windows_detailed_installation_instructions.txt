@@ -1,0 +1,34 @@
+Installation
+
+1) Create a folder where you want the files to be located
+2) Install git (https://git-scm.com/) 
+3) Place the folder containing the git.exe file onto the path (search for environment variables in the start menu, click "Environment Variables", locate path on system variables then click "edit"). Note this may happen automatically during installation.
+4) Install cmake (https://cmake.org/) and add the folder containing cmake.exe to the path as above (it may also be necessary to install make and also add to the path if an error occurs when calling make from the command line)
+5) Install g++/gcc compilers. The easiest way to do this is via a distribution such as mingw (https://sourceforge.net/projects/mingw/) or as Cygwin (https://www.cygwin.com/).
+   If using mingw click "continue" until a list of packages appears in the installation manager. Click the tickbox next to mingw32-gcc-g++ and select "mark for installation".  mingw32-base could also be useful. Click "installation" then "apply changes".
+   If using cygwin run the installer and click "next" until a large window opens saying "Select Packages". Under the "view" dropdown box select full, the search for "gcc g++" to show the required packages (can also get "cmake" and "make" from here if need be). From the adjacent dropdown list select the latest version of each then click "next" to install. 
+6) Add the folder containing the .exe files for g++ and gcc to the path. This will be within a folder corresponding to the distribution (e.g. mingw, Cygwin)
+7) Open to the command prompt, making sure you run as administrator which is necessary for step 14, and navigate to the folder where you want the files to be located using cd
+8) Clone the files required to install eigen within the desired folder by typing:
+   "git clone https://gitlab.com/libeigen/eigen.git"
+9) cd eigen
+10) git checkout 3.3
+11) mkdir build_dir
+12) cd build_dir
+13) Make files for compilation of eigen by typing:
+    cmake .. -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc -G "Unix Makefiles"
+14) (this step requires administrator privaledges)
+    make install
+15) Add the folder to which the eigen headers have been installed (likely eigen3 under program files) as an environment variable called "EIGEN_INC".
+    search for environment variables in start menu. Click "environment variables". Click "New..." under system variables. Enter "variable name" as "EIGEN_INC", and "variable value" as the folder address.
+16) Back in the command prompt navigate back to the parent folder cd ..\..
+17) Clone the toolbox using git clone https://github.com/jeanbenezech/CompositesFEMesh.git
+18) Next compile gridModification and odb2vtk. Change directory to:
+    cd CompositesFEMesh\C++\gridModification
+19) mkdir build
+20) cd build
+21) cmake .. -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc -G "Unix Makefiles"
+22) make
+23) cd ..\..\odb2vtk
+24)  repeat Steps 18)-21)
+25) Download gmsh (https://gmsh.info/) and copy folder to a convenient location. Add the folder containing gmsh.exe to the path
