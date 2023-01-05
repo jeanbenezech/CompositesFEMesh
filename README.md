@@ -4,10 +4,9 @@ This repository provide a tool-box (in **python** and **C++**) for composite lam
 The VTK format is mainly used so the user could use [paraview](https://www.paraview.org/) for visualisation.\
 The objective is to provide inputs for [Abaqus](https://www.technia.co.uk/software/simulia/abaqus/) and [Dune-composites](https://gitlab.dune-project.org/anne.reinarz/dune-composites).
 
-* **Csection_mesh** and **Stiffener_mesh** contains **python** scripts which generate the input file (*.geo*) for [gmsh](https://gmsh.info/).
+* **Csection_mesh** contains **python** scripts which generate the input file (*.geo*) for [gmsh](https://gmsh.info/).
 
 * **Csection_mesh** for Csection part but also flat laminate (depending on the option chosen).
-* **Stiffener_mesh** for T-shape or L-shape stiffeners (depending on the option chosen).
 
 * **C++** folder contains tools for FE mesh manipulation (grid transformation, local material orientation attribution, etc).
 
