@@ -68,6 +68,11 @@ public:
 	double R;
 	Vector3d StartEndinZdir;
 
+	// RVE rotation parameters
+	double angleRVE = 0.0;
+	double interior_radius_RVE = 0.0;
+	bool rotateRVE = false;
+
 	// Geometric parameters
 	double X, Y, Height;
 
@@ -204,6 +209,16 @@ void Parameters::read(const std::string& filename) {
 		// 	StackSeq.push_back(tmp);
 		// }
 
+		if (line.find("RotateRVE(b)")!=std::string::npos){
+			rotateRVE = std::stoi(extract(line));
+		}
+		if (line.find("AngleRotateRVE(f)")!=std::string::npos){
+			angleRVE = std::stof(extract(line));
+		}
+		if (line.find("InteriorRadiusRVE(f)")!=std::string::npos){
+			interior_radius_RVE = std::stof(extract(line));
+		}
+
 		std::getline(input, line);
 	}
 
@@ -216,6 +231,10 @@ void Parameters::read(const std::string& filename) {
 		resin_id = nb_plies+1;
 	} else if (!isResin==1 && isCZ==1) {
 		cz_id = nb_plies+1;
+	}
+
+	if (Shape==0) { // Cspar: force this parameter to be false
+		rotateRVE= false;
 	}
 
 }

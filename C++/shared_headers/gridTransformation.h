@@ -86,6 +86,7 @@ class GridTransformation{
 	void Csection_wrinkles_2(Vector3d& point, Vector3d& normal, int number, Parameters& param, std::tuple<double,double,double>& ramp_param);
 	void Csection_wrinkles_splined(Vector3d& point, Vector3d& normal, int number, Parameters& param, std::tuple<double,double,double>& ramp_param);
 
+	void RotateRVE(Vector3d& point, Parameters& param);
 	void flat_transformation(int& node, Vector3d& point, Parameters& param, std::tuple<double,double,double>& ramp_param);
 	void prepare_GT_for_Flat_model(int& node, Vector3d& point, Parameters& param, std::tuple<double,double,double>& ramp_param);
 	void AssociatedtoTopSurfaceNode(Mesh& m, Parameters& param);
@@ -260,6 +261,24 @@ void GridTransformation::flat_transformation(int& node, Vector3d& point, Paramet
 		N.push_back(tmp);
 		indices_map_top_surf.push_back(node);
 	}
+
+}
+
+void GridTransformation::RotateRVE(Vector3d& point, Parameters& param){
+	Vector3d init = point;
+
+	Vector3d ref, moved;
+	moved = init;
+
+	ref[0] = xmin; // X
+	ref[1] = ymin - param.interior_radius_RVE; // Y
+
+	double local_theta = (param.angleRVE * PI / 180.) * (init[0] - ref[0])/(xmax - ref[0]);
+
+	moved[0] = ref[0] + (param.interior_radius_RVE+abs(init[1]-ymin)) * sin(local_theta);
+	moved[1] = ref[1] + (param.interior_radius_RVE+abs(init[1]-ymin)) * cos(local_theta);
+
+	point = moved;
 
 }
 
@@ -811,7 +830,6 @@ void GridTransformation::Csection_wrinkles_splined(Vector3d& point, Vector3d& no
 	Vector3d spline_point_2 = c;
 	Vector3d spline_point_3 = e;
 
-	
 	std::vector<double> X = {spline_point_1(1), a(1), spline_point_2(1), spline_point_3(1)};
 	std::vector<double> Y = {spline_point_1(2), a(2), spline_point_2(2), spline_point_3(2)};
 

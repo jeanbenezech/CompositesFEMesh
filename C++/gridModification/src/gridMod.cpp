@@ -32,14 +32,18 @@ int main(int argc, const char *argv[]) {
 	m.read_points("input.txt");
 	m.exportDir = true;
 
-	if(param.Shape==0)
-		localCoorSyst(m, param);
-	else
-		globalCoorSyst(m, param);
+	if(param.Shape==0){
+		localCoorSyst(m, param);}
+	else{
+		globalCoorSyst(m, param);}
 
 	// if (param.Dune_output){ // DUNE
 	// 	attribute_weight(m, param);
 	// }
+
+	if (param.rotateRVE) {
+		m.extract_AbaqusSets(); // To be done before rotation of the RVE to keep the numbering of master nodes consistent
+	}
 
 	GeometricTransformation(m, param);
 	StackingSequence(m, param);

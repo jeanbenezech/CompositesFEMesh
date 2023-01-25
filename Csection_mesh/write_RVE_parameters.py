@@ -5,17 +5,11 @@ import numpy as np
 # geometry in millimeters
 
 def write_parameters():
-	nb_plies = 2
+	nb_plies = 24
 	nb_wrinkles = 0
-	# Xlenght = 500.0
-	# Xlenght = 50.0
-	Xlenght = 200.0
-	# Ylenght = 50.0
-	# Ylenght = 50.0
-	Ylenght = 50.0
-	Zlenght = 400.0
-	# Zlenght = 100.0
-	# Zlenght = 30.0
+	Xlenght = 100.0
+	Ylenght = 50.0 # thickness
+	Zlenght = 100.0
 	height = 0.0
 
 	# ply_thickness = Ylenght/(nb_plies+0.0)
@@ -27,42 +21,30 @@ def write_parameters():
 	# for t in ply_thickness:
 	# 	tot_ply_thickness += t
 	# StackSeq = [0.0, 0.0, 0.0, 45.0, 45.0, 45.0, 0.0, -45.0, -45.0]
+	# StackSeq = [0.0, 0.0]
 	# StackSeq = [0.0, 0.0, 0.0, 0.0, 45.0, 45.0, 45.0, 45.0, 45.0, 0.0, -45.0,-45.0, -45.0]
-	# StackSeq = [45.0, -45.0, 45.0, -45.0, 45.0, -45.0, 0.0, 90.0, 0.0, 90.0, 0.0, 90.0, 90.0, 0.0, 90.0, 0.0, 90.0, 0.0, -45.0, 45.0, -45.0, 45.0, -45.0, 45.0]
+	StackSeq = [45.0, -45.0, 45.0, -45.0, 45.0, -45.0, 0.0, 90.0, 0.0, 90.0, 0.0, 90.0, 90.0, 0.0, 90.0, 0.0, 90.0, 0.0, -45.0, 45.0, -45.0, 45.0, -45.0, 45.0]
 
-
-	StackSeq = [0.0, 0.0]
-	# StackSeq = [0.0, 45.0, -45.0]
 
 	tot_ply_thickness = Ylenght
 	ply_thickness = np.full_like(StackSeq, Ylenght/(nb_plies+0.0))
-	ply_type = np.full_like(StackSeq, 1) # Only plies, if resin, it is done via auto resin otherwize need to be specified
-
+	ply_type = np.full_like(StackSeq, 0) # 0 - plies ; 1 - resin // Here: only plies, if resin, it is done via auto resin otherwize need to be specified
 
 	# WRINKLES Parameters
 	minWsize = 1.0
-	maxWsize = 1.0
-
+	maxWsize = 5.0
 	minWposX = 0.30*Xlenght
 	maxWposX = 0.70*Xlenght
-	# minWposX = 0.49*Xlenght
-	# maxWposX = 0.51*Xlenght
-
 	minWposY = 0.49* Ylenght
 	maxWposY = 0.51* Ylenght
-
 	minWposZ = 0.45*Zlenght
 	maxWposZ = 0.55*Zlenght
-
 	minWdampX = 0.01
 	maxWdampX = 0.06
-
 	minWdampY = 0.05
 	maxWdampY = 0.15
-
 	minWdampZ = 0.05
 	maxWdampZ = 0.10
-
 	minWori = -20
 	maxWori = 20
 
@@ -70,7 +52,7 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('name(s)                  : NGUYEN_EX1\n') # mesh name
+	parameters.write('name(s)                  : RVE\n') # mesh name
 	parameters.write('Shape(i)                 : 1\n')   # 0(default): Csection ; 1: flat laminate
 	parameters.write('Auto_Resin_betw_plies(b) : 0\n')   # 1: yes ; 0: no
 	parameters.write('cohezive_elements(b)     : 0\n')   # 1: yes ; 0: no
@@ -96,65 +78,58 @@ def write_parameters():
 			parameters.write('p'+str(i)+'(f,f,b)   : '+str(StackSeq[i])+','+str(ply_thickness[i])+','+str(ply_type[i])+'\n')
 		else:
 			parameters.write('p'+str(i)+'(f,f,b)  : '+str(StackSeq[i])+','+str(ply_thickness[i])+','+str(ply_type[i])+'\n')
-	# for i in range(8):
-	# 	if i<10:
-	# 		parameters.write('p'+str(i)+'(f,f)   : 0.0,'+str(ply_thickness)+'\n')
-	# 	else:
-	# 		parameters.write('p'+str(i)+'(f,f)  : 0.0,'+str(ply_thickness)+'\n')
-	# parameters.write('p8(f,f)   : 0.0,0.31\n')
-	# for i in range(9,17):
-	# 	if i<10:
-	# 		parameters.write('p'+str(i)+'(f,f)   : 0.0,'+str(ply_thickness)+'\n')
-	# 	else:
-	# 		parameters.write('p'+str(i)+'(f,f)  : 0.0,'+str(ply_thickness)+'\n')
-	# parameters.write('p17(f,f)  : 0.0,0.31\n')
-	# for i in range(18,20):
-	# 	if i<10:
-	# 		parameters.write('p'+str(i)+'(f,f)   : 0.0,'+str(ply_thickness)+'\n')
-	# 	else:
-	# 		parameters.write('p'+str(i)+'(f,f)  : 0.0,'+str(ply_thickness)+'\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~MESH~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('lc(f)    : 1\n')        # mesh caracteristic size
-	parameters.write('dx(i)    : 8\n')       #
-	parameters.write('ddy(i)   : 2\n')        #
-	parameters.write('dz(i)    : 13\n')       #
-	parameters.write('dc(i)    : 0\n')        #
-	parameters.write('dflange(i) : 0\n')      # discretization of the flange
+	parameters.write('dx(i)    : 20\n')       #
+	parameters.write('ddy(i)   : 3\n')        # discretisation of a ply through thickness :: 2 = 1 elem/ply 
+	parameters.write('dz(i)    : 20\n')       #
+	parameters.write('dc(i)    : 0\n')        # corner :: CSPAR
+	parameters.write('dflange(i) : 0\n')      # discretization of the flange :: CSPAR
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~TRANSFORMATION~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('wrinkle(i)        : '+str(nb_wrinkles)+'\n') # Do we need to add wrinkle in the gridMod (c++) code, 2+ for multiple wrinkles
-	parameters.write('Ramp(b)           : 0\n') #
-	parameters.write('Abaqus_output(b)  : 0\n') #
-	parameters.write('Dune_output(b)    : 1\n') #
+	parameters.write('wrinkle(i)             : '+str(nb_wrinkles)+'\n') # Do we need to add wrinkle in the gridMod (c++) code, 2+ for multiple wrinkles
+	parameters.write('Ramp(b)                : 0\n') # CSPAR
+	parameters.write('RotateRVE(b)           : 0\n') #
+	parameters.write('AngleRotateRVE(f)      : 45.\n')
+	parameters.write('InteriorRadiusRVE(f)   : 100.\n')
 	for i in range(nb_wrinkles):
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~WRINKLES~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('WID(s)       : Defect0\n')
-		if i<10:
-			parameters.write('Wsize'+str(i)+'(f)    : 1.0\n') # Amplitude max
+		if i < 10:
+			parameters.write('Wsize'+str(i)+'(f)    : 1.0\n')  # Amplitude max
 			# parameters.write('Wsize'+str(i)+'(f)    : '+str(random.uniform(minWsize, maxWsize))+'\n') # Amplitude max
-			parameters.write('Wpos'+str(i)+'(f)     : '+str(random.uniform(minWposX, maxWposX))+','+str(random.uniform(minWposY, maxWposY))+','+str(random.uniform(minWposZ, maxWposZ))+'\n') # center
-			parameters.write('Wori'+str(i)+'(f)     : '+str(random.uniform(minWori, maxWori))+'\n') # Orientation in degree
-			parameters.write('Wdamp'+str(i)+'(f)    : '+str(random.uniform(minWdampX, maxWdampX))+','+str(random.uniform(minWdampY, maxWdampY))+','+str(random.uniform(minWdampZ, maxWdampZ))+'\n') # reduction of the amplitude through each direction
+			parameters.write('Wpos'+str(i)+'(f)     : '+str(random.uniform(minWposX, maxWposX))+','+str(
+				random.uniform(minWposY, maxWposY))+','+str(random.uniform(minWposZ, maxWposZ))+'\n')  # center
+			# Orientation in degree
+			parameters.write('Wori'+str(i)+'(f)     : ' +
+			                 str(random.uniform(minWori, maxWori))+'\n')
+			parameters.write('Wdamp'+str(i)+'(f)    : '+str(random.uniform(minWdampX, maxWdampX))+','+str(random.uniform(minWdampY,
+			                 maxWdampY))+','+str(random.uniform(minWdampZ, maxWdampZ))+'\n')  # reduction of the amplitude through each direction
 		else:
-			parameters.write('Wsize'+str(i)+'(f)   : '+str(random.uniform(minWsize, maxWsize))+'\n') # Amplitude max
-			parameters.write('Wpos'+str(i)+'(f)    : '+str(random.uniform(minWposX, maxWposX))+','+str(random.uniform(minWposY, maxWposY))+','+str(random.uniform(minWposZ, maxWposZ))+'\n') # center
-			parameters.write('Wori'+str(i)+'(f)    : '+str(random.uniform(minWori, maxWori))+'\n') # Orientation in degree
-			parameters.write('Wdamp'+str(i)+'(f)   : '+str(random.uniform(minWdampX, maxWdampX))+','+str(random.uniform(minWdampY, maxWdampY))+','+str(random.uniform(minWdampZ, maxWdampZ))+'\n') # reduction of the amplitude through each direction
+			parameters.write('Wsize'+str(i)+'(f)   : ' +
+			                 str(random.uniform(minWsize, maxWsize))+'\n')  # Amplitude max
+			parameters.write('Wpos'+str(i)+'(f)    : '+str(random.uniform(minWposX, maxWposX))+','+str(
+				random.uniform(minWposY, maxWposY))+','+str(random.uniform(minWposZ, maxWposZ))+'\n')  # center
+			# Orientation in degree
+			parameters.write('Wori'+str(i)+'(f)    : ' +
+			                 str(random.uniform(minWori, maxWori))+'\n')
+			parameters.write('Wdamp'+str(i)+'(f)   : '+str(random.uniform(minWdampX, maxWdampX))+','+str(random.uniform(minWdampY,
+			                 maxWdampY))+','+str(random.uniform(minWdampZ, maxWdampZ))+'\n')  # reduction of the amplitude through each direction
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('~~~~~~~~~~~~~~~~~~~~~~RAMP~~~~~~~~~~~~~~~~~~~~~~~~\n')
+	parameters.write('~~~~~~~~~~~~~~~~~~~~~OUTPUT~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('Rsize(f)          : 6.25\n')
+	parameters.write('Abaqus_output(b)  : 1\n') #
+	parameters.write('Dune_output(b)    : 0\n') #
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~ABAQUS~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('Path2result(s)    : Abaqus/results/\n')
 	parameters.write('AbaqusOdbName(s)  : model\n')
-
 
 	parameters.close()
 

@@ -12,17 +12,17 @@ import matplotlib.cm as cm
 
 def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	# cnt appears to be used to keep track of if parameters are written for multiple cases, which could be useful
-	nb_plies = 24
-	# nb_plies = 12 # large model paper off/on
-	# t_ply = 0.4 # large model paper off/on
-	t_ply = 0.196 # Define scalar ply thickness value, which will be duplicated later into an array containing thicknesses for each ply
+	# nb_plies = 24
+	nb_plies = 12 # large model paper off/on
+	t_ply = 0.4 # large model paper off/on
+	# t_ply = 0.196 # Define scalar ply thickness value, which will be duplicated later into an array containing thicknesses for each ply
 
 	nb_wrinkles = 0
 	Xlength = 140.0 # This is the distance along the web of the outer section of the spar between the radii. 140mm is correct for 5mm internal radii
 	Ylength = nb_plies*t_ply # laminate thickness
 	Zlength = 420.0 # effective length of the spar (between end blocks)
 	# Zlength = 4000.0 # large model paper off/on
-	start = Zlength/2.0 - 150 # assumes the end blocks have been placed such that the feature is exactly central
+	start = Zlength/2.0 - 150.0 # assumes the end blocks have been placed such that the feature is exactly central
 	r_int = 5.0 # internal radius
 	height = 55.0 - Ylength - r_int # flange length
 	is_coh = 0
@@ -31,8 +31,8 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	is_CornerThickness = 0
 
 
-	StackSeq = [45.0, -45.0, 45.0, -45.0, 45.0, -45.0, 0.0, 90.0, 0.0, 90.0, 0.0, 90.0, 90.0, 0.0, 90.0, 0.0, 90.0, 0.0, -45.0, 45.0, -45.0, 45.0, -45.0, 45.0]
-	# StackSeq = [45.0, -45.0, 90.0, 0.0, 0.0, 90.0, 90.0, 0.0, 0.0, 90.0, -45.0, 45.0] # large model paper off/on
+	# StackSeq = [45.0, -45.0, 45.0, -45.0, 45.0, -45.0, 0.0, 90.0, 0.0, 90.0, 0.0, 90.0, 90.0, 0.0, 90.0, 0.0, 90.0, 0.0, -45.0, 45.0, -45.0, 45.0, -45.0, 45.0]
+	StackSeq = [45.0, -45.0, 90.0, 0.0, 0.0, 90.0, 90.0, 0.0, 0.0, 90.0, -45.0, 45.0] # large model paper off/on
 	
 	ply_thickness = np.full_like(StackSeq, t_ply) # duplicate ply thickness into an array with the same dimensions as StackSeq
 	ply_type = np.full_like(StackSeq, 0) # Only plies, resin is done via auto resin
@@ -63,7 +63,7 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('name(s)                  : myCSPAR\n') # mesh name
+	parameters.write('name(s)                  : KubernetesTest\n') # mesh name
 	# parameters.write('name(s)                : '+str(int(Zlenght))+'mm_Cspar\n') # mesh name
 	parameters.write('Shape(i)                 : 0\n')   # 0(default): Csection ; 1: flat laminate
 	parameters.write('Auto_Resin_betw_plies(b) : 0\n')   # 1: yes ; 0: no (Do I want this to be on?????)
@@ -98,8 +98,8 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('dx(i)      : 70\n')   #50 discretization in X direction (plus one)
 	parameters.write('dflange(i) : 30\n')    #16 discretization of the flange (plus one)
 	parameters.write('ddy(i)     : 2\n')    #2 discretization of ply thickness (plus one)
-	parameters.write('dz(i)      : 20,150,20\n')   #150 discretization in Z direction (must be a multiple of 84 for ramps to be in the correct place for the 420mm long spar).
-	# parameters.write('dz(i)      : 2000\n')   #large example paper off/on
+	# parameters.write('dz(i)      : 20,150,20\n')   #150 discretization in Z direction (must be a multiple of 84 for ramps to be in the correct place for the 420mm long spar).
+	parameters.write('dz(i)      : 210\n')   #large example paper off/on
 	parameters.write('dc(i)      : 12\n')    #12 discretization of corners (plus one)
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~TRANSFORMATION~~~~~~~~~~~~~~~~~~~\n')

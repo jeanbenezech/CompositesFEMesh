@@ -265,7 +265,7 @@ void attribute_weight(Mesh& m, Parameters& param) {
 
 void GeometricTransformation(Mesh& m, Parameters& param) {
 
-	if(param.add_ramp==false && param.add_wrinkles==0){
+	if(param.add_ramp==false && param.add_wrinkles==0 && param.rotateRVE==0){
 		std::cout << "GeoTransformation is used for nothing." << std::endl;
 		GridTransformation GT;
 		GT.initialise(m, param);
@@ -355,6 +355,10 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 			}
 		}
 
+		if(param.rotateRVE){
+			GT.RotateRVE(point, param);
+		}
+
 		m.Vertices[node].coord(0) = point(0);
 		m.Vertices[node].coord(1) = point(1);
 		m.Vertices[node].coord(2) = point(2);
@@ -436,6 +440,11 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 				GT.Apply_Gaussian_random_field(baryMu, normal, value);
 			}
 
+			if(param.rotateRVE){
+				GT.RotateRVE(baryPu, param);
+				GT.RotateRVE(baryMu, param);
+			}
+
 			//////////////////////////////////////////////////////////////////////////////////////////
 			std::tuple<double, double, double> ramp_param_Pv = std::make_tuple(no_ramp,no_ramp,no_ramp);
 			std::tuple<double, double, double> ramp_param_Mv = std::make_tuple(no_ramp,no_ramp,no_ramp);
@@ -485,6 +494,11 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 				value/=sum;
 				value*=local_weight;
 				GT.Apply_Gaussian_random_field(baryMv, normal, value);
+			}
+
+			if(param.rotateRVE){
+				GT.RotateRVE(baryPv, param);
+				GT.RotateRVE(baryMv, param);
 			}
 
 
@@ -537,6 +551,11 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 				value/=sum;
 				value*=local_weight;
 				GT.Apply_Gaussian_random_field(baryMw, normal, value);
+			}
+
+			if(param.rotateRVE){
+				GT.RotateRVE(baryPw, param);
+				GT.RotateRVE(baryMw, param);
 			}
 
 			double angle0=0.0, angle1=0.0, angle2=0.0;

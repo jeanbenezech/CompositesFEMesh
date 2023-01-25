@@ -33,6 +33,11 @@ public:
 	int nb_corner, type;
 	std::vector<Vector2f> P;
 
+	// Abaqus specific
+	std::vector<std::vector<int>> nsets, elsets, Coh_elsets;
+	std::vector<Vector3d> masterNodes;
+	bool isNsetDone=false;
+
 
 	// FUNCTION
 	void read_mesh(const std::string& filename);
@@ -53,6 +58,8 @@ public:
 	void write_ori_txt(const std::string& filename);
 	void write_ori_inp(const std::string& filename);
 	void write_abaqus_cae_input(const std::string& filename, Parameters& param);
+
+	void extract_AbaqusSets();
 
 	void initialise(Parameters& param);
 	void print(std::string type, int number);
@@ -673,12 +680,12 @@ void Mesh::write_vtk(const std::string& filename, int verbosity=0) {
 		}
 	}
 
-	output << "POINT_DATA " << nb_vertices_ << std::endl;
-	output << "SCALARS extra double 2\n";
-	output << "LOOKUP_TABLE default\n";
-	for (int i=0; i< nb_vertices_; i++) {
-		output << Vertices[i].top_surf_indice << " " << Vertices[i].weight << std::endl;
-	}
+	// output << "POINT_DATA " << nb_vertices_ << std::endl;
+	// output << "SCALARS extra double 2\n";
+	// output << "LOOKUP_TABLE default\n";
+	// for (int i=0; i< nb_vertices_; i++) {
+	// 	output << Vertices[i].top_surf_indice << " " << Vertices[i].weight << std::endl;
+	// }
 
 	output.close();
 }
@@ -818,18 +825,10 @@ void Mesh::write_ori_inp(const std::string& filename) {
 	output << "ori_loc_dist" << std::endl;
 }
 
-void Mesh::write_inp(const std::string& filename) {
-	std::ofstream output;
-	output.open(filename+"_mesh.inp", std::ios::out);
-	if (!output.is_open()) {
-	std::cout << "Error: Cannot open file" << filename << std::endl;
-	} else {
-		std::cout << "writing " << filename+"_mesh.inp" << std::endl;
-	}
+void Mesh::extract_AbaqusSets(){
 
-	// ~~~~~~~~~ NSET and ElSET preparation ~~~~~~~~~
-	std::vector<std::vector<int>> nsets, elsets, Coh_elsets;
-	std::vector<Vector3d> masterNodes;
+	if (isNsetDone)
+		return;
 
 	// ~~~~~~~~~ NSET ~~~~~~~~~
 	nb_nset=6;
@@ -873,6 +872,21 @@ void Mesh::write_inp(const std::string& filename) {
 		masterNodes[j](2)/=nsets[j].size();
 	}
 
+	isNsetDone = true;
+	return;
+}
+
+
+void Mesh::write_inp(const std::string& filename) {
+	std::ofstream output;
+	output.open(filename+"_mesh.inp", std::ios::out);
+	if (!output.is_open()) {
+	std::cout << "Error: Cannot open file" << filename << std::endl;
+	} else {
+		std::cout << "writing " << filename+"_mesh.inp" << std::endl;
+	}
+
+	extract_AbaqusSets();
 
 	std::cout << nb_nset            << " NSETs"  << std::endl;
 	std::cout << nb_elset           << " ELSETs"  << std::endl;
