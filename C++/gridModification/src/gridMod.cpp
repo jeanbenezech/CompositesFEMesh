@@ -41,7 +41,7 @@ int main(int argc, const char *argv[]) {
 	// 	attribute_weight(m, param);
 	// }
 
-	if (param.rotateRVE) {
+	if (param.rotateRVE && param.Abaqus_output) {
 		m.extract_AbaqusSets(); // To be done before rotation of the RVE to keep the numbering of master nodes consistent
 	}
 

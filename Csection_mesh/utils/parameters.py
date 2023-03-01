@@ -17,6 +17,7 @@ class parameters():
 				 AbaqusName=None,
 				 Shape=None,
 				 resin=None,
+				 resin_from_StackSeq=None,
 				 CZ=None,
 				 recombine=None,
 				 nbp=None,
@@ -161,10 +162,6 @@ def read_parameters(param, filename):
 		interval += (2*val[1]+val[2])/float(param.Z) # length of the joggle region
 		param.dz_intervals.append(interval)
 		param.dz_intervals.append(1.)
-
-		
-
-
 
 
 	param.StackSeq = []

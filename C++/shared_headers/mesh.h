@@ -783,7 +783,7 @@ void Mesh::write_ori_txt(const std::string& filename) {
 				output << stacking_sequence[elem.Markers(0, i) - 1] << " ";
 			}
 			else{
-				output << "-1 0 ";
+				output << nb_plies_-elem.Markers(0, i) << " 0 "; // "-1 0"
 			}
 			output << std::setprecision(15) <<  elem.U(0, i) << " " <<  elem.U(1, i) << " " <<  elem.U(2, i) << " ";
 			output << std::setprecision(15) << -elem.W(0, i) << " " << -elem.W(1, i) << " " << -elem.W(2, i) << " ";
@@ -875,7 +875,6 @@ void Mesh::extract_AbaqusSets(){
 	isNsetDone = true;
 	return;
 }
-
 
 void Mesh::write_inp(const std::string& filename) {
 	std::ofstream output;

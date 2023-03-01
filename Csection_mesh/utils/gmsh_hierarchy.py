@@ -32,6 +32,8 @@ def add_y_lines(geo, param, cntL, Ylines, layer_type=0):
 		# val=param.ddy
 	elif layer_type==2: # Cohezive layer
 		val=1
+	elif layer_type > 1:  # resin layer
+		val = 2
 
 	for i in range(len(param.substr)+1):
 		geo.Lines.append([Ylines[0][i], Ylines[1][i]])
@@ -59,13 +61,17 @@ def front_surf(param, geo, rep, cntL, cntS, dy, layer_type=0):
 		newXline_start = 2* len(param.substr)
 		geo.Surfaces.append([start + k, start + k + yline_start + 2, start + k + yline_start + 1, start + k + newXline_start + 1])
 
-		if layer_type==1: # resin layer
+		if layer_type == 2 and param.CZ:  # Cohezive layer
+			geo.Physical_volumes[-1].append(cntS)
+
+		elif layer_type == 1:  # resin layer
 			if param.CZ:
 				geo.Physical_volumes[-2].append(cntS)
 			else:
 				geo.Physical_volumes[-1].append(cntS)
-		elif layer_type==2: # Cohezive layer
-			geo.Physical_volumes[-1].append(cntS)
+
+		elif layer_type > 1:  # Cohezive layer
+			geo.Physical_volumes[-int(layer_type)].append(cntS)
 		else:
 			geo.Physical_volumes[incr_vol+geo.delta_v].append(cntS)
 

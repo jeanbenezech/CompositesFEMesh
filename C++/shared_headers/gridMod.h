@@ -269,6 +269,7 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 		std::cout << "GeoTransformation is used for nothing." << std::endl;
 		GridTransformation GT;
 		GT.initialise(m, param);
+		GT.finalise(m, param);
 		return;
 	}
 
@@ -603,6 +604,8 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 		}
 	}
 
+
+	GT.finalise(m, param);
 	return;
 }
 

@@ -81,6 +81,7 @@ class GridTransformation{
 	int verbosity = 0;
 
 	void initialise(Mesh& m, Parameters& param);
+	void finalise(Mesh& m, Parameters& param);
 	std::tuple<double,double,double> ramp(Vector3d& point);
 	void Csection_wrinkles(Vector3d& point, Vector3d& normal, int number, Parameters& param, std::tuple<double,double,double>& ramp_param);
 	void Csection_wrinkles_2(Vector3d& point, Vector3d& normal, int number, Parameters& param, std::tuple<double,double,double>& ramp_param);
@@ -103,6 +104,56 @@ class GridTransformation{
 };
 
 void GridTransformation::initialise(Mesh& m, Parameters& param) {
+	zmax=0;
+	zmin=m.Vertices[0].coord(2);
+	ymin=0;
+	ymax=m.Vertices[0].coord(1);
+	xmin=0;
+	xmax=m.Vertices[0].coord(0);
+
+	for(int node=0; node < m.Nb_vertices(); ++node) {
+		if (m.Vertices[node].coord(2)>zmax){ zmax = m.Vertices[node].coord(2);}
+		if (m.Vertices[node].coord(2)<zmin){ zmin = m.Vertices[node].coord(2);}
+		if (m.Vertices[node].coord(1)>ymax){ ymax = m.Vertices[node].coord(1);}
+		if (m.Vertices[node].coord(1)<ymin){ ymin = m.Vertices[node].coord(1);}
+		if (m.Vertices[node].coord(0)>xmax){ xmax = m.Vertices[node].coord(0);}
+		if (m.Vertices[node].coord(0)<xmin){ xmin = m.Vertices[node].coord(0);}
+	}
+
+	if (verbosity>0){
+		std::cout << "Xmin : " << xmin << std::endl;
+		std::cout << "Xmax : " << xmax << std::endl;
+		std::cout << "Ymin : " << ymin << std::endl;
+		std::cout << "Ymax : " << ymax << std::endl;
+		std::cout << "Zmin : " << zmin << std::endl;
+		std::cout << "Zmax : " << zmax << std::endl;
+	}
+
+	// double deltaz = (zmax-zmin) / 16.0;
+	// z1 = zmin + 2.0*deltaz;
+	// z2 = zmin + 7.0*deltaz;
+	// z3 = zmin + 9.0*deltaz;
+	// z4 = zmin + 14.0*deltaz;
+	// double deltaz = (zmax-zmin) / 16.0;
+	z1 = zmin + param.StartEndinZdir(0);
+	z2 = z1 + param.StartEndinZdir(1);
+	z3 = z2 + param.StartEndinZdir(2);
+	z4 = z3 + param.StartEndinZdir(1);
+
+	local_xmax = param.Height;
+	local_ymin = param.R;
+	local_ymax = param.X+local_ymin;
+
+	delta_max = param.rampSize;
+	threshold_avoiding_deformation_of_corners = param.R+param.Y; // Exterior radius
+
+	interior_radius = param.R;
+
+	ymid = (ymax-ymin)/2.0;
+
+}
+
+void GridTransformation::finalise(Mesh& m, Parameters& param) {
 	zmax=0;
 	zmin=m.Vertices[0].coord(2);
 	ymin=0;
@@ -175,6 +226,22 @@ void GridTransformation::initialise(Mesh& m, Parameters& param) {
 	output << z2 << std::endl;
 	output << z3 << std::endl;
 	output << z4 << std::endl;
+
+	output << std::endl;
+	output << "Corner parameters (bool, radius, centerX, centerY, angle, axis, start, stop):" << std::endl;
+	output << param.rotateRVE << std::endl;
+	output << param.interior_radius_RVE << std::endl;
+	output << param.centerRot[0] << std::endl;
+	output << param.centerRot[1] << std::endl;
+	output << param.angleRVE << std::endl;
+	output << param.rotateAxis << std::endl;
+	output << param.rotateStartStop[0] << std::endl;
+	output << param.rotateStartStop[1] << std::endl;
+
+
+	// parameters.write('RotateAxis(b)          : X\n') # "X" or "Z"
+	// parameters.write('Rotate_start_end(f)    : 100,200\n') # to be matched with dz changes
+	// parameters.write('AngleRotateRVE(f)      : 90.\n') # positive angle
 
 	output << std::endl;
 	output << "Wrinkles creation specific parameters of the C-spar (localXmax, localYmin, localYmax, threshold_avoiding_deformation_of_corners, interior_radius, big_radius, Cspar_width):" << std::endl;
@@ -267,18 +334,60 @@ void GridTransformation::flat_transformation(int& node, Vector3d& point, Paramet
 void GridTransformation::RotateRVE(Vector3d& point, Parameters& param){
 	Vector3d init = point;
 
-	Vector3d ref, moved;
-	moved = init;
+	// rotateStartStop
 
-	ref[0] = xmin; // X
-	ref[1] = ymin - param.interior_radius_RVE; // Y
+	if (param.rotateAxis == "Z"){
 
-	double local_theta = (param.angleRVE * PI / 180.) * (init[0] - ref[0])/(xmax - ref[0]);
+		/* Full rotation, desable the rotationStartEnd*/
+		Vector3d ref, moved;
+		moved = init;
 
-	moved[0] = ref[0] + (param.interior_radius_RVE+abs(init[1]-ymin)) * sin(local_theta);
-	moved[1] = ref[1] + (param.interior_radius_RVE+abs(init[1]-ymin)) * cos(local_theta);
+		ref[0] = xmin; // X
+		ref[1] = ymin - param.interior_radius_RVE; // Y
 
-	point = moved;
+		double local_theta = (param.angleRVE * PI / 180.) * (init[0] - ref[0])/(xmax - ref[0]);
+
+		moved[0] = ref[0] + (param.interior_radius_RVE+abs(init[1]-ymin)) * sin(local_theta);
+		moved[1] = ref[1] + (param.interior_radius_RVE+abs(init[1]-ymin)) * cos(local_theta);
+
+		point = moved;
+	} else if (param.rotateAxis == "X") {
+		Vector3d ref, moved;
+		moved = init;
+
+		ref[1] = ymin - param.interior_radius_RVE; // Y
+		// ref[2] = (zmax-zmin) / 2.; // Z
+		ref[2] = param.rotateStartStop(0); // Z
+
+		param.centerRot[0] = ref[1];
+		param.centerRot[1] = ref[2];
+
+
+		// double local_theta = (param.angleRVE * PI / 180.) * (init[2] - ref[2])/(zmax - ref[2]);
+		double local_theta = (param.angleRVE * PI / 180.) * (init[2] - ref[2])/(param.rotateStartStop(1) - ref[2]);
+
+		// if(init[2]<param.rotateStartStop(0)){
+
+		// std::cout << "ici: " << moved[2] << ", " << param.rotateStartStop(0) << ", " << param.rotateStartStop(1) << std::endl;
+
+		// }
+		if(init[2]>=param.rotateStartStop(0) && init[2]<=param.rotateStartStop(1)){
+			moved[1] = ref[1] + (param.interior_radius_RVE+abs(init[1]-ymin)) * cos(local_theta);
+			moved[2] = ref[2] + (param.interior_radius_RVE+abs(init[1]-ymin)) * sin(local_theta);
+		} 
+		else if (init[2]>param.rotateStartStop(1)){
+			moved[1] = ref[1] + (param.interior_radius_RVE+abs(init[1]-ymin)) * cos(param.angleRVE * PI / 180.)\
+							  + (init[2]-param.rotateStartStop(1)) * sin(-param.angleRVE * PI / 180.);
+			// + (init[1]) 
+
+
+			moved[2] = ref[2] + (param.interior_radius_RVE+abs(init[1]-ymin)) * sin(param.angleRVE * PI / 180.)\
+							  + (init[2]-param.rotateStartStop(1)) * cos(-param.angleRVE * PI / 180.);
+		}
+
+
+		point = moved;
+	}
 
 }
 

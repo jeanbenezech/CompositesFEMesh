@@ -15,3 +15,5 @@ utils/*.pyc
 DUNE/*
 
 Abaqus/*
+
+old_meshes/
