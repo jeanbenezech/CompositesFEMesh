@@ -8,6 +8,7 @@
 #include <fstream>
 #include <Eigen/Eigenvalues>
 #include <Eigen/Dense>
+#include "vertice.h"
 
 using namespace Eigen;
 
@@ -31,7 +32,7 @@ public:
 	std::string abaqus_type;
 
 	// PRINCIPAL VARIABLES
-	VectorXi global_indices;
+	std::vector<int> global_indices;
 	Matrix<int, Dynamic, Dynamic> Nodes;
 	Matrix<int, Dynamic, Dynamic> Markers;
 	Matrix<int, Dynamic, Dynamic> DD_weight;
@@ -54,12 +55,22 @@ public:
 	// FUNCTION
 	void initialise(std::string type, int nb_elem, int nb_marker, bool isShell_);
 	void fill(std::vector<std::vector<int>> l, int& nb_elset);
+	Vector3d center(std::vector<Vertice> vertices, int id);
 
 	//~Element();
 private:
 };
 
 // ~~~~~~~~~~~~~~ INIT ~~~~~~~~~~~~~~
+
+Vector3d Element::center(std::vector<Vertice> vertices, int id){
+	Vector3d out = {0.,0.,0.};
+	// std::cout << this->Nodes.rows() << std::endl;
+	for(int node_iter =0; node_iter<this->Nodes.rows(); node_iter++){
+		out += vertices[this->Nodes(node_iter,id)].coord;
+	}
+	return out /= this->Nodes.rows();
+}
 
 void Element::initialise(std::string key, int nb_elem, int nb_marker, bool isShell_=false) {
 	type = key;

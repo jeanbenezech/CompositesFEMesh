@@ -41,12 +41,20 @@ int main(int argc, const char *argv[]) {
 	// 	attribute_weight(m, param);
 	// }
 
-	if (param.rotateRVE && param.Abaqus_output) {
-		m.extract_AbaqusSets(); // To be done before rotation of the RVE to keep the numbering of master nodes consistent
-	}
+	// if (param.rotateRVE && param.Abaqus_output) {
+	// 	// m.extract_AbaqusSets(); // To be done before rotation of the RVE to keep the numbering of master nodes consistent
+	// }
+
+	// if (param.rotateRVE && param.Abaqus_output) {
+	// 	// m.extract_AbaqusSets(); // To be done before rotation of the RVE to keep the numbering of master nodes consistent
+	// 	m.elSets_delam(); // To be done before rotation of the RVE to keep the numbering of master nodes consistent
+	// }
+	// m.elSets_delam(); // To be done before rotation of the RVE to keep the numbering of master nodes consistent
 
 	GeometricTransformation(m, param);
 	StackingSequence(m, param);
+
+
 
 	if (param.Abaqus_output){ // ABAQUS
 		// fs::create_directories("Abaqus"); // TODO:: No working with ARM os
@@ -54,6 +62,9 @@ int main(int argc, const char *argv[]) {
 		m.write_ori_inp("Abaqus/"+mesh_name);
 		m.write_inp("Abaqus/"+mesh_name);
 		// m.write_abaqus_cae_input("Abaqus/"+mesh_name, param);
+
+		if (param.writeTransformedMSH)
+			m.write_msh("tranformed_"+mesh_name);
 	}
 
 	if (param.Dune_output){ // DUNE

@@ -44,6 +44,7 @@ public:
 	void read_msh(const std::string& filename, bool only_3D, int cz_id);
 	void read_points(const std::string& filename);
 	void read_elem_fields(const std::string& filename);
+	void read_elem_fields_stresses_strains_only(const std::string& filename);
 	void read_node_fields(const std::string& filename);
 
 	void write_mesh(const std::string& filename);
@@ -60,6 +61,7 @@ public:
 	void write_abaqus_cae_input(const std::string& filename, Parameters& param);
 
 	void extract_AbaqusSets();
+	void elSets_delam(double locX, double locZ, double radius, double radius_offset_X,  double radius_offset_Z);
 
 	void initialise(Parameters& param);
 	void print(std::string type, int number);
@@ -113,7 +115,7 @@ void Mesh::read_mesh(const std::string& filename) {
 	std::ifstream input;
 	input.open(filename, std::ios::in);
 	if (!input.is_open()) {
-	std::cout << "Error: Cannot open file" << std::endl;
+	std::cout << "Error: Cannot open file " << std::endl;
 	}
 	std::cout << "Reading " << filename << std::endl;
 
@@ -216,7 +218,7 @@ void Mesh::read_msh(const std::string& filename, bool only_3D, int cz_id) {
 	std::ifstream input;
 	input.open(filename, std::ios::in);
 	if (!input.is_open()) {
-	std::cout << "Error: Cannot open file" << filename  << std::endl;
+	std::cout << "Error: Cannot open file " << filename  << std::endl;
 	}
 	std::cout << "Reading " << filename << std::endl;
 
@@ -386,7 +388,7 @@ void Mesh::read_points(const std::string& filename) {
 	std::ifstream input;
 	input.open(filename, std::ios::in);
 	if (!input.is_open()) {
-		std::cout << "Error: Cannot open file" << filename << std::endl;
+		std::cout << "Error: Cannot open file " << filename << std::endl;
 	} else{
 		std::cout << "Reading " << filename << std::endl;
 	}
@@ -403,7 +405,7 @@ void Mesh::read_elem_fields(const std::string& filename) {
 	std::ifstream input;
 	input.open(filename, std::ios::in);
 	if (!input.is_open()) {
-	std::cout << "Error: Cannot open file" << filename << std::endl;
+	std::cout << "Error: Cannot open file " << filename << std::endl;
 	}
 	std::cout << "Reading " << filename << std::endl;
 
@@ -433,22 +435,62 @@ void Mesh::read_elem_fields(const std::string& filename) {
 
 }
 
+void Mesh::read_elem_fields_stresses_strains_only(const std::string& filename) {
+	std::ifstream input;
+	input.open(filename, std::ios::in);
+	if (!input.is_open()) {
+	std::cout << "Error: Cannot open file " << filename << std::endl;
+	}
+	std::cout << "Reading " << filename << std::endl;
+
+	std::string ligne {};
+	std::getline(input, ligne);
+
+	Matrix<double, Dynamic, Dynamic> tmp;
+	tmp.resize(12,Tot_cells_);
+
+	for(int i = 0; i < Tot_cells_; i++) {
+		int num;
+		input >> num >> tmp(0, i) >> tmp(1, i) >> tmp(2, i) >> tmp(3, i) >> tmp(4, i) >> tmp(5, i)\
+		>> tmp(6, i) >> tmp(7, i) >> tmp(8, i) >> tmp(9, i) >> tmp(10, i) >> tmp(11, i);
+	}
+
+	for(auto& elem : Elements){
+		for (int i=0; i< elem.nb; i++) {
+			// std::cout << elem.S.rows() << "; " << elem.S.cols() << std::endl;
+			// std::cout << elem.E.rows() << "; " << elem.E.cols() << std::endl;
+			// std::cout <<  "i: " << elem.global_indices[-1] << std::endl;
+			for(int j=0; j<6; j++){
+				elem.S(j,i) = tmp(j,i);
+				elem.E(j,i) = tmp(j+6,i);
+				// elem.S(j,i) = tmp(j,elem.global_indices[i]-1);
+				// elem.E(j,i) = tmp(j+6,elem.global_indices[i]-1);
+			}
+		}
+	}
+
+	// std::cout << "end of read element fields." << std::endl;
+
+}
+
 void Mesh::read_node_fields(const std::string& filename) {
 	std::ifstream input;
 	input.open(filename, std::ios::in);
 	if (!input.is_open()) {
-	std::cout << "Error: Cannot open file" << filename << std::endl;
+	std::cout << "Error: Cannot open file " << filename << std::endl;
 	}
 	std::cout << "Reading " << filename << std::endl;
 
 	std::string ligne {};
 	std::getline(input, ligne); // Commentaires
 
-	// X.resize(3,nb_vertices_);
-
 	for(int i = 0; i < nb_vertices_; i++) {
 		int num;
-		input >> num >> Vertices[i].X(0) >> Vertices[i].X(1) >> Vertices[i].X(2);
+		double ux, uy, uz;
+		input >> num >> ux >> uy >> uz;
+		if(abs(ux)>1e-8){Vertices[num-1].X(0) = ux;}else{Vertices[num-1].X(0) = 0.;}
+		if(abs(uy)>1e-8){Vertices[num-1].X(1) = uy;}else{Vertices[num-1].X(1) = 0.;}
+		if(abs(uz)>1e-8){Vertices[num-1].X(2) = uz;}else{Vertices[num-1].X(2) = 0.;}
 	}
 
 }
@@ -459,7 +501,7 @@ void Mesh::write_mesh(const std::string& filename) {
 	std::ofstream output;
 	output.open(filename+".mesh", std::ios::out);
 	if (!output.is_open()) {
-	std::cout << "Error: Cannot open file" << filename << std::endl;
+	std::cout << "Error: Cannot open file " << filename << std::endl;
 	}
 	std::cout << "writing " << filename+".mesh" << std::endl;
 
@@ -496,7 +538,7 @@ void Mesh::write_msh(const std::string& filename, int verbosity=1) {
 	std::ofstream output;
 	output.open(filename+".msh", std::ios::out);
 	if (!output.is_open()) {
-	std::cout << "Error: Cannot open file" << filename << std::endl;
+	std::cout << "Error: Cannot open file " << filename << std::endl;
 	}
 	std::cout << "writing " << filename+".msh" << std::endl;
 
@@ -523,7 +565,7 @@ void Mesh::write_msh(const std::string& filename, int verbosity=1) {
 
 	for(auto& elem : Elements){
 		for (int i=0; i< elem.nb; i++) {
-			output << elem.global_indices(i) << " " << elem.msh_type << " ";
+			output << elem.global_indices[i] << " " << elem.msh_type << " ";
 			output << elem.Markers.rows() << " ";
 			for (int j =0; j < elem.Markers.rows(); j++)
 				output << elem.Markers(j,i) << " ";
@@ -655,20 +697,20 @@ void Mesh::write_vtk(const std::string& filename, int verbosity=0) {
 			}
 		}
 
-		output << "SCALARS SDEG double 1\n";
-		output << "LOOKUP_TABLE default\n";
-		for(auto& elem : Elements){
-			for (int i=0; i< elem.nb; i++) {
-				output << elem.SDEG(0, i) << std::endl;
-			}
-		}
-		output << "SCALARS QUADSCRT double 1\n";
-		output << "LOOKUP_TABLE default\n";
-		for(auto& elem : Elements){
-			for (int i=0; i< elem.nb; i++) {
-				output << elem.QUADSCRT(0, i) << std::endl;
-			}
-		}
+		// output << "SCALARS SDEG double 1\n";
+		// output << "LOOKUP_TABLE default\n";
+		// for(auto& elem : Elements){
+		// 	for (int i=0; i< elem.nb; i++) {
+		// 		output << elem.SDEG(0, i) << std::endl;
+		// 	}
+		// }
+		// output << "SCALARS QUADSCRT double 1\n";
+		// output << "LOOKUP_TABLE default\n";
+		// for(auto& elem : Elements){
+		// 	for (int i=0; i< elem.nb; i++) {
+		// 		output << elem.QUADSCRT(0, i) << std::endl;
+		// 	}
+		// }
 	}
 
 	if (exportAbaqusDisplacement){
@@ -764,7 +806,7 @@ void Mesh::write_ori_txt(const std::string& filename) {
 	std::ofstream output;
 	output.open(filename+"_ori.txt", std::ios::out);
 	if (!output.is_open()) {
-		std::cout << "Error: Cannot open file" << filename << std::endl;
+		std::cout << "Error: Cannot open file " << filename << std::endl;
 	}
 	std::cout << "writing " << filename+"_ori.txt" << std::endl;
 
@@ -774,7 +816,7 @@ void Mesh::write_ori_txt(const std::string& filename) {
 
 	for(auto& elem : Elements){
 		for (int i=0; i< elem.nb; i++) {
-			output << elem.global_indices(i) << " ";
+			output << elem.global_indices[i] << " ";
 			
 			// output << elem.DD_weight(0, i) << " ";
 			
@@ -797,7 +839,7 @@ void Mesh::write_ori_inp(const std::string& filename) {
 	std::ofstream output;
 	output.open(filename+"_ori.inp", std::ios::out);
 	if (!output.is_open()) {
-	std::cout << "Error: Cannot open file" << filename << std::endl;
+	std::cout << "Error: Cannot open file " << filename << std::endl;
 	}
 	std::cout << "writing " << filename+"_ori.inp" << std::endl;
 
@@ -810,7 +852,7 @@ void Mesh::write_ori_inp(const std::string& filename) {
 
 	for(auto& elem : Elements){
 		for (int i=0; i< elem.nb; i++) {
-			output << elem.global_indices(i) << ", ";
+			output << elem.global_indices[i] << ", ";
 			if(!isShell){
 				output << std::setprecision(15) <<  elem.U(0, i) << ", " <<  elem.U(1, i) << ", " <<  elem.U(2, i) << ", ";
 				output << std::setprecision(15) << -elem.W(0, i) << ", " << -elem.W(1, i) << ", " << -elem.W(2, i) << std::endl;
@@ -876,11 +918,87 @@ void Mesh::extract_AbaqusSets(){
 	return;
 }
 
+void Mesh::elSets_delam(double locX=40., double locZ=160., double radius=10., double radius_offset_X=0.,  double radius_offset_Z=0.){
+
+	if (isNsetDone)
+		return;
+
+	// ~~~~~~~~~ ELSET ~~~~~~~~~
+
+	// std::vector<int> new_nset;
+	// new_nset.resize(0);
+	// for(int nset : nsets)
+	// 	new_nsets
+	nb_elset+=1;
+
+	for(auto& elem : Elements){
+		for(int l=0; l < elem.nb; ++l) {
+
+			Vector3d elem_center = elem.center(Vertices, l);
+			// Elliptic region with big axes in a direction (X or Z) where opennig is critical
+			double dist= pow(locX-elem_center[0],2)/pow(radius+radius_offset_X,2) +\
+						pow(locZ-elem_center[2],2)/pow(radius+radius_offset_Z,2);
+
+			if (dist <= 1 && elem.Markers(0,l)==5){ // 1 for interlayer :: specific to an example
+				elem.Markers(0,l)=nb_elset;
+			}
+		}
+	}
+
+
+
+
+	// ~~~~~~~~~ NSET ~~~~~~~~~
+	nb_nset=6;
+	nsets.resize(nb_nset);
+	masterNodes.resize(nb_nset);
+
+	double xmin, xmax, ymin, ymax, zmin, zmax;
+	xmin=ymin=zmin=  10000;
+	xmax=ymax=zmax= -10000;
+	for (int i=0; i<nb_vertices_;i++) {
+		if (xmin > Vertices[i].coord(0)) {xmin = Vertices[i].coord(0);}
+		if (xmax < Vertices[i].coord(0)) {xmax = Vertices[i].coord(0);}
+		if (ymin > Vertices[i].coord(1)) {ymin = Vertices[i].coord(1);}
+		if (ymax < Vertices[i].coord(1)) {ymax = Vertices[i].coord(1);}
+		if (zmin > Vertices[i].coord(2)) {zmin = Vertices[i].coord(2);}
+		if (zmax < Vertices[i].coord(2)) {zmax = Vertices[i].coord(2);}
+	}
+
+	double epsi=0.01;
+
+	for (int i=0; i<nb_vertices_;i++) {
+		if (Vertices[i].coord(0)-xmin<epsi) {nsets[0].push_back(i);}
+		if (xmax-Vertices[i].coord(0)<epsi) {nsets[1].push_back(i);}
+		if (Vertices[i].coord(1)-ymin<epsi) {nsets[2].push_back(i);}
+		if (ymax-Vertices[i].coord(1)<epsi) {nsets[3].push_back(i);}
+		if (Vertices[i].coord(2)-zmin<epsi) {nsets[4].push_back(i);}
+		if (zmax-Vertices[i].coord(2)<epsi) {nsets[5].push_back(i);}
+	}
+
+	for(int j=0; j< nb_nset;j++) {
+		masterNodes[j](0)=0.0;
+		masterNodes[j](1)=0.0;
+		masterNodes[j](2)=0.0;
+		for(int i=0; i<nsets[j].size(); i++) {
+			masterNodes[j](0) += Vertices[nsets[j][i]].coord(0);
+			masterNodes[j](1) += Vertices[nsets[j][i]].coord(1);
+			masterNodes[j](2) += Vertices[nsets[j][i]].coord(2);
+		}
+		masterNodes[j](0)/=nsets[j].size();
+		masterNodes[j](1)/=nsets[j].size();
+		masterNodes[j](2)/=nsets[j].size();
+	}
+
+	isNsetDone = true;
+	return;
+}
+
 void Mesh::write_inp(const std::string& filename) {
 	std::ofstream output;
 	output.open(filename+"_mesh.inp", std::ios::out);
 	if (!output.is_open()) {
-	std::cout << "Error: Cannot open file" << filename << std::endl;
+	std::cout << "Error: Cannot open file " << filename << std::endl;
 	} else {
 		std::cout << "writing " << filename+"_mesh.inp" << std::endl;
 	}
@@ -911,7 +1029,7 @@ void Mesh::write_inp(const std::string& filename) {
 	if(elem.type != "Triangle" || elem.type != "Quadrilateral"){ // We would ony use 3D elements in Abaqus (that could change later)
 		output << "*ELEMENT, type=" << elem.abaqus_type << ", ELSET=" << elem.type << std::endl;
 		for (int i=0; i< elem.nb; i++) {
-			output << elem.global_indices(i) << ", ";
+			output << elem.global_indices[i] << ", ";
 			if(elem.type == "Cohesive"){
 				for (int j =0; j < elem.Nodes.rows()-1; j++)
 					output << elem.Nodes(cno[j],i)+1 << ", ";
@@ -935,7 +1053,7 @@ void Mesh::write_inp(const std::string& filename) {
 	// if(elem.type != "Triangle" || elem.type != "Quadrilateral"){ // We would ony use 3D elements in Abaqus (that could change later)
 	// 	output << "*ELEMENT, type=" << elem.abaqus_type << ", ELSET=" << elem.type << std::endl;
 	// 	for (int i=0; i< elem.nb; i++) {
-	// 		output << elem.global_indices(i) << ", ";
+	// 		output << elem.global_indices[i] << ", ";
 	// 		for (int j =0; j < elem.Nodes.rows()-1; j++)
 	// 			output << elem.Nodes(j,i)+1 << ", ";
 	// 		output << elem.Nodes(elem.Nodes.rows()-1,i)+1 << std::endl;
@@ -948,7 +1066,7 @@ void Mesh::write_inp(const std::string& filename) {
 	for(auto& elem : Elements){
 		if(elem.type != "Triangle" || elem.type != "Quadrilateral"){ // We would ony use 3D elements in Abaqus (that could change later)
 			for (int i=0; i< elem.nb; i++)
-				elsets[elem.Markers(0,i)-1].push_back(elem.global_indices(i));
+				elsets[elem.Markers(0,i)-1].push_back(elem.global_indices[i]);
 		}
 	}
 
@@ -964,12 +1082,12 @@ void Mesh::write_inp(const std::string& filename) {
 		for(auto& elem : Elements){
 			if(elem.type == "Cohesive"){
 				int cnt = 0;
-				Coh_elsets[cnt].push_back(elem.global_indices(0));
+				Coh_elsets[cnt].push_back(elem.global_indices[0]);
 				for (int i=1; i< elem.nb; i++){
-					if(elem.global_indices(i)-elem.global_indices(i-1)>1){
+					if(elem.global_indices[i]-elem.global_indices[i-1]>1){
 						cnt+=1;
 					}
-					Coh_elsets[cnt].push_back(elem.global_indices(i));
+					Coh_elsets[cnt].push_back(elem.global_indices[i]);
 				}
 			}
 		}
@@ -982,7 +1100,7 @@ void Mesh::write_inp(const std::string& filename) {
 	for(auto& elem : Elements){
 		if(elem.type != "Triangle" || elem.type != "Quadrilateral"){ // We would ony use 3D elements in Abaqus (that could change later)
 			for (int i=0; i< elem.nb; i++){
-				output << elem.global_indices(i);
+				output << elem.global_indices[i];
 				if ((i+1)%10 == 0) { output << "," << std::endl; }
 				else { output << ", "; }
 			}

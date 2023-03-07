@@ -49,7 +49,7 @@ public:
 	int nb_plies;
 
 	int cz_id, resin_id;
-	bool isResin, isCZ, isShell;
+	bool isResin, isCZ, isShell, writeTransformedMSH;
 
 	bool GaussianThickness, CornerThickness;
 	double sigma, length, ThicknessVar;
@@ -176,6 +176,9 @@ void Parameters::read(const std::string& filename) {
 
 		if (line.find("Dune_output")!=std::string::npos)
 			Dune_output = std::stoi(extract(line));
+
+		if (line.find("writeTransformedMSH(b)")!=std::string::npos)
+			writeTransformedMSH = std::stoi(extract(line));
 
 		if (line.find("Rsize(f)")!=std::string::npos)
 			rampSize = std::stod(extract(line));

@@ -5,14 +5,14 @@ import numpy as np
 # geometry in millimeters
 
 def write_parameters():
-	nb_plies = 8
+	nb_plies = 4
 	nb_wrinkles = 0
 	# Xlenght = 500.0
 	# Xlenght = 50.0
 	Xlenght = 100.0
 	# Ylenght = 50.0
 	# Ylenght = 50.0
-	Ylenght = 10.0
+	Ylenght = 2.0
 	Zlenght = 300.0
 	# Zlenght = 100.0
 	# Zlenght = 30.0
@@ -37,7 +37,8 @@ def write_parameters():
 	# StackSeq = [0., 0., 0.]
 	# StackSeq = [0., 0.]
 	
-	StackSeq = [45., -45., 0., 0., 0., 0., -45., 45.]
+	# StackSeq = [45., -45., 0., 0., 0., -45., 45.]
+	StackSeq = [0., 0., 90., 0.]
 	
 	# tot_ply_thickness = Ylenght
 	ply_thickness = np.full_like(StackSeq, Ylenght/(nb_plies+0.0))
@@ -45,16 +46,16 @@ def write_parameters():
 	ply_type = np.full_like(StackSeq, 0)
 
 	# tot_ply_thickness = Ylenght
-	# tot_ply_thickness = Ylenght + epsilon
-	tot_ply_thickness = Ylenght + 2*epsilon
+	tot_ply_thickness = Ylenght + epsilon
+	# tot_ply_thickness = Ylenght + 2*epsilon
 	ply_thickness = np.full_like(StackSeq, Ylenght/(nb_plies+0.0))
-	# ply_thickness[1] = epsilon
-	# ply_type[1] = 1
+	ply_thickness[1] = epsilon
+	ply_type[1] = 1
 
-	ply_thickness[2] = epsilon
-	ply_type[2] = 1
-	ply_thickness[5] = epsilon
-	ply_type[5] = 2
+	# ply_thickness[2] = epsilon
+	# ply_type[2] = 1
+	# ply_thickness[5] = epsilon
+	# ply_type[5] = 2
 
 
 	# WRINKLES Parameters
@@ -79,7 +80,7 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('name(s)                  : CornerDelam90\n') # mesh name
+	parameters.write('name(s)                  : ThinCorner\n') # mesh name
 	parameters.write('Shape(i)                 : 1\n')   # 0(default): Csection ; 1: flat laminate
 	parameters.write('Auto_Resin_betw_plies(b) : 0\n')   # 1: yes ; 0: no
 	parameters.write('cohezive_elements(b)     : 0\n')   # 1: yes ; 0: no
@@ -109,10 +110,10 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~MESH~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('lc(f)    : 1\n')        # mesh caracteristic size
-	parameters.write('dx(i)    : 40\n')       # 15
+	parameters.write('dx(i)    : 40\n')       # 15 // 40
 	parameters.write('ddy(i)   : 2\n')        #
 	# parameters.write('dz(i)    : 160\n')       #
-	parameters.write('dz(i)      : 10,40,40,10\n')  # 5,15,15,5
+	parameters.write('dz(i)      : 10,40,40,10\n')  # 5,15,15,5 // 10,40,40,10
 	parameters.write('dc(i)    : 0\n')        #
 	parameters.write('dflange(i) : 0\n')      # discretization of the flange
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -143,7 +144,7 @@ def write_parameters():
 	parameters.write('RotateRVE(b)           : 1\n')
 	parameters.write('RotateAxis(b)          : X\n') # "X" or "Z"
 	parameters.write('Rotate_start_end(f)    : 100,200\n') # to be matched with dz changes
-	parameters.write('AngleRotateRVE(f)      : 90.\n') # positive angle
+	parameters.write('AngleRotateRVE(f)      : 90\n') # positive angle
 	parameters.write('Rsize(f)               : 6.25\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~OUTPUT~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -153,8 +154,9 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~ABAQUS~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('Path2result(s)    : Abaqus/results/\n')
-	parameters.write('AbaqusOdbName(s)  : model\n')
+	parameters.write('Path2result(s)         : Abaqus/results/\n')
+	parameters.write('AbaqusOdbName(s)       : model\n')
+	parameters.write('writeTransformedMSH(b) : 1\n')
 
 
 	parameters.close()
