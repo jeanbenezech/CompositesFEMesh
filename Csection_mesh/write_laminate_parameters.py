@@ -5,14 +5,16 @@ import numpy as np
 # geometry in millimeters
 
 def write_parameters():
-	nb_plies = 4
+	# nb_plies = 7
+	nb_plies = 2
 	nb_wrinkles = 0
 	# Xlenght = 500.0
 	# Xlenght = 50.0
-	Xlenght = 100.0
+	Xlenght = 30.0
 	# Ylenght = 50.0
 	# Ylenght = 50.0
-	Ylenght = 2.0
+	Ylenght = 5
+	# Ylenght = 1.5
 	Zlenght = 300.0
 	# Zlenght = 100.0
 	# Zlenght = 30.0
@@ -37,19 +39,25 @@ def write_parameters():
 	# StackSeq = [0., 0., 0.]
 	# StackSeq = [0., 0.]
 	
-	# StackSeq = [45., -45., 0., 0., 0., -45., 45.]
-	StackSeq = [0., 0., 90., 0.]
+	# large model paper off/on
+	# StackSeq = [90.0, 0.0, 90.0, 0.0, 90.0, 0.0, 90.0]
+	# StackSeq = [-45.0, 45.0, 0.0, 0.0, 0.0, 45.0, -45.0]
+
+	# StackSeq = [0., 0., 90., 0.]
+	StackSeq = [ 0.0, 0.0 ]
 	
 	# tot_ply_thickness = Ylenght
 	ply_thickness = np.full_like(StackSeq, Ylenght/(nb_plies+0.0))
 	# 0 - plies ; 1 - resin // Here: only plies, if resin, it is done via auto resin otherwize need to be specified
 	ply_type = np.full_like(StackSeq, 0)
 
-	# tot_ply_thickness = Ylenght
-	tot_ply_thickness = Ylenght + epsilon
+	tot_ply_thickness = Ylenght
+	# tot_ply_thickness = Ylenght + epsilon
 	# tot_ply_thickness = Ylenght + 2*epsilon
 	ply_thickness = np.full_like(StackSeq, Ylenght/(nb_plies+0.0))
-	ply_thickness[1] = epsilon
+	# ply_thickness[0] = epsilon
+	ply_type[0] = 2
+	# ply_thickness[1] = epsilon
 	ply_type[1] = 1
 
 	# ply_thickness[2] = epsilon
@@ -80,7 +88,7 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('name(s)                  : ThinCorner\n') # mesh name
+	parameters.write('name(s)                  : BeamWeak\n') # mesh name
 	parameters.write('Shape(i)                 : 1\n')   # 0(default): Csection ; 1: flat laminate
 	parameters.write('Auto_Resin_betw_plies(b) : 0\n')   # 1: yes ; 0: no
 	parameters.write('cohezive_elements(b)     : 0\n')   # 1: yes ; 0: no
@@ -109,12 +117,12 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~MESH~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('lc(f)    : 1\n')        # mesh caracteristic size
-	parameters.write('dx(i)    : 40\n')       # 15 // 40
-	parameters.write('ddy(i)   : 2\n')        #
-	# parameters.write('dz(i)    : 160\n')       #
-	parameters.write('dz(i)      : 10,40,40,10\n')  # 5,15,15,5 // 10,40,40,10
-	parameters.write('dc(i)    : 0\n')        #
+	parameters.write('lc(f)      : 1\n')        # mesh caracteristic size
+	parameters.write('dx(i)      : 15\n')       # 15 // 40
+	parameters.write('ddy(i)     : 2\n')        #
+	# parameters.write('dz(i)      : 160\n')       #
+	parameters.write('dz(i)      : 150\n')  # 5,15,15,5 // 10,40,40,10
+	parameters.write('dc(i)      : 0\n')        #
 	parameters.write('dflange(i) : 0\n')      # discretization of the flange
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~TRANSFORMATION~~~~~~~~~~~~~~~~~~~\n')
@@ -138,10 +146,10 @@ def write_parameters():
 			parameters.write('Wori'+str(i)+'(f)    : '+str(random.uniform(minWori, maxWori))+'\n') # Orientation in degree
 			parameters.write('Wdamp'+str(i)+'(f)   : '+str(random.uniform(minWdampX, maxWdampX))+','+str(random.uniform(minWdampY, maxWdampY))+','+str(random.uniform(minWdampZ, maxWdampZ))+'\n') # reduction of the amplitude through each direction
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('~~~~~~~~~~~~~~~~~~~~~~RAMP~~~~~~~~~~~~~~~~~~~~~~~~\n')
+	parameters.write('~~~~~~~~~~~~~~~~GEO-TRANSFORMATION~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('Ramp(b)                : 0\n')
-	parameters.write('RotateRVE(b)           : 1\n')
+	parameters.write('RotateRVE(b)           : 0\n')
 	parameters.write('RotateAxis(b)          : X\n') # "X" or "Z"
 	parameters.write('Rotate_start_end(f)    : 100,200\n') # to be matched with dz changes
 	parameters.write('AngleRotateRVE(f)      : 90\n') # positive angle

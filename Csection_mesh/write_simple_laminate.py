@@ -5,23 +5,23 @@ import numpy as np
 # geometry in millimeters
 
 def write_parameters():
-	nb_plies = 1
+	nb_plies = 2
 	nb_wrinkles = 0
 	# Xlenght = 500.0
-	Xlenght = 30.0
+	Xlenght = 200.0
 	# Xlenght = 140.0
 	# Ylenght = 50.0
-	Ylenght = 2.0
+	Ylenght = 50.0
 	# Zlenght = 600.0
 	# Zlenght = 10.0
-	Zlenght = 500.0
+	Zlenght = 400.0
 	height = 0.0
 
-	StackSeq = [0.0]
+	StackSeq = [0.0, 0.0]
 	# StackSeq = [45.0, -45.0, 45.0, -45.0, 45.0, -45.0, 0.0, 90.0, 0.0, 90.0, 0.0, 90.0, 90.0, 0.0, 90.0, 0.0, 90.0, 0.0, -45.0, 45.0, -45.0, 45.0, -45.0, 45.0]
 
 	ply_thickness = np.full_like(StackSeq, Ylenght/(nb_plies+0.0))
-	ply_type = np.full_like(StackSeq, 0) # Only plies, resin is done via auto resin
+	ply_type = np.full_like(StackSeq, 1) # Only plies, resin is done via auto resin
 
 
 	# WRINKLES Parameters
@@ -55,7 +55,7 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('name(s)                  : simple_refine\n') # mesh name
+	parameters.write('name(s)                  : nlbeam\n') # mesh name
 	parameters.write('Shape(i)                 : 1\n')   # 0(default): Csection ; 1: flat laminate
 	parameters.write('Auto_Resin_betw_plies(b) : 0\n')   # 1: yes ; 0: no
 	parameters.write('cohezive_elements(b)     : 0\n')   # 1: yes ; 0: no
@@ -102,9 +102,9 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~MESH~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('lc(f)    : 1\n')        # mesh caracteristic size
-	parameters.write('dx(i)    : 24\n')       #
-	parameters.write('ddy(i)   : 3\n')        #
-	parameters.write('dz(i)    : 300\n')      #
+	parameters.write('dx(i)    : 7\n')       #
+	parameters.write('ddy(i)   : 2\n')        #
+	parameters.write('dz(i)    : 15\n')      #
 	parameters.write('dc(i)    : 0\n')        #
 	parameters.write('dflange(i) : 0\n')      # discretization of the flange
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -131,7 +131,7 @@ def write_parameters():
 			parameters.write('Wori'+str(i)+'(f)    : '+str(random.uniform(minWori, maxWori))+'\n') # Orientation in degree
 			parameters.write('Wdamp'+str(i)+'(f)   : '+str(random.uniform(minWdampX, maxWdampX))+','+str(random.uniform(minWdampY, maxWdampY))+','+str(random.uniform(minWdampZ, maxWdampZ))+'\n') # reduction of the amplitude through each direction
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('~~~~~~~~~~~~~~~~~~~~~~RAMP~~~~~~~~~~~~~~~~~~~~~~~~\n')
+	parameters.write('~~~~~~~~~~~~~~~~GEO-TRANSFORMATION~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('Rsize(f)          : 6.25\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')

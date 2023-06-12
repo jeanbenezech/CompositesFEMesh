@@ -10,7 +10,7 @@ if __name__ == '__main__':
 	param.init('parameters')
 
 	nb_ply=param.nbp
-	name=param.AbaqusName
+	name=param.name
 
 	f=open('Abaqus/'+name+'.inp','w')
 
@@ -55,15 +55,15 @@ if __name__ == '__main__':
 	# ~~~~~~~~~~~~~ MATERIAL ~~~~~~~~~~~~~
 	# Csection
 	f.write('**\n')
-	f.write('**---------- MATERIALS ---------- \n')
-	f.write('*MATERIAL, NAME=ALU \n')
-	f.write('*ELASTIC, TYPE=ISOTROPIC \n')
-	f.write('{}, {}\n'.format(70000., 0.3))
+	# f.write('**---------- MATERIALS ---------- \n')
+	# f.write('*MATERIAL, NAME=ALU \n')
+	# f.write('*ELASTIC, TYPE=ISOTROPIC \n')
+	# f.write('{}, {}\n'.format(70000., 0.3))
 
-	# f.write('*MATERIAL, NAME=AS4-8552 \n')
-	# f.write('*ELASTIC, TYPE=ENGINEERING CONSTANTS \n')
-	# f.write('{}, {}, {}, {}, {}, {}, {}, {}\n'.format(137300., 8800., 8800., 0.314, 0.314, 0.487, 4900., 4900.))
-	# f.write('{}\n'.format(2960.))
+	f.write('*MATERIAL, NAME=AS4-8552 \n')
+	f.write('*ELASTIC, TYPE=ENGINEERING CONSTANTS \n')
+	f.write('{}, {}, {}, {}, {}, {}, {}, {}\n'.format(137300., 8800., 8800., 0.314, 0.314, 0.487, 4900., 4900.))
+	f.write('{}\n'.format(2960.))
 
 	# Cohesive behavior
 	# f.write('*MATERIAL, name=CZ \n')

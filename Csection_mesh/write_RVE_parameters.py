@@ -88,7 +88,7 @@ def write_parameters():
 	parameters.write('dc(i)    : 0\n')        # corner :: CSPAR
 	parameters.write('dflange(i) : 0\n')      # discretization of the flange :: CSPAR
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('~~~~~~~~~~~~~~~~~TRANSFORMATION~~~~~~~~~~~~~~~~~~~\n')
+	parameters.write('~~~~~~~~~~~~~~~~GEO-TRANSFORMATION~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('wrinkle(i)             : '+str(nb_wrinkles)+'\n') # Do we need to add wrinkle in the gridMod (c++) code, 2+ for multiple wrinkles
 	parameters.write('Ramp(b)                : 0\n') # CSPAR

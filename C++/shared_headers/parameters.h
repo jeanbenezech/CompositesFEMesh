@@ -71,8 +71,10 @@ public:
 
 	// RVE rotation parameters
 	double angleRVE = 0.0;
+	double AngleRotateFlanges = 0.0;
 	double interior_radius_RVE = 0.0;
 	bool rotateRVE = false;
+	bool RotateFlanges = false;
 	std::string rotateAxis = "X";
 	Vector2d rotateStartStop;
 	Vector2d centerRot;
@@ -234,6 +236,14 @@ void Parameters::read(const std::string& filename) {
 		if (line.find("Rotate_start_end(f)")!=std::string::npos){
 			rotateStartStop = ExtractV2d(line);
 			need_default_rotate_start_stop=false;
+		}
+
+
+		if (line.find("RotateFlanges(b)")!=std::string::npos){
+			RotateFlanges = std::stoi(extract(line));
+		}
+		if (line.find("AngleRotateFlanges(f)")!=std::string::npos){
+			AngleRotateFlanges = std::stof(extract(line));
 		}
 
 		std::getline(input, line);

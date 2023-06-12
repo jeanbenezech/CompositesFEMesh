@@ -35,7 +35,8 @@ int main(int argc, const char *argv[]) {
 	if(param.Shape==0){
 		localCoorSyst(m, param);}
 	else{
-		globalCoorSyst(m, param);}
+		globalCoorSyst(m, param);
+	}
 
 	// if (param.Dune_output){ // DUNE
 	// 	attribute_weight(m, param);

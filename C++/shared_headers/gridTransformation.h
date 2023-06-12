@@ -89,6 +89,7 @@ class GridTransformation{
 
 	void RotateRVE(Vector3d& point, Parameters& param);
 	void flat_transformation(int& node, Vector3d& point, Parameters& param, std::tuple<double,double,double>& ramp_param);
+	void RotateFlanges(Vector3d& point, Parameters& param, std::tuple<double,double,double>& ramp_param);
 	void prepare_GT_for_Flat_model(int& node, Vector3d& point, Parameters& param, std::tuple<double,double,double>& ramp_param);
 	void AssociatedtoTopSurfaceNode(Mesh& m, Parameters& param);
 	void Gaussian_random_field_K_initialisation(Parameters& param);
@@ -389,6 +390,96 @@ void GridTransformation::RotateRVE(Vector3d& point, Parameters& param){
 		point = moved;
 	}
 
+}
+
+void GridTransformation::RotateFlanges(Vector3d& point, Parameters& param, std::tuple<double,double,double>& ramp_param){
+
+	double local_ymid = (local_ymin+local_ymax)/2.0;
+	Vector3d ramp;
+	ramp[2] = 0.0;
+	ramp[0] = -std::get<0>(ramp_param);
+	if(point[1]>=local_ymid)
+		ramp[1] = -std::get<1>(ramp_param);
+	else
+		ramp[1] = std::get<2>(ramp_param);
+	Vector3d init = point-ramp;
+
+
+	double zmid = param.Z/2.;
+	double myAngle;
+
+	// linear in z coord
+	if(init[2]>=zmid)
+		myAngle = param.AngleRotateFlanges * (init[2]-zmid)/(zmax-zmid);
+	else 
+		myAngle = param.AngleRotateFlanges * (zmid-init[2])/(zmid);
+	// To be edited if we want diff variation
+
+	Vector3d ref, moved;
+	double dist_from_bottom_surf=0.0;
+	moved = init;
+	if (init[1]>=local_ymax){
+		if(init[0]<=local_xmax){
+			dist_from_bottom_surf = (init[1] - local_ymax) - interior_radius;
+		} else {
+			dist_from_bottom_surf = sqrt((init[1]-local_ymax)*(init[1]-local_ymax)+(init[0]-local_xmax)*(init[0]-local_xmax))-interior_radius;
+		}
+		ref[0] = local_xmax;
+		ref[1] = local_ymax;
+		double local_radius = interior_radius + dist_from_bottom_surf;
+
+		if(init[0]<=local_xmax){
+			double theta = PI/2. - myAngle * PI / 180.0;
+
+			moved[1] = ref[1] + (local_radius) * sin(theta)\
+							  + (local_xmax-init[0]) * cos(-theta);
+			moved[0] = ref[0] + (local_radius) * cos(theta)\
+							  + (local_xmax-init[0]) * sin(-theta);
+
+		} else {
+			double o = init[1]-local_ymax;
+			double a = init[0]-local_xmax;
+			double local_theta = atan(o/a);
+
+			double theta = local_theta - (myAngle * PI / 180.0) * (local_theta/(PI/2.0));
+
+			moved[1] = ref[1] + (local_radius) * sin(theta);
+			moved[0] = ref[0] + (local_radius) * cos(theta);
+		}
+	}
+	else if (init[1]<=local_ymin){
+		if(init[0]<=local_xmax){
+			dist_from_bottom_surf = - init[1] + local_ymin - interior_radius;
+		} else {
+			dist_from_bottom_surf = sqrt((init[1]-local_ymin)*(init[1]-local_ymin)+(init[0]-local_xmax)*(init[0]-local_xmax))-interior_radius;
+		}
+		ref[0] = local_xmax;
+		ref[1] = interior_radius;
+		double local_radius = interior_radius + dist_from_bottom_surf;
+
+		if(init[0]<=local_xmax){
+			double theta = - PI/2. + myAngle * PI / 180.0;
+
+			moved[1] = ref[1] + (local_radius) * sin(theta)\
+							  - (local_xmax-init[0]) * cos(-theta);
+			moved[0] = ref[0] + (local_radius) * cos(theta)\
+							  - (local_xmax-init[0]) * sin(-theta);
+
+		} else {
+
+			double o = local_ymin - init[1];
+			double a = init[0]-local_xmax;
+			double local_theta = atan(o/a);
+
+			double theta = - local_theta + (myAngle * PI / 180.0) * (local_theta/(PI/2.0));
+
+			moved[1] = ref[1] + (local_radius) * sin(theta);
+			moved[0] = ref[0] + (local_radius) * cos(theta);
+
+		}
+	}
+
+	point = moved+ramp;
 }
 
 void GridTransformation::prepare_GT_for_Flat_model(int& node, Vector3d& point, Parameters& param, std::tuple<double,double,double>& ramp_param){

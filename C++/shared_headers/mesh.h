@@ -830,6 +830,8 @@ void Mesh::write_ori_txt(const std::string& filename) {
 			output << std::setprecision(15) <<  elem.U(0, i) << " " <<  elem.U(1, i) << " " <<  elem.U(2, i) << " ";
 			output << std::setprecision(15) << -elem.W(0, i) << " " << -elem.W(1, i) << " " << -elem.W(2, i) << " ";
 			output << std::setprecision(15) <<  elem.V(0, i) << " " <<  elem.V(1, i) << " " <<  elem.V(2, i) << std::endl;
+			
+			// output << "-1 0 1 0 0 -0 -0 1 0 -1 0" << std::endl;
 		}
 	}
 }

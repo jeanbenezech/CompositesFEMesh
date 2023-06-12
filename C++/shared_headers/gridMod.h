@@ -356,6 +356,11 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 			}
 		}
 
+
+		if(param.RotateFlanges){
+			GT.RotateFlanges(point, param, ramp_param);
+		}
+
 		if(param.rotateRVE){
 			GT.RotateRVE(point, param);
 		}
@@ -441,6 +446,10 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 				GT.Apply_Gaussian_random_field(baryMu, normal, value);
 			}
 
+			if(param.RotateFlanges){
+				GT.RotateFlanges(baryPu, param, ramp_param);
+				GT.RotateFlanges(baryMu, param, ramp_param);
+			}
 			if(param.rotateRVE){
 				GT.RotateRVE(baryPu, param);
 				GT.RotateRVE(baryMu, param);
@@ -495,6 +504,11 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 				value/=sum;
 				value*=local_weight;
 				GT.Apply_Gaussian_random_field(baryMv, normal, value);
+			}
+
+			if(param.RotateFlanges){
+				GT.RotateFlanges(baryPv, param, ramp_param);
+				GT.RotateFlanges(baryMv, param, ramp_param);
 			}
 
 			if(param.rotateRVE){
@@ -552,6 +566,11 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 				value/=sum;
 				value*=local_weight;
 				GT.Apply_Gaussian_random_field(baryMw, normal, value);
+			}
+
+			if(param.RotateFlanges){
+				GT.RotateFlanges(baryPw, param, ramp_param);
+				GT.RotateFlanges(baryPw, param, ramp_param);
 			}
 
 			if(param.rotateRVE){
