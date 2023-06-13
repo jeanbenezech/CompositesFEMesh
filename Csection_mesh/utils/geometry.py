@@ -65,12 +65,11 @@ class geometry():
 
 		len_PG=param.nbp
 
-		resin_from_StackSeq = 0;
+		param.resin_from_StackSeq = 0
 		for v in param.StackSeq:
-			if v[2] == 1:
-				resin_from_StackSeq = 1;
-		if resin_from_StackSeq== 1:
-			len_PG+=1 # +1 for the resin layer group
+			if v[2] > 0:
+				param.resin_from_StackSeq = max(param.resin_from_StackSeq,int(v[2]))
+		len_PG += param.resin_from_StackSeq  # +1 for each the resin layer group
 
 		if param.resin==1:
 			len_PG+=1 # +1 for the resin layer group
@@ -158,10 +157,12 @@ class geometry():
 			for dz in param.dz[1:]:
 				f.write(', '+str(dz))
 			f.write('}, {'+str(1/len(param.dz)))
+			i=1
 			for dz in param.dz[1:-1]:
-				f.write(', '+str(1/len(param.dz)))
+				f.write(', '+str((1+i)/len(param.dz)))
+				i+=1
 			f.write(', 1} }; Recombine; }\n')
-		else: # Param + len(dz)>1
+		else: # Ramp + len(dz)>1
 			assert len(param.dz) == len(param.dz_intervals)
 			f.write('; Layers{ {'+str(param.dz[0]))
 			for dz in param.dz[1:]:

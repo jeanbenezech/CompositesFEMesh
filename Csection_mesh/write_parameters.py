@@ -1,12 +1,12 @@
+import matplotlib.cm as cm
+import matplotlib.pyplot as plt
+import random
+import sys
 import numpy as np
 np.random.seed(123)
 
-import sys
-import random
-import matplotlib.pyplot as plt
 # from skopt.space import Space
 # from skopt.sampler import Lhs
-import matplotlib.cm as cm
 
 # geometry in millimeters
 
@@ -53,11 +53,10 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0
 	minWori = -20
 	maxWori = 20
 
-
-	if (cnt>0):
-		parameters=open('parameters_'+str(cnt)+'.txt','w')
+	if (cnt > 0):
+		parameters = open('parameters_'+str(cnt)+'.txt', 'w')
 	else:
-		parameters=open('parameters.txt','w')
+		parameters = open('parameters.txt', 'w')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -73,9 +72,10 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~GEOMETRY~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('np(i)         : '+str(nb_plies)+'\n')     # 6, 12 or 24 # TODO: find a clever way of setting stacking sequence
+	# 6, 12 or 24 # TODO: find a clever way of setting stacking sequence
+	parameters.write('np(i)         : '+str(nb_plies)+'\n')
 	parameters.write('X(f)          : '+str(Xlength)+'\n')   #
-	parameters.write('Y(f)          : '+str(Ylength)+'\n')  #
+	parameters.write('Y(f)          : '+str(tot_ply_thickness)+'\n')  #
 	parameters.write('R(f)          : '+str(r_int)+'\n')    #
 	parameters.write('Height(f)     : '+str(height)+'\n')    #
 	parameters.write('Z(f)          : '+str(Zlength)+'\n')   #
@@ -85,10 +85,12 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	# Note - the below if statement is just for neat formatting of the parameter file. Presumably also gmsh defines the coordinate system at 90 degrees to the way we do. Check this
 	for i in range(nb_plies):
-		if i<10:
-			parameters.write('p'+str(i)+'(f,f,b)   : '+str(StackSeq[i]+90.0)+','+str(ply_thickness[i])+','+str(ply_type[i])+'\n')
+		if i < 10:
+			parameters.write('p'+str(i)+'(f,f,b)   : ' +
+			                 str(StackSeq[i]+90.0)+','+str(ply_thickness[i])+','+str(ply_type[i])+'\n')
 		else:
-			parameters.write('p'+str(i)+'(f,f,b)  : '+str(StackSeq[i]+90.0)+','+str(ply_thickness[i])+','+str(ply_type[i])+'\n')
+			parameters.write('p'+str(i)+'(f,f,b)  : ' +
+			                 str(StackSeq[i]+90.0)+','+str(ply_thickness[i])+','+str(ply_type[i])+'\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~MESH~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -102,7 +104,7 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0
 	parameters.write('~~~~~~~~~~~~~~~~~TRANSFORMATION~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('wrinkle(i)        : '+str(nb_wrinkles)+'\n') # Do we need to add wrinkle in the gridMod (c++) code, 2+ for multiple wrinkles
-	parameters.write('Ramp(b)           : 1\n') #
+	# parameters.write('Ramp(b)           : 1\n') # I think Jean moved this to GEO-TRANSFORMATION BELOW - UNCOMMENT IF THIS BREAKS THE CODE
 	parameters.write('Abaqus_output(b)  : 1\n') #
 	parameters.write('Dune_output(b)    : 0\n') #
 	if (nb_wrinkles>0):
@@ -110,37 +112,56 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0
 		parameters.write('~~~~~~~~~~~~~~~~~~~~WRINKLES~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('WID(s)    : Defect_'+str(cnt)+'\n')
-	# parameters.write('Wsize(f)    : '+str(p1)+'\n') # Amplitude max
-	# parameters.write('Wpos(f)     : 84.0,73.3,207.7\n') # center
-	# parameters.write('Wori(f)     : '+str(p4)+'\n') # Orientation in degree
-	# parameters.write('Wdamp(f)    : 8.0,'+str(p2)+','+str(p3)+'\n') # reduction of the amplitude through each direction
-	for i in range(nb_wrinkles):
-		if i<10:
-			parameters.write('Wsize'+str(i)+'(f)    : '+str(random.uniform(minWsize, maxWsize))+'\n') # Amplitude max
-			parameters.write('Wpos'+str(i)+'(f)     : '+str(random.uniform(minWposX, maxWposX))+','+str(random.uniform(minWposY, maxWposY))+','+str(random.uniform(minWposZ, maxWposZ))+'\n') # center
-			parameters.write('Wori'+str(i)+'(f)     : '+str(random.uniform(minWori, maxWori))+'\n') # Orientation in degree
-			parameters.write('Wdamp'+str(i)+'(f)    : '+str(random.uniform(minWdampX, maxWdampX))+','+str(random.uniform(minWdampY, maxWdampY))+','+str(random.uniform(minWdampZ, maxWdampZ))+'\n') # reduction of the amplitude through each direction
-		else:
-			parameters.write('Wsize'+str(i)+'(f)   : '+str(random.uniform(minWsize, maxWsize))+'\n') # Amplitude max
-			parameters.write('Wpos'+str(i)+'(f)    : '+str(random.uniform(minWposX, maxWposX))+','+str(random.uniform(minWposY, maxWposY))+','+str(random.uniform(minWposZ, maxWposZ))+'\n') # center
-			parameters.write('Wori'+str(i)+'(f)    : '+str(random.uniform(minWori, maxWori))+'\n') # Orientation in degree
-			parameters.write('Wdamp'+str(i)+'(f)   : '+str(random.uniform(minWdampX, maxWdampX))+','+str(random.uniform(minWdampY, maxWdampY))+','+str(random.uniform(minWdampZ, maxWdampZ))+'\n') # reduction of the amplitude through each direction
+		# parameters.write('Wsize(f)    : '+str(p1)+'\n') # Amplitude max
+		# parameters.write('Wpos(f)     : 84.0,73.3,207.7\n') # center
+		# parameters.write('Wori(f)     : '+str(p4)+'\n') # Orientation in degree
+		# parameters.write('Wdamp(f)    : 8.0,'+str(p2)+','+str(p3)+'\n') # reduction of the amplitude through each direction
+		for i in range(nb_wrinkles):
+			if i < 10:
+				parameters.write('Wsize'+str(i)+'(f)    : ' +
+								str(random.uniform(minWsize, maxWsize))+'\n')  # Amplitude max
+				parameters.write('Wpos'+str(i)+'(f)     : '+str(random.uniform(minWposX, maxWposX))+','+str(
+					random.uniform(minWposY, maxWposY))+','+str(random.uniform(minWposZ, maxWposZ))+'\n')  # center
+				# Orientation in degree
+				parameters.write('Wori'+str(i)+'(f)     : ' +
+								str(random.uniform(minWori, maxWori))+'\n')
+				parameters.write('Wdamp'+str(i)+'(f)    : '+str(random.uniform(minWdampX, maxWdampX))+','+str(random.uniform(minWdampY,
+								maxWdampY))+','+str(random.uniform(minWdampZ, maxWdampZ))+'\n')  # reduction of the amplitude through each direction
+			else:
+				parameters.write('Wsize'+str(i)+'(f)   : ' +
+								str(random.uniform(minWsize, maxWsize))+'\n')  # Amplitude max
+				parameters.write('Wpos'+str(i)+'(f)    : '+str(random.uniform(minWposX, maxWposX))+','+str(
+					random.uniform(minWposY, maxWposY))+','+str(random.uniform(minWposZ, maxWposZ))+'\n')  # center
+				# Orientation in degree
+				parameters.write('Wori'+str(i)+'(f)    : ' +
+								str(random.uniform(minWori, maxWori))+'\n')
+				parameters.write('Wdamp'+str(i)+'(f)   : '+str(random.uniform(minWdampX, maxWdampX))+','+str(random.uniform(minWdampY,
+								maxWdampY))+','+str(random.uniform(minWdampZ, maxWdampZ))+'\n')  # reduction of the amplitude through each direction
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('~~~~~~~~~~~~~~~~~~~~~~RAMP~~~~~~~~~~~~~~~~~~~~~~~~\n')
+	parameters.write('~~~~~~~~~~~~~~~~GEO-TRANSFORMATION~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('Rsize(f)          : 6.25\n')
-	parameters.write('StartEndinZdir(f) : '+str(start)+','+str(125.0)+','+str(50.0)+'\n')
+	parameters.write('Ramp(b)                : 1\n')
+	parameters.write('RotateFlanges(b)       : 1\n')
+	parameters.write('RotateRVE(b)           : 0\n')
+	parameters.write('RotateAxis(b)          : X\n') # "X" or "Z"
+	parameters.write('Rotate_start_end(f)    : 100,200\n') # to be matched with dz changes
+	parameters.write('AngleRotateRVE(f)      : 90\n') # positive angle
+	parameters.write('AngleRotateFlangeR(f)  : 3\n') # positive angle
+	parameters.write('AngleRotateFlangeL(f)  : 4\n') # positive angle
+	parameters.write('Rsize(f)               : 6.25\n')
+	parameters.write('StartEndinZdir(f)      : '+str(start) +
+	                 ','+str(125.0)+','+str(50.0)+'\n')
 	if (is_GaussianThickness):
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~GAUSSIAN~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-		parameters.write('Sigma(d)          : 0.1\n') #
-		parameters.write('Length(d)         : 10\n') #
+		parameters.write('Sigma(d)          : 0.1\n')
+		parameters.write('Length(d)         : 10\n')
 	if (is_CornerThickness):
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~CORNER THICKNESS~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-		parameters.write('ThicknessVar(d)   : 1\n') #
+		parameters.write('ThicknessVar(d)   : 1\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~ABAQUS~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -148,13 +169,13 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0
 	# parameters.write('AbaqusOdbName(s)  : C-spar_FINE_'+str(nb_plies)+'plies\n')
 	parameters.write('AbaqusOdbName(s)  : ' + model_name + '\n')
 
-
 	parameters.close()
+
 
 def plot_S_dampY(x, title, colors):
     fig, ax = plt.subplots()
-    for datax,datay,color in zip(np.array(x)[:, 0], np.array(x)[:, 1],colors):
-        plt.scatter(datax,datay,color=color)
+    for datax, datay, color in zip(np.array(x)[:, 0], np.array(x)[:, 1], colors):
+        plt.scatter(datax, datay, color=color)
     # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', label='samples')
     # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', markersize=80, alpha=0.5)
     # ax.legend(loc="best", numpoints=1)
@@ -165,10 +186,11 @@ def plot_S_dampY(x, title, colors):
     plt.title(title)
     plt.savefig(title+".png", dpi=150)
 
+
 def plot_S_dampZ(x, title, colors):
     fig, ax = plt.subplots()
-    for datax,datay,color in zip(np.array(x)[:, 0], np.array(x)[:, 2],colors):
-        plt.scatter(datax,datay,color=color)
+    for datax, datay, color in zip(np.array(x)[:, 0], np.array(x)[:, 2], colors):
+        plt.scatter(datax, datay, color=color)
     # plt.plot(np.array(x)[:, 0], np.array(x)[:, 2], 'bo', label='samples')
     # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', markersize=80, alpha=0.5)
     # ax.legend(loc="best", numpoints=1)
@@ -179,10 +201,11 @@ def plot_S_dampZ(x, title, colors):
     plt.title(title)
     plt.savefig(title+".png", dpi=150)
 
+
 def plot_S_Angle(x, title, colors):
     fig, ax = plt.subplots()
-    for datax,datay,color in zip(np.array(x)[:, 0], np.array(x)[:, 3],colors):
-        plt.scatter(datax,datay,color=color)
+    for datax, datay, color in zip(np.array(x)[:, 0], np.array(x)[:, 3], colors):
+        plt.scatter(datax, datay, color=color)
     # plt.plot(np.array(x)[:, 0], np.array(x)[:, 3], 'bo', label='samples')
     # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', markersize=80, alpha=0.5)
     # ax.legend(loc="best", numpoints=1)
@@ -193,10 +216,11 @@ def plot_S_Angle(x, title, colors):
     plt.title(title)
     plt.savefig(title+".png", dpi=150)
 
+
 def plot_DampYZ(x, title, colors):
     fig, ax = plt.subplots()
-    for datax,datay,color in zip(np.array(x)[:, 1], np.array(x)[:, 2],colors):
-        plt.scatter(datax,datay,color=color)
+    for datax, datay, color in zip(np.array(x)[:, 1], np.array(x)[:, 2], colors):
+        plt.scatter(datax, datay, color=color)
     # plt.plot(np.array(x)[:, 1], np.array(x)[:, 2], 'bo', label='samples')
     # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', markersize=80, alpha=0.5)
     # ax.legend(loc="best", numpoints=1)
@@ -206,6 +230,7 @@ def plot_DampYZ(x, title, colors):
     ax.set_ylim([3., 10.])
     plt.title(title)
     plt.savefig(title+".png", dpi=150)
+
 
 if __name__ == '__main__':
 
@@ -225,6 +250,5 @@ if __name__ == '__main__':
 
 	# for cnt in range(n_samples):
 	# 	write_parameters(cnt,np.array(x)[cnt, 0], np.array(x)[cnt, 1], np.array(x)[cnt, 2], np.array(x)[cnt, 3])
-
 
 	write_parameters()

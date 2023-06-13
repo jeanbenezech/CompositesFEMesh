@@ -125,10 +125,18 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 			parameters.write('Wori'+str(i)+'(f)    : '+str(random.uniform(minWori, maxWori))+'\n') # Orientation in degree
 			parameters.write('Wdamp'+str(i)+'(f)   : '+str(random.uniform(minWdampX, maxWdampX))+','+str(random.uniform(minWdampY, maxWdampY))+','+str(random.uniform(minWdampZ, maxWdampZ))+'\n') # reduction of the amplitude through each direction
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('~~~~~~~~~~~~~~~~~~~~~~RAMP~~~~~~~~~~~~~~~~~~~~~~~~\n')
+	parameters.write('~~~~~~~~~~~~~~~~GEO-TRANSFORMATION~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('Rsize(f)          : 6.25\n')
-	parameters.write('StartEndinZdir(f) : '+str(start)+','+str(125.0)+','+str(50.0)+'\n') # 1: starting of the ramp; 2: lenght of the ramp; 3: lenght of the middle section;
+	parameters.write('Ramp(b)                : 1\n')
+	parameters.write('RotateFlanges(b)       : 1\n')
+	parameters.write('RotateRVE(b)           : 0\n')
+	parameters.write('RotateAxis(b)          : X\n') # "X" or "Z"
+	parameters.write('Rotate_start_end(f)    : 100,200\n') # to be matched with dz changes
+	parameters.write('AngleRotateRVE(f)      : 90\n') # positive angle
+	parameters.write('AngleRotateFlangeR(f)  : 3\n') # positive angle
+	parameters.write('AngleRotateFlangeL(f)  : 15\n') # positive angle
+	parameters.write('Rsize(f)               : 6.25\n')
+	parameters.write('StartEndinZdir(f)      : '+str(start)+','+str(125.0)+','+str(50.0)+'\n')
 	if (is_GaussianThickness):
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~GAUSSIAN~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -148,61 +156,61 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 
 	parameters.close()
 
-def plot_S_dampY(x, title, colors):
-    fig, ax = plt.subplots()
-    for datax,datay,color in zip(np.array(x)[:, 0], np.array(x)[:, 1],colors):
-        plt.scatter(datax,datay,color=color)
-    # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', label='samples')
-    # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', markersize=80, alpha=0.5)
-    # ax.legend(loc="best", numpoints=1)
-    ax.set_xlabel("Size")
-    ax.set_xlim([2., 12.])
-    ax.set_ylabel("DampY")
-    ax.set_ylim([1., 6.])
-    plt.title(title)
-    plt.savefig(title+".png", dpi=150)
+# def plot_S_dampY(x, title, colors):
+#     fig, ax = plt.subplots()
+#     for datax,datay,color in zip(np.array(x)[:, 0], np.array(x)[:, 1],colors):
+#         plt.scatter(datax,datay,color=color)
+#     # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', label='samples')
+#     # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', markersize=80, alpha=0.5)
+#     # ax.legend(loc="best", numpoints=1)
+#     ax.set_xlabel("Size")
+#     ax.set_xlim([2., 12.])
+#     ax.set_ylabel("DampY")
+#     ax.set_ylim([1., 6.])
+#     plt.title(title)
+#     plt.savefig(title+".png", dpi=150)
 
-def plot_S_dampZ(x, title, colors):
-    fig, ax = plt.subplots()
-    for datax,datay,color in zip(np.array(x)[:, 0], np.array(x)[:, 2],colors):
-        plt.scatter(datax,datay,color=color)
-    # plt.plot(np.array(x)[:, 0], np.array(x)[:, 2], 'bo', label='samples')
-    # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', markersize=80, alpha=0.5)
-    # ax.legend(loc="best", numpoints=1)
-    ax.set_xlabel("Size")
-    ax.set_xlim([2., 12.])
-    ax.set_ylabel("DampZ")
-    ax.set_ylim([3., 10.])
-    plt.title(title)
-    plt.savefig(title+".png", dpi=150)
+# def plot_S_dampZ(x, title, colors):
+#     fig, ax = plt.subplots()
+#     for datax,datay,color in zip(np.array(x)[:, 0], np.array(x)[:, 2],colors):
+#         plt.scatter(datax,datay,color=color)
+#     # plt.plot(np.array(x)[:, 0], np.array(x)[:, 2], 'bo', label='samples')
+#     # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', markersize=80, alpha=0.5)
+#     # ax.legend(loc="best", numpoints=1)
+#     ax.set_xlabel("Size")
+#     ax.set_xlim([2., 12.])
+#     ax.set_ylabel("DampZ")
+#     ax.set_ylim([3., 10.])
+#     plt.title(title)
+#     plt.savefig(title+".png", dpi=150)
 
-def plot_S_Angle(x, title, colors):
-    fig, ax = plt.subplots()
-    for datax,datay,color in zip(np.array(x)[:, 0], np.array(x)[:, 3],colors):
-        plt.scatter(datax,datay,color=color)
-    # plt.plot(np.array(x)[:, 0], np.array(x)[:, 3], 'bo', label='samples')
-    # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', markersize=80, alpha=0.5)
-    # ax.legend(loc="best", numpoints=1)
-    ax.set_xlabel("Size")
-    ax.set_xlim([2., 12.])
-    ax.set_ylabel("Angle")
-    ax.set_ylim([-5., 5.])
-    plt.title(title)
-    plt.savefig(title+".png", dpi=150)
+# def plot_S_Angle(x, title, colors):
+#     fig, ax = plt.subplots()
+#     for datax,datay,color in zip(np.array(x)[:, 0], np.array(x)[:, 3],colors):
+#         plt.scatter(datax,datay,color=color)
+#     # plt.plot(np.array(x)[:, 0], np.array(x)[:, 3], 'bo', label='samples')
+#     # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', markersize=80, alpha=0.5)
+#     # ax.legend(loc="best", numpoints=1)
+#     ax.set_xlabel("Size")
+#     ax.set_xlim([2., 12.])
+#     ax.set_ylabel("Angle")
+#     ax.set_ylim([-5., 5.])
+#     plt.title(title)
+#     plt.savefig(title+".png", dpi=150)
 
-def plot_DampYZ(x, title, colors):
-    fig, ax = plt.subplots()
-    for datax,datay,color in zip(np.array(x)[:, 1], np.array(x)[:, 2],colors):
-        plt.scatter(datax,datay,color=color)
-    # plt.plot(np.array(x)[:, 1], np.array(x)[:, 2], 'bo', label='samples')
-    # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', markersize=80, alpha=0.5)
-    # ax.legend(loc="best", numpoints=1)
-    ax.set_xlabel("DampY")
-    ax.set_xlim([1., 6.])
-    ax.set_ylabel("DampZ")
-    ax.set_ylim([3., 10.])
-    plt.title(title)
-    plt.savefig(title+".png", dpi=150)
+# def plot_DampYZ(x, title, colors):
+#     fig, ax = plt.subplots()
+#     for datax,datay,color in zip(np.array(x)[:, 1], np.array(x)[:, 2],colors):
+#         plt.scatter(datax,datay,color=color)
+#     # plt.plot(np.array(x)[:, 1], np.array(x)[:, 2], 'bo', label='samples')
+#     # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', markersize=80, alpha=0.5)
+#     # ax.legend(loc="best", numpoints=1)
+#     ax.set_xlabel("DampY")
+#     ax.set_xlim([1., 6.])
+#     ax.set_ylabel("DampZ")
+#     ax.set_ylim([3., 10.])
+#     plt.title(title)
+#     plt.savefig(title+".png", dpi=150)
 
 if __name__ == '__main__':
 

@@ -11,7 +11,9 @@ def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, 
 	param = parameters()
 	param.init('parameters')
 	nb_ply=param.nbp
-	name=param.AbaqusName
+	# name=param.AbaqusName From my latest change - keep if it breaks code
+	name=param.name
+
 	f=open('Abaqus/'+name+'.inp','w')
 
 	# ~~~~~~~~~~~~~ HEADER ~~~~~~~~~~~~~
@@ -57,7 +59,7 @@ def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, 
 	# ~~~~~~~~~~~~~ MATERIAL ~~~~~~~~~~~~~
 	# Csection
 	f.write('**\n')
-	f.write('**---------- MATERIALS ---------- \n')
+	# f.write('**---------- MATERIALS ---------- \n')
 	# f.write('*MATERIAL, NAME=ALU \n')
 	# f.write('*ELASTIC, TYPE=ISOTROPIC \n')
 	# f.write('{}, {}\n'.format(70000., 0.3))

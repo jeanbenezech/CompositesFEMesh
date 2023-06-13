@@ -6,6 +6,7 @@
 #include <fstream>
 #include <cmath>
 #include <cstdlib>
+#define PI 3.14159265
 
 std::string extract(std::string line) {
 	std::string out;
@@ -48,7 +49,7 @@ public:
 	int nb_plies;
 
 	int cz_id, resin_id;
-	bool isResin, isCZ, isShell;
+	bool isResin, isCZ, isShell, writeTransformedMSH;
 
 	bool GaussianThickness, CornerThickness;
 	double sigma, length, ThicknessVar;
@@ -70,11 +71,17 @@ public:
 
 	// RVE rotation parameters
 	double angleRVE = 0.0;
+	double AngleRotateFlangeR = 0.0;
+	double AngleRotateFlangeL = 0.0;
 	double interior_radius_RVE = 0.0;
 	bool rotateRVE = false;
+	bool RotateFlanges = false;
+	std::string rotateAxis = "X";
+	Vector2d rotateStartStop;
+	Vector2d centerRot;
 
 	// Geometric parameters
-	double X, Y, Height;
+	double X, Y, Z, Height;
 
 	// Path to results
 	std::string path_to_abaqus_result;
@@ -105,6 +112,8 @@ void Parameters::read(const std::string& filename) {
 	wrinklePos.resize(0);
 	wrinkleDamp.resize(0);
 	wrinkleOri.resize(0);
+
+	bool need_default_rotate_start_stop=true;
 
 	while(!line.empty()){
 
@@ -155,6 +164,9 @@ void Parameters::read(const std::string& filename) {
 
 		if (line.find("Y(f)")!=std::string::npos)
 			Y = std::stod(extract(line));
+		
+		if (line.find("Z(f)")!=std::string::npos)
+			Z = std::stod(extract(line));
 
 		if (line.find("Height(f)")!=std::string::npos)
 			Height = std::stod(extract(line));
@@ -167,6 +179,9 @@ void Parameters::read(const std::string& filename) {
 
 		if (line.find("Dune_output")!=std::string::npos)
 			Dune_output = std::stoi(extract(line));
+
+		if (line.find("writeTransformedMSH(b)")!=std::string::npos)
+			writeTransformedMSH = std::stoi(extract(line));
 
 		if (line.find("Rsize(f)")!=std::string::npos)
 			rampSize = std::stod(extract(line));
@@ -215,12 +230,50 @@ void Parameters::read(const std::string& filename) {
 		if (line.find("AngleRotateRVE(f)")!=std::string::npos){
 			angleRVE = std::stof(extract(line));
 		}
-		if (line.find("InteriorRadiusRVE(f)")!=std::string::npos){
-			interior_radius_RVE = std::stof(extract(line));
+
+		if (line.find("RotateAxis(f)")!=std::string::npos)
+			rotateAxis = extract(line);
+
+		if (line.find("Rotate_start_end(f)")!=std::string::npos){
+			rotateStartStop = ExtractV2d(line);
+			need_default_rotate_start_stop=false;
+		}
+
+
+		if (line.find("RotateFlanges(b)")!=std::string::npos){
+			RotateFlanges = std::stoi(extract(line));
+		}
+		if (line.find("AngleRotateFlangeR(f)")!=std::string::npos){
+			AngleRotateFlangeR = std::stof(extract(line));
+		}
+		if (line.find("AngleRotateFlangeL(f)")!=std::string::npos){
+			AngleRotateFlangeL = std::stof(extract(line));
 		}
 
 		std::getline(input, line);
 	}
+
+
+
+	if (need_default_rotate_start_stop){
+		// Default value
+		if (rotateAxis=="X"){
+			rotateStartStop = {0., Z };
+		} else if (rotateAxis=="Z"){
+			rotateStartStop = {0., X };
+		}
+	}
+
+	if (rotateRVE){
+		if (angleRVE>0){
+			interior_radius_RVE = (rotateStartStop(1)-rotateStartStop(0)) / (angleRVE*PI / 180.);
+		} else {
+			std::cout << "the angle of rotate RVE must be positive" << std::endl; 
+			exit( 0 );
+		}
+	}
+
+
 
 	cz_id = -1;
 	resin_id = -1;
