@@ -14,7 +14,7 @@ np.random.seed(123)
 def write_parameters(cnt=-1, p1=0, p2=0, p3=0, p4=0):
 	# cnt appears to be used to keep track of if parameters are written for multiple cases, which could be useful
 	# nb_plies = 48
-	nb_plies = 5
+	nb_plies = 4
 	# nb_plies = 1
 	# t_ply = 0.4  # large model paper off/on
 	# t_ply = 0.196 # Define scalar ply thickness value, which will be duplicated later into an array containing thicknesses for each ply
@@ -83,7 +83,7 @@ def write_parameters(cnt=-1, p1=0, p2=0, p3=0, p4=0):
 	# StackSeq = [ 45.0, 0.0, -45.0]
 	# StackSeq = [ 45.0, -45.0, 0.0, 0.0, -45.0,  45.0]
 	# StackSeq = [ 45.0, -45.0, 0.0, 0.0, 0.0, -45.0,  45.0]
-	StackSeq = [ 45.0, 0.0, -45.0, -45.0, 45.0]
+	StackSeq = [ 45.0, 0.0, 0.0, -45.0]
 
 	# duplicate ply thickness into an array with the same dimensions as StackSeq
 
@@ -94,8 +94,8 @@ def write_parameters(cnt=-1, p1=0, p2=0, p3=0, p4=0):
 	# tot_ply_thickness = Ylength
 	ply_t = Ylength/float(nb_plies-1)
 	ply_thickness = np.full_like(StackSeq, ply_t)
-	ply_thickness[1] = epsilon
-	ply_type[1] = 1
+	ply_thickness[2] = epsilon
+	ply_type[2] = 1
 	# ply_thickness[3] = epsilon
 	# ply_type[3] = 2
 
@@ -126,7 +126,7 @@ def write_parameters(cnt=-1, p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	# parameters.write('name(s)                  : '+str(nb_plies)+'pliesCoarse\n')  # mesh name
-	parameters.write('name(s)                : CsparFiner_6plies_resin\n') # mesh name
+	parameters.write('name(s)                : Cspar_3plies_resin\n') # mesh name
 	# 0(default): Csection ; 1: flat laminate
 	parameters.write('Shape(i)                 : 0\n')
 	# 1: Laminate type model ; 0: Cspar 
@@ -168,15 +168,15 @@ def write_parameters(cnt=-1, p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('lc(f)      : 1\n')  # 1 mesh caracteristic size
 	# 50 discretization in X direction (plus one)
-	parameters.write('dx(i)      : 20\n') # 140
+	parameters.write('dx(i)      : 17\n') # 140
 	# 16 discretization of the flange (plus one)
-	parameters.write('dflange(i) : 7\n') # 30
+	parameters.write('dflange(i) : 6\n') # 30
 	# 2 discretization of ply thickness (plus one)
 	parameters.write('ddy(i)     : 2\n')
 	# parameters.write('dz(i)      : 75\n')   #150 discretization in Z direction (must be a multiple of 84 for ramps to be in the correct place for the 420mm long spar).
-	parameters.write('dz(i)      : 60\n')  # large example paper off/on 20,200,20
+	parameters.write('dz(i)      : 55\n')  # large example paper off/on 20,200,20
 	# 12 discretization of corners (plus one)
-	parameters.write('dc(i)      : 7\n') #20
+	parameters.write('dc(i)      : 6\n') #20
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~TRANSFORMATION~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -223,7 +223,7 @@ def write_parameters(cnt=-1, p1=0, p2=0, p3=0, p4=0):
 	parameters.write('RotateAxis(b)          : X\n') # "X" or "Z"
 	parameters.write('Rotate_start_end(f)    : 100,200\n') # to be matched with dz changes
 	parameters.write('AngleRotateRVE(f)      : 90\n') # positive angle
-	parameters.write('AngleRotateFlanges(f)  : 10\n') # positive angle
+	parameters.write('AngleRotateFlanges(f)  : 3\n') # positive angle
 	parameters.write('Rsize(f)               : 6.25\n')
 	parameters.write('StartEndinZdir(f)      : '+str(start) +
 	                 ','+str(125.0)+','+str(50.0)+'\n')

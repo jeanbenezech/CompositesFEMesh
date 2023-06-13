@@ -89,9 +89,11 @@ void Mesh::initialise(Parameters& param) {
 	nb_plies_=param.nb_plies;
 
 	stacking_sequence.resize(nb_plies_);
-
-	for(int i=0; i<nb_plies_; i++)
-		stacking_sequence[i] = param.StackSeq[i](0);
+	if (!isShell)
+		for(int i=0; i<nb_plies_; i++)
+			stacking_sequence[i] = param.StackSeq[i](0);
+	else
+		stacking_sequence[0]=0.;
 
 }
 

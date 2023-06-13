@@ -11,12 +11,17 @@ import matplotlib.cm as cm
 # geometry in millimeters
 
 def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
-	nb_plies = 1
+	nb_plies = 1 #fixed
 	nb_wrinkles = 0 # let it to 0
 	Xlenght = 140.0
-	Ylenght = 6.48 #6.48
-	Zlenght = 500.0
+	Ylength = 5.0 #6.48
+	Zlength = 420.0
 	height = 35 # height of the flanges
+
+	# assumes the end blocks have been placed such that the feature is exactly central
+	start = Zlength/2.0 - 150.0
+	r_int = 5.0  # internal radius
+	height = 50.0 - Ylength - r_int  # flange length
 	r_int = 5.0 # internal radius
 	is_coh = 0 # Not for shell
 
@@ -26,7 +31,7 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	# ply_thickness = Ylenght/(nb_plies+0.0)
 	StackSeq = [0.0]
 
-	ply_thickness = np.full_like(StackSeq, Ylenght/(nb_plies+0.0))
+	ply_thickness = np.full_like(StackSeq, Ylength/(nb_plies+0.0))
 	ply_type = np.full_like(StackSeq, 0) # Only plies, resin is done via auto resin
 
 
@@ -37,11 +42,11 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	minWposX = 0.11*Xlenght
 	maxWposX = 0.89*Xlenght
 
-	minWposY = height - 0.31*Ylenght
+	minWposY = height - 0.31*Ylength
 	maxWposY = height + 0.0
 
-	minWposZ = 0.11*Zlenght
-	maxWposZ = 0.89*Zlenght
+	minWposZ = 0.11*Zlength
+	maxWposZ = 0.89*Zlength
 
 	minWdampX = 2.0
 	maxWdampX = 9.0
@@ -76,10 +81,10 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('np(i)         : '+str(nb_plies)+'\n')     # 6, 12 or 24 # TODO: find a clever way of setting stacking sequence
 	parameters.write('X(f)          : '+str(Xlenght)+'\n')   #
-	parameters.write('Y(f)          : '+str(Ylenght)+'\n')  #
+	parameters.write('Y(f)          : '+str(Ylength)+'\n')  #
 	parameters.write('R(f)          : '+str(r_int)+'\n')    #
 	parameters.write('Height(f)     : '+str(height)+'\n')    #
-	parameters.write('Z(f)          : '+str(Zlenght)+'\n')   #
+	parameters.write('Z(f)          : '+str(Zlength)+'\n')   #
 	parameters.write('e(f)          : 0.01\n')  # Resin layer thickness
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~STACKSEQ~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -128,8 +133,16 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~GEO-TRANSFORMATION~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('Rsize(f)          : 6.25\n')
-	parameters.write('StartEndinZdir(f) : 100.0,125.0,50.0\n') # 1: starting of the ramp; 2: lenght of the ramp; 3: lenght of the middle section;
+	parameters.write('Ramp(b)                : 1\n')
+	parameters.write('RotateFlanges(b)       : 1\n')
+	parameters.write('RotateRVE(b)           : 0\n')
+	parameters.write('RotateAxis(b)          : X\n') # "X" or "Z"
+	parameters.write('Rotate_start_end(f)    : 100,200\n') # to be matched with dz changes
+	parameters.write('AngleRotateRVE(f)      : 90\n') # positive angle
+	parameters.write('AngleRotateFlanges(f)  : 3\n') # positive angle
+	parameters.write('Rsize(f)               : 6.25\n')
+	parameters.write('StartEndinZdir(f)      : '+str(start) +
+	                 ','+str(125.0)+','+str(50.0)+'\n')
 	if (is_GaussianThickness):
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~GAUSSIAN~~~~~~~~~~~~~~~~~~~~~~\n')
