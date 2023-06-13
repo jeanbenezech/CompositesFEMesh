@@ -405,20 +405,22 @@ void GridTransformation::RotateFlanges(Vector3d& point, Parameters& param, std::
 	Vector3d init = point-ramp;
 
 
-	double zmid = param.Z/2.;
+	// double zmid = param.Z/2.;
 	double myAngle;
-
 	// linear in z coord
-	if(init[2]>=zmid)
-		myAngle = param.AngleRotateFlanges * (init[2]-zmid)/(zmax-zmid);
-	else 
-		myAngle = param.AngleRotateFlanges * (zmid-init[2])/(zmid);
+	// if(init[2]>=zmid)
+	// 	myAngle = param.AngleRotateFlanges * (init[2]-zmid)/(zmax-zmid);
+	// else 
+	// 	myAngle = param.AngleRotateFlanges * (zmid-init[2])/(zmid);
 	// To be edited if we want diff variation
 
 	Vector3d ref, moved;
 	double dist_from_bottom_surf=0.0;
 	moved = init;
 	if (init[1]>=local_ymax){
+
+		myAngle = param.AngleRotateFlangeR;
+
 		if(init[0]<=local_xmax){
 			dist_from_bottom_surf = (init[1] - local_ymax) - interior_radius;
 		} else {
@@ -448,6 +450,9 @@ void GridTransformation::RotateFlanges(Vector3d& point, Parameters& param, std::
 		}
 	}
 	else if (init[1]<=local_ymin){
+
+		myAngle = param.AngleRotateFlangeL;
+
 		if(init[0]<=local_xmax){
 			dist_from_bottom_surf = - init[1] + local_ymin - interior_radius;
 		} else {

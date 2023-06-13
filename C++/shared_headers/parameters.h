@@ -71,7 +71,8 @@ public:
 
 	// RVE rotation parameters
 	double angleRVE = 0.0;
-	double AngleRotateFlanges = 0.0;
+	double AngleRotateFlangeR = 0.0;
+	double AngleRotateFlangeL = 0.0;
 	double interior_radius_RVE = 0.0;
 	bool rotateRVE = false;
 	bool RotateFlanges = false;
@@ -242,8 +243,11 @@ void Parameters::read(const std::string& filename) {
 		if (line.find("RotateFlanges(b)")!=std::string::npos){
 			RotateFlanges = std::stoi(extract(line));
 		}
-		if (line.find("AngleRotateFlanges(f)")!=std::string::npos){
-			AngleRotateFlanges = std::stof(extract(line));
+		if (line.find("AngleRotateFlangeR(f)")!=std::string::npos){
+			AngleRotateFlangeR = std::stof(extract(line));
+		}
+		if (line.find("AngleRotateFlangeL(f)")!=std::string::npos){
+			AngleRotateFlangeL = std::stof(extract(line));
 		}
 
 		std::getline(input, line);

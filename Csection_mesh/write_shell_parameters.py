@@ -4,8 +4,8 @@ np.random.seed(123)
 import sys
 import random
 import matplotlib.pyplot as plt
-from skopt.space import Space
-from skopt.sampler import Lhs
+# from skopt.space import Space
+# from skopt.sampler import Lhs
 import matplotlib.cm as cm
 
 # geometry in millimeters
@@ -139,7 +139,8 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('RotateAxis(b)          : X\n') # "X" or "Z"
 	parameters.write('Rotate_start_end(f)    : 100,200\n') # to be matched with dz changes
 	parameters.write('AngleRotateRVE(f)      : 90\n') # positive angle
-	parameters.write('AngleRotateFlanges(f)  : 3\n') # positive angle
+	parameters.write('AngleRotateFlangeR(f)  : 3\n') # positive angle
+	parameters.write('AngleRotateFlangeL(f)  : 15\n') # positive angle
 	parameters.write('Rsize(f)               : 6.25\n')
 	parameters.write('StartEndinZdir(f)      : '+str(start) +
 	                 ','+str(125.0)+','+str(50.0)+'\n')
@@ -163,61 +164,61 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 
 	parameters.close()
 
-def plot_S_dampY(x, title, colors):
-    fig, ax = plt.subplots()
-    for datax,datay,color in zip(np.array(x)[:, 0], np.array(x)[:, 1],colors):
-        plt.scatter(datax,datay,color=color)
-    # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', label='samples')
-    # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', markersize=80, alpha=0.5)
-    # ax.legend(loc="best", numpoints=1)
-    ax.set_xlabel("Size")
-    ax.set_xlim([2., 12.])
-    ax.set_ylabel("DampY")
-    ax.set_ylim([1., 6.])
-    plt.title(title)
-    plt.savefig(title+".png", dpi=150)
+# def plot_S_dampY(x, title, colors):
+#     fig, ax = plt.subplots()
+#     for datax,datay,color in zip(np.array(x)[:, 0], np.array(x)[:, 1],colors):
+#         plt.scatter(datax,datay,color=color)
+#     # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', label='samples')
+#     # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', markersize=80, alpha=0.5)
+#     # ax.legend(loc="best", numpoints=1)
+#     ax.set_xlabel("Size")
+#     ax.set_xlim([2., 12.])
+#     ax.set_ylabel("DampY")
+#     ax.set_ylim([1., 6.])
+#     plt.title(title)
+#     plt.savefig(title+".png", dpi=150)
 
-def plot_S_dampZ(x, title, colors):
-    fig, ax = plt.subplots()
-    for datax,datay,color in zip(np.array(x)[:, 0], np.array(x)[:, 2],colors):
-        plt.scatter(datax,datay,color=color)
-    # plt.plot(np.array(x)[:, 0], np.array(x)[:, 2], 'bo', label='samples')
-    # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', markersize=80, alpha=0.5)
-    # ax.legend(loc="best", numpoints=1)
-    ax.set_xlabel("Size")
-    ax.set_xlim([2., 12.])
-    ax.set_ylabel("DampZ")
-    ax.set_ylim([3., 10.])
-    plt.title(title)
-    plt.savefig(title+".png", dpi=150)
+# def plot_S_dampZ(x, title, colors):
+#     fig, ax = plt.subplots()
+#     for datax,datay,color in zip(np.array(x)[:, 0], np.array(x)[:, 2],colors):
+#         plt.scatter(datax,datay,color=color)
+#     # plt.plot(np.array(x)[:, 0], np.array(x)[:, 2], 'bo', label='samples')
+#     # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', markersize=80, alpha=0.5)
+#     # ax.legend(loc="best", numpoints=1)
+#     ax.set_xlabel("Size")
+#     ax.set_xlim([2., 12.])
+#     ax.set_ylabel("DampZ")
+#     ax.set_ylim([3., 10.])
+#     plt.title(title)
+#     plt.savefig(title+".png", dpi=150)
 
-def plot_S_Angle(x, title, colors):
-    fig, ax = plt.subplots()
-    for datax,datay,color in zip(np.array(x)[:, 0], np.array(x)[:, 3],colors):
-        plt.scatter(datax,datay,color=color)
-    # plt.plot(np.array(x)[:, 0], np.array(x)[:, 3], 'bo', label='samples')
-    # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', markersize=80, alpha=0.5)
-    # ax.legend(loc="best", numpoints=1)
-    ax.set_xlabel("Size")
-    ax.set_xlim([2., 12.])
-    ax.set_ylabel("Angle")
-    ax.set_ylim([-5., 5.])
-    plt.title(title)
-    plt.savefig(title+".png", dpi=150)
+# def plot_S_Angle(x, title, colors):
+#     fig, ax = plt.subplots()
+#     for datax,datay,color in zip(np.array(x)[:, 0], np.array(x)[:, 3],colors):
+#         plt.scatter(datax,datay,color=color)
+#     # plt.plot(np.array(x)[:, 0], np.array(x)[:, 3], 'bo', label='samples')
+#     # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', markersize=80, alpha=0.5)
+#     # ax.legend(loc="best", numpoints=1)
+#     ax.set_xlabel("Size")
+#     ax.set_xlim([2., 12.])
+#     ax.set_ylabel("Angle")
+#     ax.set_ylim([-5., 5.])
+#     plt.title(title)
+#     plt.savefig(title+".png", dpi=150)
 
-def plot_DampYZ(x, title, colors):
-    fig, ax = plt.subplots()
-    for datax,datay,color in zip(np.array(x)[:, 1], np.array(x)[:, 2],colors):
-        plt.scatter(datax,datay,color=color)
-    # plt.plot(np.array(x)[:, 1], np.array(x)[:, 2], 'bo', label='samples')
-    # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', markersize=80, alpha=0.5)
-    # ax.legend(loc="best", numpoints=1)
-    ax.set_xlabel("DampY")
-    ax.set_xlim([1., 6.])
-    ax.set_ylabel("DampZ")
-    ax.set_ylim([3., 10.])
-    plt.title(title)
-    plt.savefig(title+".png", dpi=150)
+# def plot_DampYZ(x, title, colors):
+#     fig, ax = plt.subplots()
+#     for datax,datay,color in zip(np.array(x)[:, 1], np.array(x)[:, 2],colors):
+#         plt.scatter(datax,datay,color=color)
+#     # plt.plot(np.array(x)[:, 1], np.array(x)[:, 2], 'bo', label='samples')
+#     # plt.plot(np.array(x)[:, 0], np.array(x)[:, 1], 'bo', markersize=80, alpha=0.5)
+#     # ax.legend(loc="best", numpoints=1)
+#     ax.set_xlabel("DampY")
+#     ax.set_xlim([1., 6.])
+#     ax.set_ylabel("DampZ")
+#     ax.set_ylim([3., 10.])
+#     plt.title(title)
+#     plt.savefig(title+".png", dpi=150)
 
 if __name__ == '__main__':
 
