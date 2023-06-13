@@ -10,7 +10,7 @@ import matplotlib.cm as cm
 
 # geometry in millimeters
 
-def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0, total_height = 55.0, model_name = 'CSpar'):
+def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0, height = 55.0, model_name = 'CSpar'):
 	# t_ply = ply thickness
 	# Zlength = effective length of the spar (between end blocks)
 	# total_height = distance from tip of the flanges to the outer surface of the web
@@ -20,7 +20,7 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0
 	nb_wrinkles = 0
 	Xlength = 140.0 # This is the distance along the web of the outer section of the spar between the radii. 140mm is correct for 5mm internal radii
 	Ylength = nb_plies*t_ply # laminate thickness
-	start = Zlength/2.0 - 150 # assumes the end blocks have been placed such that the feature is exactly central
+	start = Zlength/2.0 - 150.0 # assumes the end blocks have been placed such that the feature is exactly central
 	r_int = 5.0 # internal radius
 	height = 55.0 - Ylength - r_int # flange length
 	is_coh = 0
@@ -210,10 +210,6 @@ def plot_DampYZ(x, title, colors):
 if __name__ == '__main__':
 
 	# For Chensen
-	# n_samples = 100
-	# space = Space([(2., 12.), (1., 6.), (3., 10.), (-5., 5.)])
-	# lhs = Lhs(lhs_type="classic", criterion=None)
-	# x = lhs.generate(space.dimensions, n_samples)
 
 	# colors = cm.coolwarm(np.linspace(0, 1, n_samples))
 	# plot_S_dampY(x, 'Size vs dampY',colors)
