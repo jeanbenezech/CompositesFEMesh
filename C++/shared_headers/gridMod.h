@@ -356,7 +356,6 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 			}
 		}
 
-
 		if(param.RotateFlanges){
 			GT.RotateFlanges(point, param, ramp_param);
 		}

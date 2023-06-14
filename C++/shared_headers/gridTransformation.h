@@ -397,9 +397,9 @@ void GridTransformation::RotateFlanges(Vector3d& point, Parameters& param, std::
 	double local_ymid = (local_ymin+local_ymax)/2.0;
 	Vector3d ramp;
 	ramp[2] = 0.0;
-	ramp[0] = -std::get<0>(ramp_param);
+	ramp[0] = - std::get<0>(ramp_param);
 	if(point[1]>=local_ymid)
-		ramp[1] = -std::get<1>(ramp_param);
+		ramp[1] = - std::get<1>(ramp_param);
 	else
 		ramp[1] = std::get<2>(ramp_param);
 	Vector3d init = point-ramp;
@@ -419,7 +419,7 @@ void GridTransformation::RotateFlanges(Vector3d& point, Parameters& param, std::
 	moved = init;
 	if (init[1]>=local_ymax){
 
-		myAngle = param.AngleRotateFlangeR;
+		myAngle = param.AngleRotateFlangeR; // 0
 
 		if(init[0]<=local_xmax){
 			dist_from_bottom_surf = (init[1] - local_ymax) - interior_radius;
@@ -448,8 +448,10 @@ void GridTransformation::RotateFlanges(Vector3d& point, Parameters& param, std::
 			moved[1] = ref[1] + (local_radius) * sin(theta);
 			moved[0] = ref[0] + (local_radius) * cos(theta);
 		}
-	}
-	else if (init[1]<=local_ymin){
+
+		point = moved+ramp;
+		// return;
+	} else if (init[1]<=local_ymin){
 
 		myAngle = param.AngleRotateFlangeL;
 
@@ -482,9 +484,12 @@ void GridTransformation::RotateFlanges(Vector3d& point, Parameters& param, std::
 			moved[0] = ref[0] + (local_radius) * cos(theta);
 
 		}
-	}
 
-	point = moved+ramp;
+
+		point = moved+ramp;
+		// return;
+	} 
+
 }
 
 void GridTransformation::prepare_GT_for_Flat_model(int& node, Vector3d& point, Parameters& param, std::tuple<double,double,double>& ramp_param){
