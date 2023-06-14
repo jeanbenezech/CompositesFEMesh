@@ -14,7 +14,7 @@ np.random.seed(123)
 def write_parameters(cnt=-1, p1=0, p2=0, p3=0, p4=0):
 	# cnt appears to be used to keep track of if parameters are written for multiple cases, which could be useful
 	# nb_plies = 48
-	nb_plies = 4
+	nb_plies = 3
 	# nb_plies = 1
 	# t_ply = 0.4  # large model paper off/on
 	# t_ply = 0.196 # Define scalar ply thickness value, which will be duplicated later into an array containing thicknesses for each ply
@@ -22,14 +22,14 @@ def write_parameters(cnt=-1, p1=0, p2=0, p3=0, p4=0):
 	nb_wrinkles = 0
 	Xlength = 140.0  # This is the distance along the web of the outer section of the spar between the radii. 140mm is correct for 5mm internal radii
 	# Ylength = nb_plies*t_ply  # laminate thickness
-	Ylength = 5.0  # laminate thickness
+	Ylength = 5.  # laminate thickness
 	Zlength = 420.0  # effective length of the spar (between end blocks)
 
 	# assumes the end blocks have been placed such that the feature is exactly central
 	start = Zlength/2.0 - 150.0
 	r_int = 5.0  # internal radius
-	height = 50.0 - Ylength - r_int  # flange length
-	# height = 50.0  # flange length
+	# height = 50.0 - Ylength - r_int  # flange length
+	height = 40.0  # flange length
 	is_coh = 0
 
 	is_GaussianThickness = 0
@@ -83,19 +83,20 @@ def write_parameters(cnt=-1, p1=0, p2=0, p3=0, p4=0):
 	# StackSeq = [ 45.0, 0.0, -45.0]
 	# StackSeq = [ 45.0, -45.0, 0.0, 0.0, -45.0,  45.0]
 	# StackSeq = [ 45.0, -45.0, 0.0, 0.0, 0.0, -45.0,  45.0]
-	StackSeq = [ 45.0, 0.0, 0.0, -45.0]
+	StackSeq = [ 45.0, 0.0, -45.0]
 
 	# duplicate ply thickness into an array with the same dimensions as StackSeq
 
 	# ply_thickness = np.full_like(StackSeq, t_ply)
 	# Only plies, resin is done via auto resin
 	ply_type = np.full_like(StackSeq, 0)
-	tot_ply_thickness = Ylength + epsilon
-	# tot_ply_thickness = Ylength
-	ply_t = Ylength/float(nb_plies-1)
+	# tot_ply_thickness = Ylength + epsilon
+	tot_ply_thickness = Ylength
+	# ply_t = Ylength/float(nb_plies)
+	ply_t = Ylength/float(nb_plies)
 	ply_thickness = np.full_like(StackSeq, ply_t)
-	ply_thickness[2] = epsilon
-	ply_type[2] = 1
+	# ply_thickness[2] = epsilon
+	# ply_type[2] = 1
 	# ply_thickness[3] = epsilon
 	# ply_type[3] = 2
 
@@ -126,7 +127,7 @@ def write_parameters(cnt=-1, p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	# parameters.write('name(s)                  : '+str(nb_plies)+'pliesCoarse\n')  # mesh name
-	parameters.write('name(s)                : Cspar_3plies_resin\n') # mesh name
+	parameters.write('name(s)                : Cspar_3plies_resin_\n') # mesh name
 	# 0(default): Csection ; 1: flat laminate
 	parameters.write('Shape(i)                 : 0\n')
 	# 1: Laminate type model ; 0: Cspar 
@@ -223,8 +224,8 @@ def write_parameters(cnt=-1, p1=0, p2=0, p3=0, p4=0):
 	parameters.write('RotateAxis(b)          : X\n') # "X" or "Z"
 	parameters.write('Rotate_start_end(f)    : 100,200\n') # to be matched with dz changes
 	parameters.write('AngleRotateRVE(f)      : 90\n') # positive angle
-	parameters.write('AngleRotateFlangeR(f)  : 3\n') # positive angle
-	parameters.write('AngleRotateFlangeL(f)  : 4\n') # positive angle
+	parameters.write('AngleRotateFlangeRi(f) : 0\n') # positive angle
+	parameters.write('AngleRotateFlangeLe(f) : 5\n') # positive angle
 	parameters.write('Rsize(f)               : 6.25\n')
 	parameters.write('StartEndinZdir(f)      : '+str(start) +
 	                 ','+str(125.0)+','+str(50.0)+'\n')

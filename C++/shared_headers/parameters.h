@@ -156,8 +156,9 @@ void Parameters::read(const std::string& filename) {
 		if (line.find("Ramp(b)")!=std::string::npos)
 			add_ramp = std::stoi(extract(line));
 
-		if (line.find("R(f)")!=std::string::npos)
+		if (line.find("R(f)")!=std::string::npos){
 			R = std::stod(extract(line));
+		}
 
 		if (line.find("X(f)")!=std::string::npos)
 			X = std::stod(extract(line));
@@ -242,11 +243,12 @@ void Parameters::read(const std::string& filename) {
 
 		if (line.find("RotateFlanges(b)")!=std::string::npos){
 			RotateFlanges = std::stoi(extract(line));
+			// std::cout << "RotateFlanges: " << RotateFlanges << std::endl;
 		}
-		if (line.find("AngleRotateFlangeR(f)")!=std::string::npos){
+		if (line.find("AngleRotateFlangeRi(f)")!=std::string::npos){
 			AngleRotateFlangeR = std::stof(extract(line));
 		}
-		if (line.find("AngleRotateFlangeL(f)")!=std::string::npos){
+		if (line.find("AngleRotateFlangeLe(f)")!=std::string::npos){
 			AngleRotateFlangeL = std::stof(extract(line));
 		}
 
