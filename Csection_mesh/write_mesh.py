@@ -9,6 +9,7 @@ def write_mesh():
     filename_param = 'parameters'
     param = parameters()
     param.init(filename_param)
+    print(param)
 
     geo = geometry()
     geo.init(param)
@@ -17,10 +18,8 @@ def write_mesh():
     param.write_input_orientation('input.txt')
 
     geo.dump(param)
-    # command = 'gmsh {} -3 -format msh2 -o {}'.format(param.name+'.geo', param.name+'.msh')
-    # Below is attempt to suppress output to the terminal
-    command = 'gmsh {} -3 -format msh2 -v 0 -o {}'.format(param.name+'.geo', param.name+'.msh')
+    command = 'gmsh {} -3 -format msh2 -o {}'.format(param.name+'.geo', param.name+'.msh')
     os.system(command)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     write_mesh()

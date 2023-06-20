@@ -24,29 +24,18 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0
 	r_int = 5.0 # internal radius
 	height = 55.0 - Ylength - r_int # flange length
 	is_coh = 0
-
 	is_GaussianThickness = 0
 	is_CornerThickness = 0
-
-	# epsilon = 0.05 # resin layer thickness. Don't use
- 
 	
 	# StackSeq = [45.0, -45.0, 45.0, -45.0, 45.0, -45.0, 0.0, 90.0, 0.0, 90.0, 0.0, 90.0, 90.0, 0.0, 90.0, 0.0, 90.0, 0.0, -45.0, 45.0, -45.0, 45.0, -45.0, 45.0]
 	# Jean's model seems to use a left-handed convention for the ply orientations for some reason. Have to swap the -45s and 45s for this to match the right
 	# - handed convention used (I think) in the actually specimen
 	StackSeq = [-45.0, 45.0, -45.0, 45.0, -45.0, 45.0, 0.0, 90.0, 0.0, 90.0, 0.0, 90.0, 90.0, 0.0, 90.0, 0.0, 90.0, 0.0, 45.0, -45.0, 45.0, -45.0, 45.0, -45.0]
+
 	
 	ply_thickness = np.full_like(StackSeq, t_ply) # duplicate ply thickness into an array with the same dimensions as StackSeq
-	# Only plies, resin is done via auto resin
 	ply_type = np.full_like(StackSeq, 0) # Only plies, resin is done via auto resin
-	# tot_ply_thickness = Ylength + epsilon
 	tot_ply_thickness = Ylength
-	# ply_t = Ylength/float(nb_plies-1)
-	# ply_thickness = np.full_like(StackSeq, ply_t)
-	# ply_thickness[2] = epsilon
-	# ply_type[2] = 1
-	# ply_thickness[3] = epsilon
-	# ply_type[3] = 2
 
 
 	# WRINKLES Parameters
@@ -117,11 +106,11 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~TRANSFORMATION~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('wrinkle(i)        : '+str(nb_wrinkles)+'\n') # Do we need to add wrinkle in the gridMod (c++) code, 2+ for multiple wrinkles
-	# parameters.write('Ramp(b)           : 1\n') # I think Jean moved this to GEO-TRANSFORMATION BELOW - UNCOMMENT IF THIS BREAKS THE CODE
-	parameters.write('Abaqus_output(b)  : 1\n') #
-	parameters.write('Dune_output(b)    : 0\n') #
-	if (nb_wrinkles>0):
+	# Do we need to add wrinkle in the gridMod (c++) code, 2+ for multiple wrinkles
+	parameters.write('wrinkle(i)        : '+str(nb_wrinkles)+'\n')
+	parameters.write('Abaqus_output(b)  : 1\n')
+	parameters.write('Dune_output(b)    : 0\n')
+	if (nb_wrinkles > 0):
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~WRINKLES~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -155,16 +144,15 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0
 	parameters.write('~~~~~~~~~~~~~~~~GEO-TRANSFORMATION~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('Ramp(b)                : 1\n')
-	parameters.write('RotateFlanges(b)       : 0\n')
+	parameters.write('RotateFlanges(b)       : 1\n')
 	parameters.write('RotateRVE(b)           : 0\n')
 	parameters.write('RotateAxis(b)          : X\n') # "X" or "Z"
 	parameters.write('Rotate_start_end(f)    : 100,200\n') # to be matched with dz changes
 	parameters.write('AngleRotateRVE(f)      : 90\n') # positive angle
-	parameters.write('AngleRotateFlangeRi(f) : 20\n') # positive angle
-	parameters.write('AngleRotateFlangeLe(f) : 20\n') # positive angle
+	parameters.write('AngleRotateFlangeRi(f) : 8\n') # positive angle
+	parameters.write('AngleRotateFlangeLe(f) : -4\n') # positive angle
 	parameters.write('Rsize(f)               : 6.25\n')
-	parameters.write('StartEndinZdir(f)      : '+str(start) +
-	                 ','+str(125.0)+','+str(50.0)+'\n')
+	parameters.write('StartEndinZdir(f)      : '+str(start) + ','+str(125.0)+','+str(50.0)+'\n')
 	if (is_GaussianThickness):
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~GAUSSIAN~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -249,6 +237,10 @@ def plot_DampYZ(x, title, colors):
 if __name__ == '__main__':
 
 	# For Chensen
+	# n_samples = 100
+	# space = Space([(2., 12.), (1., 6.), (3., 10.), (-5., 5.)])
+	# lhs = Lhs(lhs_type="classic", criterion=None)
+	# x = lhs.generate(space.dimensions, n_samples)
 
 	# colors = cm.coolwarm(np.linspace(0, 1, n_samples))
 	# plot_S_dampY(x, 'Size vs dampY',colors)

@@ -4,21 +4,23 @@ np.random.seed(123)
 import sys
 import random
 import matplotlib.pyplot as plt
+# from skopt.space import Space
+# from skopt.sampler import Lhs
 import matplotlib.cm as cm
 
 # geometry in millimeters
 
-def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
-	model_name = 'C-spar_continuum_shell'
-	nb_plies = 1
+def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0, height = 55.0, LFlange_theta = 0.0, RFlange_theta = 0.0,  model_name = 'CSpar'):
+	
+	nb_plies = 1 #fixed
 	nb_wrinkles = 0 # let it to 0
-	Xlength = 140.0 # This is the distance along the web of the outer section of the spar between the radii. 140mm is correct for 5mm internal radii
-	Ylength = 4.704  # Laminate thickness
+	Xlength = 140.0
+	Ylength = 24*t_ply # laminate thickness
 	Zlength = 420.0
 	r_int = 5.0 # internal radius
-	height = 55.0 - Ylength - r_int # height of the flanges
+	height = 55.0 - Ylength - r_int # flange length
 	is_coh = 0 # Not for shell
-	start = Zlength/2.0 -150.0
+	start = Zlength/2.0 - 150 # assumes the end blocks have been placed such that the feature is exactly central
 
 	is_GaussianThickness = 0
 	is_CornerThickness = 0
@@ -28,6 +30,7 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 
 	ply_thickness = np.full_like(StackSeq, Ylength/(nb_plies+0.0))
 	ply_type = np.full_like(StackSeq, 0) # Only plies, resin is done via auto resin
+
 
 	# WRINKLES Parameters
 	minWsize = -0.2
@@ -62,7 +65,7 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('name(s)                  : '+ model_name + '\n') # mesh name
+	parameters.write('name(s)                  : ' + model_name + '\n') # mesh name
 	parameters.write('Shape(i)                 : 0\n')   # 0(default): Csection ; 1: flat laminate
 	parameters.write('Auto_Resin_betw_plies(b) : 0\n')   # 1: yes ; 0: no
 	parameters.write('cohezive_elements(b)     : '+str(is_coh)+'\n')   # 1: yes ; 0: no
@@ -133,10 +136,11 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('RotateAxis(b)          : X\n') # "X" or "Z"
 	parameters.write('Rotate_start_end(f)    : 100,200\n') # to be matched with dz changes
 	parameters.write('AngleRotateRVE(f)      : 90\n') # positive angle
-	parameters.write('AngleRotateFlangeRi(f) : 3\n') # positive angle
-	parameters.write('AngleRotateFlangeLe(f) : 15\n') # positive angle
+	parameters.write('AngleRotateFlangeRi(f) : ' + str(RFlange_theta) + '\n') # positive angle
+	parameters.write('AngleRotateFlangeLe(f) : ' + str(LFlange_theta) + '\n') # positive angle
 	parameters.write('Rsize(f)               : 6.25\n')
-	parameters.write('StartEndinZdir(f)      : '+str(start)+','+str(125.0)+','+str(50.0)+'\n')
+	parameters.write('StartEndinZdir(f)      : '+str(start) +
+	                 ','+str(125.0)+','+str(50.0)+'\n')
 	if (is_GaussianThickness):
 		parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 		parameters.write('~~~~~~~~~~~~~~~~~~~~GAUSSIAN~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -151,8 +155,9 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~ABAQUS~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('Path2result(s)    : Abaqus/\n')
+	parameters.write('Path2result(s)    : Abaqus/results/\n')
 	parameters.write('AbaqusOdbName(s)  : ' + model_name + '\n')
+
 
 	parameters.close()
 
@@ -213,8 +218,6 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 #     plt.savefig(title+".png", dpi=150)
 
 if __name__ == '__main__':
-
-	# For Chensen
 
 	# colors = cm.coolwarm(np.linspace(0, 1, n_samples))
 	# plot_S_dampY(x, 'Size vs dampY',colors)
