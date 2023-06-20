@@ -394,15 +394,15 @@ void GridTransformation::RotateRVE(Vector3d& point, Parameters& param){
 
 void GridTransformation::RotateFlanges(Vector3d& point, Parameters& param, std::tuple<double,double,double>& ramp_param){
 
-	double local_ymid = (local_ymin+local_ymax)/2.0;
-	Vector3d ramp;
-	ramp[2] = 0.0;
-	ramp[0] = - std::get<0>(ramp_param);
-	if(point[1]>=local_ymid)
-		ramp[1] = - std::get<1>(ramp_param);
-	else
-		ramp[1] = std::get<2>(ramp_param);
-	Vector3d init = point-ramp;
+	// double local_ymid = (local_ymin+local_ymax)/2.0;
+	// Vector3d ramp;
+	// ramp[2] = 0.0;
+	// ramp[0] = - std::get<0>(ramp_param);
+	// if(point[1]>=local_ymid)
+	// 	ramp[1] = - std::get<1>(ramp_param);
+	// else
+	// 	ramp[1] = std::get<2>(ramp_param);
+	Vector3d init = point;//-ramp;
 
 	bool do_fix_angle = true; // fix angle at the ramp
 
@@ -418,34 +418,43 @@ void GridTransformation::RotateFlanges(Vector3d& point, Parameters& param, std::
 	Vector3d ref, moved;
 	double dist_from_bottom_surf=0.0;
 	moved = init;
-	if (init[1]>=local_ymax){
+
+	
+	double local_local_xmax = local_xmax - std::get<0>(ramp_param);
+	double local_local_ymax = local_ymax - std::get<1>(ramp_param);
+	double local_local_ymin = local_ymin + std::get<2>(ramp_param);
+
+	if (init[1]>=local_local_ymax){
+		double local_int_rad = interior_radius - sqrt(pow(std::get<0>(ramp_param),2)+pow(std::get<1>(ramp_param),2));
 
 		myAngle = param.AngleRotateFlangeR; // 0
 
 		if(do_fix_angle)
 			myAngle -= ((atan(std::get<1>(ramp_param)/param.Height))*180/PI) *\
-						(myAngle / 90.);
+						 sin(myAngle * PI/180.);
 
-		if(init[0]<=local_xmax){
-			dist_from_bottom_surf = (init[1] - local_ymax) - interior_radius;
+		if(init[0]<=local_local_xmax){
+			dist_from_bottom_surf = (init[1] - local_local_ymax) - local_int_rad;
 		} else {
-			dist_from_bottom_surf = sqrt((init[1]-local_ymax)*(init[1]-local_ymax)+(init[0]-local_xmax)*(init[0]-local_xmax))-interior_radius;
+			dist_from_bottom_surf = sqrt((init[1]-local_local_ymax)*(init[1]-local_local_ymax)\
+										+(init[0]-local_local_xmax)*(init[0]-local_local_xmax))-local_int_rad;
 		}
-		ref[0] = local_xmax;
-		ref[1] = local_ymax;
-		double local_radius = interior_radius + dist_from_bottom_surf;
+		ref[0] = local_xmax- std::get<0>(ramp_param);
+		ref[1] = local_ymax- std::get<1>(ramp_param);
 
-		if(init[0]<=local_xmax){
+		double local_radius = local_int_rad + dist_from_bottom_surf;
+
+		if(init[0]<=local_local_xmax){
 			double theta = PI/2. - myAngle * PI / 180.0;
 
 			moved[1] = ref[1] + (local_radius) * sin(theta)\
-							  + (local_xmax-init[0]) * cos(-theta);
+							  + (local_local_xmax-init[0]) * cos(-theta);
 			moved[0] = ref[0] + (local_radius) * cos(theta)\
-							  + (local_xmax-init[0]) * sin(-theta);
+							  + (local_local_xmax-init[0]) * sin(-theta);
 
 		} else {
-			double o = init[1]-local_ymax;
-			double a = init[0]-local_xmax;
+			double o = init[1]-local_local_ymax;
+			double a = init[0]-local_local_xmax;
 			double local_theta = atan(o/a);
 
 			double theta = local_theta - (myAngle * PI / 180.0) * (local_theta/(PI/2.0));
@@ -454,37 +463,46 @@ void GridTransformation::RotateFlanges(Vector3d& point, Parameters& param, std::
 			moved[0] = ref[0] + (local_radius) * cos(theta);
 		}
 
-		point = moved+ramp;
+		point = moved;
+		// point = moved+ramp;
 		// return;
-	} else if (init[1]<=local_ymin){
+	} else if (init[1]<=local_local_ymin){
+
+		double local_int_rad = interior_radius - sqrt(pow(std::get<0>(ramp_param),2)+pow(std::get<2>(ramp_param),2));
 
 		myAngle = param.AngleRotateFlangeL;
 
 		if(do_fix_angle)
-			myAngle -= (atan(std::get<2>(ramp_param)/param.Height))*180/PI *\
-						(myAngle / 90.);
+			myAngle -= ((atan(std::get<2>(ramp_param)/param.Height))*180/PI) *\
+						sin(myAngle * PI/180.);
+			// myAngle -= (atan(std::get<2>(ramp_param)/param.Height))*180/PI *\
+			// 			(myAngle / 90.);
 
-		if(init[0]<=local_xmax){
-			dist_from_bottom_surf = - init[1] + local_ymin - interior_radius;
+
+		if(init[0]<=local_local_xmax){
+			dist_from_bottom_surf = - init[1] + local_local_ymin - local_int_rad;
 		} else {
-			dist_from_bottom_surf = sqrt((init[1]-local_ymin)*(init[1]-local_ymin)+(init[0]-local_xmax)*(init[0]-local_xmax))-interior_radius;
+			dist_from_bottom_surf = sqrt((init[1]-local_local_ymin)*(init[1]-local_local_ymin)\
+										+(init[0]-local_local_xmax)*(init[0]-local_local_xmax))\
+										-local_int_rad;
 		}
-		ref[0] = local_xmax;
-		ref[1] = interior_radius;
-		double local_radius = interior_radius + dist_from_bottom_surf;
 
-		if(init[0]<=local_xmax){
+		ref[0] = local_local_xmax;
+		ref[1] = local_local_ymin;
+		double local_radius = local_int_rad + dist_from_bottom_surf;
+
+		if(init[0]<=local_local_xmax){
 			double theta = - PI/2. + myAngle * PI / 180.0;
 
 			moved[1] = ref[1] + (local_radius) * sin(theta)\
-							  - (local_xmax-init[0]) * cos(-theta);
+							  - (local_local_xmax-init[0]) * cos(-theta);
 			moved[0] = ref[0] + (local_radius) * cos(theta)\
-							  - (local_xmax-init[0]) * sin(-theta);
+							  - (local_local_xmax-init[0]) * sin(-theta);
 
 		} else {
 
-			double o = local_ymin - init[1];
-			double a = init[0]-local_xmax;
+			double o = local_local_ymin - init[1];
+			double a = init[0]-local_local_xmax;
 			double local_theta = atan(o/a);
 
 			double theta = - local_theta + (myAngle * PI / 180.0) * (local_theta/(PI/2.0));
@@ -495,7 +513,8 @@ void GridTransformation::RotateFlanges(Vector3d& point, Parameters& param, std::
 		}
 
 
-		point = moved+ramp;
+		// point = moved+ramp;
+		point = moved;
 		// return;
 	} 
 
