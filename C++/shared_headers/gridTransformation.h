@@ -423,7 +423,8 @@ void GridTransformation::RotateFlanges(Vector3d& point, Parameters& param, std::
 		myAngle = param.AngleRotateFlangeR; // 0
 
 		if(do_fix_angle)
-			myAngle -= (atan(std::get<1>(ramp_param)/param.Height))*180/PI;
+			myAngle -= ((atan(std::get<1>(ramp_param)/param.Height))*180/PI) *\
+						(myAngle / 90.);
 
 		if(init[0]<=local_xmax){
 			dist_from_bottom_surf = (init[1] - local_ymax) - interior_radius;
