@@ -404,6 +404,7 @@ void GridTransformation::RotateFlanges(Vector3d& point, Parameters& param, std::
 		ramp[1] = std::get<2>(ramp_param);
 	Vector3d init = point-ramp;
 
+	bool do_fix_angle = true; // fix angle at the ramp
 
 	// double zmid = param.Z/2.;
 	double myAngle;
@@ -420,6 +421,9 @@ void GridTransformation::RotateFlanges(Vector3d& point, Parameters& param, std::
 	if (init[1]>=local_ymax){
 
 		myAngle = param.AngleRotateFlangeR; // 0
+
+		if(do_fix_angle)
+			myAngle -= (atan(std::get<1>(ramp_param)/param.Height))*180/PI;
 
 		if(init[0]<=local_xmax){
 			dist_from_bottom_surf = (init[1] - local_ymax) - interior_radius;
@@ -454,6 +458,9 @@ void GridTransformation::RotateFlanges(Vector3d& point, Parameters& param, std::
 	} else if (init[1]<=local_ymin){
 
 		myAngle = param.AngleRotateFlangeL;
+
+		if(do_fix_angle)
+			myAngle -= (atan(std::get<2>(ramp_param)/param.Height))*180/PI;
 
 		if(init[0]<=local_xmax){
 			dist_from_bottom_surf = - init[1] + local_ymin - interior_radius;
@@ -699,7 +706,7 @@ std::tuple<double,double,double> GridTransformation::ramp(Vector3d& point){
 				point(1) -= decrease_1;
 			} else {
 
-				if (initial_1 < ymin + threshold_avoiding_deformation_of_corners)
+				if (initial_1 < (ymin + threshold_avoiding_deformation_of_corners))
 					increase_1 = delta_max;
 				else
 					increase_1 = (delta_max/(ymid-(ymin+threshold_avoiding_deformation_of_corners))) * (ymid - initial_1); // Linear
