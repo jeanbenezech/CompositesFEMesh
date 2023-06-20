@@ -18,7 +18,7 @@ def write_mesh():
     param.write_input_orientation('input.txt')
 
     geo.dump(param)
-    command = 'gmsh {} -3 -format msh2 -o {}'.format(param.name+'.geo', param.name+'.msh')
+    command = 'gmsh {} -3 -format msh2 -o {} -v 0'.format(param.name+'.geo', param.name+'.msh')
     os.system(command)
 
 if __name__ == "__main__":
