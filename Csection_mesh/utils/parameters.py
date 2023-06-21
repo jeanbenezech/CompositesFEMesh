@@ -154,7 +154,7 @@ def read_parameters(param, filename):
 		for string_value in string_StartEndinZdir.strip().split(','):
 			val.append(float(string_value))
 
-		print (val)
+		# print (val)
 
 		param.dz_intervals = []
 		interval = val[0]/float(param.Z) # start of the ramp in term of perone of the ful length
