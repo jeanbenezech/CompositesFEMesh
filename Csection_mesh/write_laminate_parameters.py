@@ -6,16 +6,16 @@ import numpy as np
 
 def write_parameters():
 	# nb_plies = 7
-	nb_plies = 2
+	nb_plies = 1
 	nb_wrinkles = 0
 	# Xlenght = 500.0
 	# Xlenght = 50.0
-	Xlenght = 30.0
+	Xlenght = 1.0
 	# Ylenght = 50.0
 	# Ylenght = 50.0
-	Ylenght = 5
+	Ylenght = 0.1
 	# Ylenght = 1.5
-	Zlenght = 300.0
+	Zlenght = 10.0
 	# Zlenght = 100.0
 	# Zlenght = 30.0
 	height = 0.0
@@ -44,7 +44,7 @@ def write_parameters():
 	# StackSeq = [-45.0, 45.0, 0.0, 0.0, 0.0, 45.0, -45.0]
 
 	# StackSeq = [0., 0., 90., 0.]
-	StackSeq = [ 0.0, 0.0 ]
+	StackSeq = [ 0.0 ]
 	
 	# tot_ply_thickness = Ylenght
 	ply_thickness = np.full_like(StackSeq, Ylenght/(nb_plies+0.0))
@@ -56,9 +56,9 @@ def write_parameters():
 	# tot_ply_thickness = Ylenght + 2*epsilon
 	ply_thickness = np.full_like(StackSeq, Ylenght/(nb_plies+0.0))
 	# ply_thickness[0] = epsilon
-	ply_type[0] = 2
+	# ply_type[0] = 1
 	# ply_thickness[1] = epsilon
-	ply_type[1] = 1
+	# ply_type[1] = 1
 
 	# ply_thickness[2] = epsilon
 	# ply_type[2] = 1
@@ -88,7 +88,7 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-	parameters.write('name(s)                  : BeamWeak\n') # mesh name
+	parameters.write('name(s)                  : CantileverRefine\n') # mesh name
 	parameters.write('Shape(i)                 : 1\n')   # 0(default): Csection ; 1: flat laminate
 	parameters.write('Auto_Resin_betw_plies(b) : 0\n')   # 1: yes ; 0: no
 	parameters.write('cohezive_elements(b)     : 0\n')   # 1: yes ; 0: no
@@ -118,10 +118,10 @@ def write_parameters():
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~MESH~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('lc(f)      : 1\n')        # mesh caracteristic size
-	parameters.write('dx(i)      : 15\n')       # 15 // 40
-	parameters.write('ddy(i)     : 2\n')        #
+	parameters.write('dx(i)      : 6\n')       # 15 // 40
+	parameters.write('ddy(i)     : 3\n')        #
 	# parameters.write('dz(i)      : 160\n')       #
-	parameters.write('dz(i)      : 150\n')  # 5,15,15,5 // 10,40,40,10
+	parameters.write('dz(i)      : 60\n')  # 5,15,15,5 // 10,40,40,10
 	parameters.write('dc(i)      : 0\n')        #
 	parameters.write('dflange(i) : 0\n')      # discretization of the flange
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')

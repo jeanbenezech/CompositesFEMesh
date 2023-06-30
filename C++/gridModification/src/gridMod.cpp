@@ -60,7 +60,7 @@ int main(int argc, const char *argv[]) {
 	if (param.Abaqus_output){ // ABAQUS
 		// fs::create_directories("Abaqus"); // TODO:: No working with ARM os
 		// m.write_msh("Abaqus/results/"+mesh_name); // for visualisation: mesh with in it wrinkle
-		m.write_ori_inp("Abaqus/"+mesh_name);
+		m.write_ori_inp("Abaqus/"+mesh_name, param);
 		m.write_inp("Abaqus/"+mesh_name);
 		// m.write_abaqus_cae_input("Abaqus/"+mesh_name, param);
 

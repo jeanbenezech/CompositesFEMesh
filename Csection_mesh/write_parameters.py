@@ -312,6 +312,28 @@ def plot_DampYZ(x, title, colors):
 
 if __name__ == '__main__':
 
+	# EXT 
+	a = 40.581
+	b = 0.73325
+
+	c = -1.6413
+	d = -5.12753
+
+	print((a-b)/(c-d))
+
+	# INT
+	a = 34.5916
+	b = 0.485142
+
+	c = 5.79578
+	d = 2.80836
+	print((a-b)/(c-d))
+
+	
+
+
+
+
 	# For Chensen
 	# n_samples = 100
 	# space = Space([(2., 12.), (1., 6.), (3., 10.), (-5., 5.)])

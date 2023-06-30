@@ -140,7 +140,7 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	parameters.write('Rotate_start_end(f)    : 100,200\n') # to be matched with dz changes
 	parameters.write('AngleRotateRVE(f)      : 90\n') # positive angle
 	parameters.write('AngleRotateFlangeRi(f) : 3\n') # positive angle
-	parameters.write('AngleRotateFlangeLe(f) : 15\n') # positive angle
+	parameters.write('AngleRotateFlangeLe(f) : 10\n') # positive angle
 	parameters.write('Rsize(f)               : 6.25\n')
 	parameters.write('StartEndinZdir(f)      : '+str(start) +
 	                 ','+str(125.0)+','+str(50.0)+'\n')

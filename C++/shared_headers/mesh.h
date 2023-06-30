@@ -57,7 +57,7 @@ public:
 	void write_point_cloud_vtk(const std::string& filename, int verbosity);
 	void write_inp(const std::string& filename);
 	void write_ori_txt(const std::string& filename);
-	void write_ori_inp(const std::string& filename);
+	void write_ori_inp(const std::string& filename, Parameters& param);
 	void write_abaqus_cae_input(const std::string& filename, Parameters& param);
 
 	void extract_AbaqusSets();
@@ -838,7 +838,7 @@ void Mesh::write_ori_txt(const std::string& filename) {
 	}
 }
 
-void Mesh::write_ori_inp(const std::string& filename) {
+void Mesh::write_ori_inp(const std::string& filename, Parameters& param) {
 
 	std::ofstream output;
 	output.open(filename+"_ori.inp", std::ios::out);
@@ -858,8 +858,14 @@ void Mesh::write_ori_inp(const std::string& filename) {
 		for (int i=0; i< elem.nb; i++) {
 			output << elem.global_indices[i] << ", ";
 			if(!isShell){
-				output << std::setprecision(15) <<  elem.U(0, i) << ", " <<  elem.U(1, i) << ", " <<  elem.U(2, i) << ", ";
-				output << std::setprecision(15) << -elem.W(0, i) << ", " << -elem.W(1, i) << ", " << -elem.W(2, i) << std::endl;
+				if(param.RotateFlanges){
+					output << std::setprecision(15) <<  elem.U(0, i) << ", " <<  elem.U(1, i) << ", " <<  elem.U(2, i) << ", ";
+					output << std::setprecision(15) <<  elem.V(0, i) << ", " <<  elem.V(1, i) << ", " <<  elem.V(2, i) << std::endl;
+				}
+				else {
+					output << std::setprecision(15) <<  elem.U(0, i) << ", " <<  elem.U(1, i) << ", " <<  elem.U(2, i) << ", ";
+					output << std::setprecision(15) << -elem.W(0, i) << ", " << -elem.W(1, i) << ", " << -elem.W(2, i) << std::endl;
+				}
 			} else {
 				output << std::setprecision(15) <<  elem.V(0, i) << ", " <<  elem.V(1, i) << ", " <<  elem.V(2, i) << ", ";
 				output << std::setprecision(15) <<  elem.W(0, i) << ", " <<  elem.W(1, i) << ", " <<  elem.W(2, i) << std::endl;
