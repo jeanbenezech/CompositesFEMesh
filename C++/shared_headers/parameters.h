@@ -101,7 +101,7 @@ void Parameters::read(const std::string& filename) {
 	if (!input.is_open()) {
 		std::cout << "Error: Cannot open file" << filename << std::endl;
 	} else {
-		std::cout << "Reading " << filename << std::endl;
+		//std::cout << "Reading " << filename << std::endl;
 	}
 
 	std::string line {};
