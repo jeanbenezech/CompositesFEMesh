@@ -39,20 +39,16 @@ def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, 
 	# nodal coordinates
 	# Continuum shell elements are specified in the mesh definition, which is in a separate
 	# .inp file
+	
+	# Note that I have swapped the 45 and -45 degree plies around, as Jean's coordinate
+	# system is orthogonal than that used to lay up the spar
+	StackSeq = [45.0, -45.0, 45.0, -45.0, 45.0, -45.0, 0.0, 90.0, 0.0, 90.0, 0.0, 90.0]
 
 	f.write('*SHELL SECTION, ELSET=All_elements, COMPOSITE, ORIENTATION=ori_loc , OFFSET=0, LAYUP="Inner Skin", SYMMETRIC\n')
-	f.write(str(t_ply) + ', 3, AS4-8552, 45., Ply1\n')
-	f.write(str(t_ply) + ', 3, AS4-8552, -45., Ply2\n')
-	f.write(str(t_ply) + ', 3, AS4-8552, 45., Ply3\n')
-	f.write(str(t_ply) + ', 3, AS4-8552, -45., Ply4\n')
-	f.write(str(t_ply) + ', 3, AS4-8552, 45., Ply5\n')
-	f.write(str(t_ply) + ', 3, AS4-8552, -45., Ply6\n')
-	f.write(str(t_ply) + ', 3, AS4-8552, 0., Ply7\n')
-	f.write(str(t_ply) + ', 3, AS4-8552, 90., Ply8\n')
-	f.write(str(t_ply) + ', 3, AS4-8552, 0., Ply9\n')
-	f.write(str(t_ply) + ', 3, AS4-8552, 90., Ply10\n')
-	f.write(str(t_ply) + ', 3, AS4-8552, 0., Ply11\n')
-	f.write(str(t_ply) + ', 3, AS4-8552, 90., Ply12\n')
+	for i, ply in enumerate(StackSeq):
+		# Subtract 90 for consistency with non-shell version
+		f.write('{}, 3, AS4-8552, {}, Ply{}\n'.format(t_ply, ply+90.0, i))
+	
 	f.write('*end part\n')
 
 	# ~~~~~~~~~~~~~ MATERIAL ~~~~~~~~~~~~~
