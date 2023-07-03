@@ -867,14 +867,17 @@ void Mesh::write_ori_inp(const std::string& filename, Parameters& param) {
 					output << std::setprecision(15) << -elem.W(0, i) << ", " << -elem.W(1, i) << ", " << -elem.W(2, i) << std::endl;
 				}
 			} else {
-				output << std::setprecision(15) <<  elem.V(0, i) << ", " <<  elem.V(1, i) << ", " <<  elem.V(2, i) << ", ";
-				output << std::setprecision(15) <<  elem.W(0, i) << ", " <<  elem.W(1, i) << ", " <<  elem.W(2, i) << std::endl;
+				output << std::setprecision(15) <<  elem.U(0, i) << ", " <<  elem.U(1, i) << ", " <<  elem.U(2, i) << ", ";
+				output << std::setprecision(15) <<  elem.V(0, i) << ", " <<  elem.V(1, i) << ", " <<  elem.V(2, i) << std::endl;
 			}
 		}
 	}
 
 	output << "*ORIENTATION, NAME=ori_loc" << std::endl;
 	output << "ori_loc_dist" << std::endl;
+	if(isShell){
+		output << "3, 0.0" << std::endl;
+	}
 }
 
 void Mesh::extract_AbaqusSets(){
