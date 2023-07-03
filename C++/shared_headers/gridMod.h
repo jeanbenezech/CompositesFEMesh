@@ -581,14 +581,33 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 
 			// No shift in the V direction which is the normal to the ply
 			// if(dim==1){
-			Vector3d local_dir_use_U = baryPu-baryMu;
-			angle1 = -atan2(local_dir_use_U.dot(u)/h,local_dir_use_U.dot(w)/h)*180.0/PI+90.0; // atan(dir0/dir2) --> adjacent dir is 2
 
-			// Vector3d local_dir_use_V = baryPv-baryMv;
-			angle2 = -atan2(local_dir_use_U.dot(v)/h,local_dir_use_U.dot(u)/h)*180.0/PI;
 
-			Vector3d local_dir_use_W = baryPw-baryMw;
-			angle0 = -atan2(local_dir_use_W.dot(w)/h,local_dir_use_W.dot(v)/h)*180.0/PI+90.0; // atan(dir2/dir1) --> adjacent dir is 1
+			if(param.RotateFlanges){
+				Vector3d local_dir_use_U = baryPu-baryMu;
+				angle1 = -atan2(local_dir_use_U.dot(u)/h,local_dir_use_U.dot(w)/h)*180.0/PI+90.0; // atan(dir0/dir2) --> adjacent dir is 2
+
+				// Vector3d local_dir_use_V = baryPv-baryMv;
+				
+				angle2 = -atan2(local_dir_use_U.dot(v)/h,local_dir_use_U.dot(u)/h)*180.0/PI;
+
+
+				Vector3d local_dir_use_V = baryPv-baryMv;
+				// Vector3d local_dir_use_W = baryPw-baryMw;
+				angle0 = -atan2(local_dir_use_V.dot(w)/h,local_dir_use_V.dot(v)/h)*180.0/PI+90.; // atan(dir2/dir1) --> adjacent dir is 1
+
+			}
+			else {
+				Vector3d local_dir_use_U = baryPu-baryMu;
+				angle1 = -atan2(local_dir_use_U.dot(u)/h,local_dir_use_U.dot(w)/h)*180.0/PI+90.0; // atan(dir0/dir2) --> adjacent dir is 2
+
+				// Vector3d local_dir_use_V = baryPv-baryMv;
+				angle2 = -atan2(local_dir_use_U.dot(v)/h,local_dir_use_U.dot(u)/h)*180.0/PI;
+
+				Vector3d local_dir_use_W = baryPw-baryMw;
+				angle0 = -atan2(local_dir_use_W.dot(w)/h,local_dir_use_W.dot(v)/h)*180.0/PI+90.0; // atan(dir2/dir1) --> adjacent dir is 1
+			}
+
 
 			// ///
 			// Vector3d local_dir_use_U = baryPu-baryMu;
@@ -603,7 +622,12 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 			// angle0 = -atan2(local_dir_use_W.dot(w)/h,local_dir_use_W.dot(v)/h)*180.0/PI+90.0; // atan(dir2/dir1) --> adjacent dir is 1
 
 			// if (angle1 > 0.2)
-			// 	std::cout << "angle0 : " << angle0 << ", angle1 : " << angle1 << ", angle2 : " << angle2 << std::endl;
+			// std::cout << "Element : " << l << std::endl;
+			// std::cout << "Baryce : " << elem.Initial_barycenter.col(l)[0] << ", " << \
+			// 							elem.Initial_barycenter.col(l)[1] << ", " << \
+			// 							elem.Initial_barycenter.col(l)[2] << std::endl;
+			// std::cout << "angle0 : " << angle0 << ", angle1 : " << angle1 << ", angle2 : " << angle2 << std::endl;
+			// std::cout << std::endl;
 
 			urot = rotate_hors_axes(v, angle1, u);
 			urot = rotate_hors_axes(w, angle2, urot);
