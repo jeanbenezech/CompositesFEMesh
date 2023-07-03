@@ -9,7 +9,6 @@ def write_mesh():
     filename_param = 'parameters'
     param = parameters()
     param.init(filename_param)
-    print(param)
 
     geo = geometry()
     geo.init(param)
