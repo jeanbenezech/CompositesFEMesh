@@ -10,15 +10,15 @@ import matplotlib.cm as cm
 
 # geometry in millimeters
 
-def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0, height = 55.0, LFlange_theta = 0.0, RFlange_theta = 0.0,  model_name = 'CSpar'):
+def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0, height = 55.0, LFlange_theta = 0.0, RFlange_theta = 0.0, n_plies = 24, rotate_flanges = True, model_name = 'CSpar'):
 	
-	nb_plies = 1 #fixed
+	nb_plies = 1 #fixed (not the same as input n_plies)
 	nb_wrinkles = 0 # let it to 0
 	Xlength = 140.0
-	Ylength = 24*t_ply # laminate thickness
+	Ylength = n_plies*t_ply # laminate thickness
 	Zlength = 420.0
 	r_int = 5.0 # internal radius
-	height = 55.0 - Ylength - r_int # flange length
+	height = height - Ylength - r_int # flange length
 	is_coh = 0 # Not for shell
 	start = Zlength/2.0 - 150 # assumes the end blocks have been placed such that the feature is exactly central
 
@@ -27,7 +27,7 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0
 
 	# ply_thickness = Ylenght/(nb_plies+0.0)
 	StackSeq = [0.0]
-
+	
 	ply_thickness = np.full_like(StackSeq, Ylength/(nb_plies+0.0))
 	ply_type = np.full_like(StackSeq, 0) # Only plies, resin is done via auto resin
 
@@ -131,7 +131,10 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0
 	parameters.write('~~~~~~~~~~~~~~~~GEO-TRANSFORMATION~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('Ramp(b)                : 1\n')
-	parameters.write('RotateFlanges(b)       : 1\n')
+	if rotate_flanges:
+		parameters.write('RotateFlanges(b)       : 1\n')
+	else:
+		parameters.write('RotateFlanges(b)       : 0\n')
 	parameters.write('RotateRVE(b)           : 0\n')
 	parameters.write('RotateAxis(b)          : X\n') # "X" or "Z"
 	parameters.write('Rotate_start_end(f)    : 100,200\n') # to be matched with dz changes

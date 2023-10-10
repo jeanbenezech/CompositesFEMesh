@@ -5,7 +5,7 @@ from utils.parameters import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Modified to be called as a library, with optional inputs
-def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, t_ply = 0.196, K = 1.0e10, x_spring = 27.5, load = -10.0313, init_inc = 1.0, min_inc = 1.0e-5, max_inc = 1.0):
+def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, t_ply = 0.196, K = 1.0e10, x_spring = 27.5, load = -10.0313, StackSeq = [], init_inc = 1.0, min_inc = 1.0e-5, max_inc = 1.0):
 
 	param = parameters()
 	param.init('parameters')
@@ -42,7 +42,8 @@ def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, 
 	
 	# Note that I have swapped the 45 and -45 degree plies around, as Jean's coordinate
 	# system is orthogonal than that used to lay up the spar
-	StackSeq = [45.0, -45.0, 45.0, -45.0, 45.0, -45.0, 0.0, 90.0, 0.0, 90.0, 0.0, 90.0]
+	if len(StackSeq) < 1:
+		StackSeq = [45.0, -45.0, 45.0, -45.0, 45.0, -45.0, 0.0, 90.0, 0.0, 90.0, 0.0, 90.0]
 
 	f.write('*SHELL SECTION, ELSET=All_elements, COMPOSITE, ORIENTATION=ori_loc , OFFSET=0, LAYUP="Inner Skin", SYMMETRIC\n')
 	for i, ply in enumerate(StackSeq):

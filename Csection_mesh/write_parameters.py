@@ -10,28 +10,27 @@ np.random.seed(123)
 
 # geometry in millimeters
 
-def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0, height = 55.0, model_name = 'CSpar'):
+def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0, height = 55.0, StackSeq = [], rotate_flanges = True, model_name = 'CSpar'):
 	# t_ply = ply thickness
 	# Zlength = effective length of the spar (between end blocks)
 	# total_height = distance from tip of the flanges to the outer surface of the web
 	# model_name is the name used for all of the Abaqus input files
 	
-	nb_plies = 24
+	if len(StackSeq) < 1:
+		# Jean's model seems to use a left-handed convention for the ply orientations for some reason. Have to swap the -45s and 45s for this to match the right
+		# - handed convention used (I think) in the actually specimen
+		StackSeq = [-45.0, 45.0, -45.0, 45.0, -45.0, 45.0, 0.0, 90.0, 0.0, 90.0, 0.0, 90.0, 90.0, 0.0, 90.0, 0.0, 90.0, 0.0, 45.0, -45.0, 45.0, -45.0, 45.0, -45.0]
+	nb_plies = len(StackSeq)
+
 	nb_wrinkles = 0
 	Xlength = 140.0 # This is the distance along the web of the outer section of the spar between the radii. 140mm is correct for 5mm internal radii
 	Ylength = nb_plies*t_ply # laminate thickness
 	start = Zlength/2.0 - 150.0 # assumes the end blocks have been placed such that the feature is exactly central
 	r_int = 5.0 # internal radius
-	height = 55.0 - Ylength - r_int # flange length
+	height = height - Ylength - r_int # flange length
 	is_coh = 0
 	is_GaussianThickness = 0
 	is_CornerThickness = 0
-	
-	# StackSeq = [45.0, -45.0, 45.0, -45.0, 45.0, -45.0, 0.0, 90.0, 0.0, 90.0, 0.0, 90.0, 90.0, 0.0, 90.0, 0.0, 90.0, 0.0, -45.0, 45.0, -45.0, 45.0, -45.0, 45.0]
-	# Jean's model seems to use a left-handed convention for the ply orientations for some reason. Have to swap the -45s and 45s for this to match the right
-	# - handed convention used (I think) in the actually specimen
-	StackSeq = [-45.0, 45.0, -45.0, 45.0, -45.0, 45.0, 0.0, 90.0, 0.0, 90.0, 0.0, 90.0, 90.0, 0.0, 90.0, 0.0, 90.0, 0.0, 45.0, -45.0, 45.0, -45.0, 45.0, -45.0]
-
 	
 	ply_thickness = np.full_like(StackSeq, t_ply) # duplicate ply thickness into an array with the same dimensions as StackSeq
 	ply_type = np.full_like(StackSeq, 0) # Only plies, resin is done via auto resin
@@ -144,7 +143,10 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0
 	parameters.write('~~~~~~~~~~~~~~~~GEO-TRANSFORMATION~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('Ramp(b)                : 1\n')
-	parameters.write('RotateFlanges(b)       : 1\n')
+	if rotate_flanges:
+		parameters.write('RotateFlanges(b)       : 1\n')
+	else:
+		parameters.write('RotateFlanges(b)       : 0\n')
 	parameters.write('RotateRVE(b)           : 0\n')
 	parameters.write('RotateAxis(b)          : X\n') # "X" or "Z"
 	parameters.write('Rotate_start_end(f)    : 100,200\n') # to be matched with dz changes
