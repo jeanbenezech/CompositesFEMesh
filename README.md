@@ -15,7 +15,7 @@ The objective is to provide inputs for [Abaqus](https://www.technia.co.uk/softwa
 * **C++/odb2vtk** provides examples of ODB results reader (**C++/odb2vtk/Abaqus2txt_examples**) to extract Abaqus results as a list save in a *.txt* file; and a **C++** function (**C++/odb2vtk**) used to associate these extracted data to the corresponding mesh in VTK format.
 
 
-* Ini files are read with the [mINI](https://github.com/metayeti/mINI) library.
+* Ini files are read with the [mINI](https://github.com/metayeti/mINI) library within C++ codes.
 
 ---
 
