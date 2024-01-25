@@ -368,9 +368,7 @@ void GridTransformation::RotateRVE(Vector3d& point, Parameters& param){
 		double local_theta = (param.angleRVE * PI / 180.) * (init[2] - ref[2])/(param.rotateStartStop(1) - ref[2]);
 
 		// if(init[2]<param.rotateStartStop(0)){
-
-		// std::cout << "ici: " << moved[2] << ", " << param.rotateStartStop(0) << ", " << param.rotateStartStop(1) << std::endl;
-
+		// 	std::cout << "ici: " << moved[2] << ", " << param.rotateStartStop(0) << ", " << param.rotateStartStop(1) << std::endl;
 		// }
 		if(init[2]>=param.rotateStartStop(0) && init[2]<=param.rotateStartStop(1)){
 			moved[1] = ref[1] + (param.interior_radius_RVE+abs(init[1]-ymin)) * cos(local_theta);
@@ -386,6 +384,11 @@ void GridTransformation::RotateRVE(Vector3d& point, Parameters& param){
 							  + (init[2]-param.rotateStartStop(1)) * cos(-param.angleRVE * PI / 180.);
 		}
 
+		// std::cout << "param.centerRot: " << param.centerRot[0] << ", " << param.centerRot[1] << std::endl;
+		// std::cout << "param.angleRVE: " << param.angleRVE << std::endl;
+		// std::cout << "param.interior_radius_RVE: " << param.interior_radius_RVE << std::endl;
+		// std::cout << "init: " << init[0] << ", " << init[1] << ", " << init[2] << std::endl;
+		// std::cout << "moved: " << moved[0] << ", " << moved[1] << ", " << moved[2] << std::endl;
 
 		point = moved;
 	}
@@ -569,7 +572,7 @@ void GridTransformation::AssociatedtoTopSurfaceNode(Mesh& m, Parameters& param){
 
 	int nb_vertice_top_plan = m.Nb_vertices()/(m.Nb_plies()+1);
 	Vector3d ext;
-	if (param.Shape == 0) {
+	if (param.Shape == 0 || param.Shape == 2) {
 		ext = {1.0, 0.0, 0.0}; // For flat domain of the C-spar
 	} else if (param.Shape == 1) {
 		ext = {0.0, 1.0, 0.0}; // For flat beam
@@ -822,7 +825,7 @@ void GridTransformation::Csection_wrinkles(Vector3d& point, Vector3d& normal, in
 	defect_location = param.wrinklePos[number];
 	wrinkleOri = param.wrinkleOri[number];
 	defect_size = param.wrinkleSize[number];
-	if (param.Shape == 0) { // C-spar
+	if (param.Shape == 0 || param.Shape == 2) { // C-spar
 		damping = {param.wrinkleDamp[number](0)/(local_xmax-xmin), param.wrinkleDamp[number](1)/(local_ymax-local_ymin), param.wrinkleDamp[number](2)/(zmax-zmin)}; // the more damping is big the small is the wrinkle in that direction
 	} else if (param.Shape == 1) { // Flat laminate
 		damping = {param.wrinkleDamp[number](0), param.wrinkleDamp[number](1), param.wrinkleDamp[number](2)}; // the more damping is big the small is the wrinkle in that direction
@@ -843,7 +846,7 @@ void GridTransformation::Csection_wrinkles(Vector3d& point, Vector3d& normal, in
 	double dist_from_bottom_surf = 0.0;
 	moved = init;
 	// Moving in the flat coordinate system
-	if (param.Shape == 0) { // C-spar
+	if (param.Shape == 0 || param.Shape == 2) { // C-spar
 		if (init[1]>=local_ymax){
 			if(init[0]<=local_xmax){
 				dist_from_bottom_surf = (init[1] - local_ymax) - interior_radius;
@@ -942,7 +945,7 @@ void GridTransformation::Csection_wrinkles_2(Vector3d& point, Vector3d& normal, 
 	defect_location = param.wrinklePos[number];
 	wrinkleOri = param.wrinkleOri[number];
 	defect_size = param.wrinkleSize[number];
-	// if (param.Shape == 0) { // C-spar
+	// if (param.Shape == 0 || param.Shape == 2) { // C-spar
 	// 	damping = {param.wrinkleDamp[number](0)/(local_xmax-xmin), param.wrinkleDamp[number](1)/(local_ymax-local_ymin), param.wrinkleDamp[number](2)/(zmax-zmin)}; // the more damping is big the small is the wrinkle in that direction
 	// } else if (param.Shape == 1) { // Flat laminate
 	damping = {param.wrinkleDamp[number](0), param.wrinkleDamp[number](1), param.wrinkleDamp[number](2)}; // the more damping is big the small is the wrinkle in that direction
@@ -963,7 +966,7 @@ void GridTransformation::Csection_wrinkles_2(Vector3d& point, Vector3d& normal, 
 	double dist_from_bottom_surf = 0.0;
 	moved = init;
 	// Moving in the flat coordinate system
-	if (param.Shape == 0) { // C-spar
+	if (param.Shape == 0 || param.Shape == 2) { // C-spar
 		if (init[1]>=local_ymax){
 			if(init[0]<=local_xmax){
 				dist_from_bottom_surf = (init[1] - local_ymax) - interior_radius;
@@ -1082,7 +1085,7 @@ void GridTransformation::Csection_wrinkles_splined(Vector3d& point, Vector3d& no
 
 	wrinkleOri = param.wrinkleOri[number];
 	defect_size = param.wrinkleSize[number];
-	// if (param.Shape == 0) { // C-spar
+	// if (param.Shape == 0 || param.Shape == 2) { // C-spar
 	// 	damping = {param.wrinkleDamp[number](0)/(local_xmax-xmin), param.wrinkleDamp[number](1)/(local_ymax-local_ymin), param.wrinkleDamp[number](2)/(zmax-zmin)}; // the more damping is big the small is the wrinkle in that direction
 	// } else if (param.Shape == 1) { // Flat laminate
 	damping = {param.wrinkleDamp[number](0), param.wrinkleDamp[number](1), param.wrinkleDamp[number](2)}; // the more damping is big the small is the wrinkle in that direction
@@ -1103,7 +1106,7 @@ void GridTransformation::Csection_wrinkles_splined(Vector3d& point, Vector3d& no
 	double dist_from_bottom_surf = 0.0;
 	moved = init;
 	// Moving in the flat coordinate system
-	if (param.Shape == 0) { // C-spar
+	if (param.Shape == 0 || param.Shape == 2) { // C-spar
 		if (init[1]>=local_ymax){
 			if(init[0]<=local_xmax){
 				dist_from_bottom_surf = (init[1] - local_ymax) - interior_radius;

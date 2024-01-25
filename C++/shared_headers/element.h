@@ -54,7 +54,7 @@ public:
 
 	// FUNCTION
 	void initialise(std::string type, int nb_elem, int nb_marker, bool isShell_);
-	void fill(std::vector<std::vector<int>> l, int& nb_elset);
+	void fill(std::vector<std::vector<int>> l, int& nb_elset, std::vector<int>& material_types);
 	Vector3d center(std::vector<Vertice> vertices, int id);
 
 	//~Element();
@@ -124,7 +124,7 @@ void Element::initialise(std::string key, int nb_elem, int nb_marker, bool isShe
 		abaqus_type = "C3D5";
 	}
 	Nodes.resize(size, nb);
-	Markers.resize(nb_marker, nb);
+	Markers.resize(nb_marker + 1, nb); // nb_marker=1 for the physical group +1 for the material type
 	DD_weight.resize(1, nb);
 	global_indices.resize(nb);
 
@@ -143,7 +143,7 @@ void Element::initialise(std::string key, int nb_elem, int nb_marker, bool isShe
 	QUADSCRT.resize(1, nb);
 }
 
-void Element::fill(std::vector<std::vector<int>> l, int& nb_set) {
+void Element::fill(std::vector<std::vector<int>> l, int& nb_set, std::vector<int>& material_types) {
 
 	for(int i = 0; i < nb; i++) {
 		int beg_node = 2+l[i][2]+1;
@@ -151,7 +151,8 @@ void Element::fill(std::vector<std::vector<int>> l, int& nb_set) {
 			Nodes(j,i) = l[i][beg_node+j]-1;
 
 		global_indices[i] = l[i][0];
-		Markers(0,i) = l[i][3]; // Maker[0] = physical group
+		Markers(0,i) = l[i][3]; // Marker[0] = indice ply in incremental order from bottom to top surface
+		Markers(1,i) = material_types[Markers(0,i)-1]; // Maker[1] = type of material behaviour
 		if (Markers(0,i)>nb_set) {nb_set=Markers(0,i);}
 	}
 

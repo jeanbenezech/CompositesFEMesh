@@ -947,3 +947,40 @@ void StackingSequence(Mesh& m, Parameters& param) {
 		}
 	}
 }
+
+void Rigid_Boundary(Mesh& m, Parameters& param) {
+
+
+	int beg, end;
+	if (param.SizeIntervaldZ==2){
+		beg = param.intervaldZ[0];
+		end = param.intervaldZ[1];
+	} else if (param.SizeIntervaldZ==4){
+		beg = param.intervaldZ[0];
+		end = param.intervaldZ[3];
+	}
+
+	// std::cout << "Steel behaviour from z=0 to z=" << beg << " and z=" << end << " to z=zmax" << std::endl;
+
+	for(auto& elem : m.Elements){
+		for(int l=0; l < elem.nb; ++l) {
+
+			if (elem.Initial_barycenter.col(l)(2) < beg || 
+				elem.Initial_barycenter.col(l)(2) > end){
+
+				elem.Markers(1,l) = 4; // Marker for rigid boundary element
+				elem.U(0,l) = 1.0;
+				elem.U(1,l) = 0.0;
+				elem.U(2,l) = 0.0;
+				elem.V(0,l) = 0.0;
+				elem.V(1,l) = 1.0;
+				elem.V(2,l) = 0.0;
+				elem.W(0,l) = 0.0;
+				elem.W(1,l) = 0.0;
+				elem.W(2,l) = 1.0;
+
+			}
+
+		}
+	}
+}

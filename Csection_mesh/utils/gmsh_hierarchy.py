@@ -60,20 +60,21 @@ def front_surf(param, geo, rep, cntL, cntS, dy, layer_type=0):
 		yline_start = 3* len(param.substr)
 		newXline_start = 2* len(param.substr)
 		geo.Surfaces.append([start + k, start + k + yline_start + 2, start + k + yline_start + 1, start + k + newXline_start + 1])
+		geo.Physical_volumes[incr_vol+geo.delta_v].append(cntS)
 
-		if layer_type == 2 and param.CZ:  # Cohezive layer
-			geo.Physical_volumes[-1].append(cntS)
+		# if layer_type == 2 and param.CZ:  # Cohezive layer
+		# 	geo.Physical_volumes[-1].append(cntS)
 
-		elif layer_type == 1:  # resin layer
-			if param.CZ:
-				geo.Physical_volumes[-2].append(cntS)
-			else:
-				geo.Physical_volumes[-1].append(cntS)
+		# elif layer_type == 1:  # resin layer
+		# 	if param.CZ:
+		# 		geo.Physical_volumes[-2].append(cntS)
+		# 	else:
+		# 		geo.Physical_volumes[-1].append(cntS)
 
-		elif layer_type > 1:  # Cohezive layer
-			geo.Physical_volumes[-int(layer_type)].append(cntS)
-		else:
-			geo.Physical_volumes[incr_vol+geo.delta_v].append(cntS)
+		# elif layer_type > 1:  # Cohezive layer
+		# 	geo.Physical_volumes[-int(layer_type)].append(cntS)
+		# else:
+		# 	geo.Physical_volumes[incr_vol+geo.delta_v].append(cntS)
 
 		cntS+=1
 

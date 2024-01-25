@@ -19,7 +19,7 @@ Vector3d rotate_hors_axes(const Vector3d& u, double theta, const Vector3d& v) { 
 		Q(1,1)=0.0;
 		Q(2,2)=0.0;
 		Q(1,0)=-u(2);
-		Q(2,0)=u(1);
+		Q(2,0)= u(1);
 		Q(2,1)=-u(0);
 		Q(0,1)=-Q(1,0);
 		Q(0,2)=-Q(2,0);

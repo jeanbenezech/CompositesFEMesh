@@ -15,7 +15,7 @@ int main(int argc, const char *argv[]) {
 	// for (int i=0; i<101; i++){
 
 	Parameters param;
-	param.read("parameters.txt");
+	param.read("parameters");
 	// param.read("parameters_wrinkles.txt");
 	// param.read("parameters_"+std::to_string(i)+".txt");
 
@@ -25,16 +25,15 @@ int main(int argc, const char *argv[]) {
 	size_t lastindex = param.meshname.find_last_of(".");
 	std::string mesh_name = param.meshname.substr(0, lastindex);
 	m.isShell = param.isShell;
-	m.read_msh(mesh_name+".msh", true, param.cz_id);
-
 	m.initialise(param);
+	m.read_msh(mesh_name+".msh", true, param.cz_id);
 
 	m.read_points("input.txt");
 	m.exportDir = true;
 
-	if(param.Shape==0){
+	if(param.Shape==0 || param.Shape==2){ // Cspar
 		localCoorSyst(m, param);}
-	else{
+	else { // laminate
 		globalCoorSyst(m, param);
 	}
 
@@ -56,6 +55,9 @@ int main(int argc, const char *argv[]) {
 	StackingSequence(m, param);
 
 
+	if(param.RigidBoundary){
+		Rigid_Boundary(m, param);
+	}
 
 	if (param.Abaqus_output){ // ABAQUS
 		// fs::create_directories("Abaqus"); // TODO:: No working with ARM os
