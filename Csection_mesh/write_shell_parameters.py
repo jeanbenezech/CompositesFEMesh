@@ -6,7 +6,6 @@ import random
 import matplotlib.pyplot as plt
 # from skopt.space import Space
 # from skopt.sampler import Lhs
-import matplotlib.cm as cm
 
 # geometry in millimeters
 
@@ -88,9 +87,9 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	for i in range(nb_plies):
 		if i<10:
-			parameters.write('p'+str(i)+'(f,f)   : '+str(StackSeq[i]+90.0)+','+str(ply_thickness[i])+','+str(ply_type[i])+'\n')
+			parameters.write('p'+str(i)+'(f,f,b)   : '+str(StackSeq[i]+90.0)+','+str(ply_thickness[i])+','+str(ply_type[i])+'\n')
 		else:
-			parameters.write('p'+str(i)+'(f,f)  : '+str(StackSeq[i]+90.0)+','+str(ply_thickness[i])+','+str(ply_type[i])+'\n')
+			parameters.write('p'+str(i)+'(f,f,b)  : '+str(StackSeq[i]+90.0)+','+str(ply_thickness[i])+','+str(ply_type[i])+'\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~MESH~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
@@ -104,7 +103,7 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0
 	parameters.write('~~~~~~~~~~~~~~~~~TRANSFORMATION~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 	parameters.write('wrinkle(i)        : '+str(nb_wrinkles)+'\n') # Do we need to add wrinkle in the gridMod (c++) code, 2+ for multiple wrinkles
-	parameters.write('Ramp(b)           : 1\n') #
+	# parameters.write('Ramp(b)           : 1\n') #
 	parameters.write('Abaqus_output(b)  : 1\n') #
 	parameters.write('Dune_output(b)    : 0\n') #
 	if (nb_wrinkles>0):

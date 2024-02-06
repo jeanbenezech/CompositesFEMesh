@@ -5,7 +5,7 @@ from utils.parameters import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Modified to be called as a library, with optional inputs
-def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, t_ply = 0.196, K = 1.0e10, x_spring = 27.5, load = -10.0313, StackSeq = [], init_inc = 1.0, min_inc = 1.0e-5, max_inc = 1.0):
+def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, t_ply = 0.196, K = 1.0e10, x_spring = 27.5, x_spring_fix = [], x_spring_load = [], load = -10.0313, rotation_offset = 0.0, StackSeq = [], init_inc = 1.0, min_inc = 1.0e-5, max_inc = 1.0):
 
 	param = parameters()
 	param.init('parameters')
@@ -40,7 +40,7 @@ def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, 
 	# Continuum shell elements are specified in the mesh definition, which is in a separate
 	# .inp file
 	
-	# Note that I have swapped the 45 and -45 degree plies around, as Jean's coordinate
+	# Note that I have swapped the 45 and -45 degree plies around, as Jean's coordinate 
 	# system is orthogonal than that used to lay up the spar
 	if len(StackSeq) < 1:
 		StackSeq = [45.0, -45.0, 45.0, -45.0, 45.0, -45.0, 0.0, 90.0, 0.0, 90.0, 0.0, 90.0]
@@ -91,8 +91,12 @@ def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, 
 	# Create New nodes at which above which rotational springs are to be defined
 	# Should check that this still makes sense for the shell...
 	f.write('*Node\n')
-	f.write('1, {}, 75.0, 0.0\n'.format(x_spring))
-	f.write('2, {}, 75.0, 420.0\n'.format(x_spring))
+	if (not x_spring_fix) and (not x_spring_load):
+		print("using symmetric offest")
+		x_spring_fix = x_spring
+		x_spring_load = x_spring
+	f.write('1, {}, 75.0, {}\n'.format(x_spring_fix, -rotation_offset))
+	f.write('2, {}, 75.0, {}\n'.format(x_spring_load, 420.0+rotation_offset))
 	f.write('**\n')
 	# Define Node sets
 	f.write('*Nset, nset=Fixed_RP\n')
