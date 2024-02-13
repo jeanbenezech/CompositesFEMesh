@@ -96,7 +96,7 @@ class GridTransformation{
 	void Transfo_CT(Mesh& CTmesh);
 	void Apply_Gaussian_random_field(Vector3d& point, Vector3d& normal, double& value);
 
-	void Corner_thickness(Vector3d& point, Vector3d& normal, Parameters& param, std::tuple<double,double,double>& ramp_param, double CTV);
+	void Corner_thickness(Vector3d& point, Vector3d& normal, Parameters& param,std::tuple<double,double,double>& ramp_param, double CTV, bool verbosity);
 
 	void wrinkles(Vector3d& point);
 
@@ -660,7 +660,9 @@ void GridTransformation::Apply_Gaussian_random_field(Vector3d& point, Vector3d& 
 	point[2] += normal[2]*value;
 }
 
-void GridTransformation::Corner_thickness(Vector3d& point, Vector3d& normal, Parameters& param, std::tuple<double,double,double>& ramp_param, double CTV){
+void GridTransformation::Corner_thickness(Vector3d& point, Vector3d& normal,
+	Parameters& param, std::tuple<double,double,double>& ramp_param, double CTV,
+	bool verbosity=0){
 
 	double local_ymid = (local_ymin+local_ymax)/2.0;
 
@@ -692,11 +694,28 @@ void GridTransformation::Corner_thickness(Vector3d& point, Vector3d& normal, Par
 
 	double delta_val = - CTV * (1 - cos(4*angle))/2;
 
-	// std::cout << "[ " << moved[0] << " ; " << moved[1] << " ]" << std::endl;
+	// std::cout << "delta_val: " << delta_val << std::endl;
+
+	if(verbosity && abs(delta_val)>0.1){
+		std::cout << "BEFORE: " << delta_val << std::endl;
+		std::cout << "point[0]: " << point[0] << std::endl;
+		std::cout << "point[1]: " << point[1] << std::endl;
+		std::cout << "point[2]: " << point[2] << std::endl;
+		std::cout << "normal[0]: " << normal[0] << std::endl;
+		std::cout << "normal[1]: " << normal[1] << std::endl;
+		std::cout << "normal[2]: " << normal[2] << std::endl;
+	}
 
 	point[0] += normal[0]*delta_val;
 	point[1] += normal[1]*delta_val;
 	point[2] += normal[2]*delta_val;
+
+	if(verbosity && abs(delta_val)>0.1){
+		std::cout << "AFTER: " << std::endl;
+		std::cout << "point[0]: " << point[0] << std::endl;
+		std::cout << "point[1]: " << point[1] << std::endl;
+		std::cout << "point[2]: " << point[2] << std::endl;
+	}
 
 	return;
 }

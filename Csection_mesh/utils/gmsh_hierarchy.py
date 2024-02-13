@@ -25,15 +25,15 @@ def add_c_line(geo, param, line, cntL, stype):
 
 def add_y_lines(geo, param, cntL, Ylines, layer_type=0):
 
-	if layer_type==0: # ply layer
+	if layer_type==0 or layer_type==1: # ply layer
 		val=param.ddy
-	elif layer_type==1: # resin layer
-		val=2
+	# elif layer_type==1: # resin layer
+	# 	val=2
 		# val=param.ddy
-	elif layer_type==2: # Cohezive layer
+	else: # Cohezive layer
 		val=1
-	elif layer_type > 1:  # resin layer
-		val = 2
+	# elif layer_type > 1:  # resin layer
+	# 	val = 2
 
 	for i in range(len(param.substr)+1):
 		geo.Lines.append([Ylines[0][i], Ylines[1][i]])

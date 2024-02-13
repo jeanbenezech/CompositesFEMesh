@@ -13,7 +13,7 @@ def write_parameters():
 	Ylength = 0.2
 	Zlength = 20.0
 	# Height = 0.0
-	epsilon = 0.1
+	epsilon = 0.005
 
 	###### Ply types: 
 		##### 0 : isotropic
@@ -31,26 +31,26 @@ def write_parameters():
 	# ply_type = np.full_like(StackSeq, 0)
 
 	### cohesive zone example
-	nb_plies = 3
-	StackSeq = [0., 0., 0.]
-	tot_ply_thickness = Ylength + epsilon
-	ply_t = Ylength/float(nb_plies-1) # nb_plies - #interlayer
-	ply_thickness = np.full_like(StackSeq, ply_t)
-	ply_thickness[1] = epsilon
-	ply_type = np.full_like(StackSeq, 1)
-	ply_type[1] = 2
-
-	### Double cohesive zone example
-	# nb_plies = 5
-	# StackSeq = [0., 0., 0., 0., 0.]
-	# tot_ply_thickness = Ylength + 2*epsilon
-	# ply_t = Ylength/float(nb_plies-2) # nb_plies - #interlayer
+	# nb_plies = 3
+	# StackSeq = [0., 0., 0.]
+	# tot_ply_thickness = Ylength + epsilon
+	# ply_t = Ylength/float(nb_plies-1) # nb_plies - #interlayer
 	# ply_thickness = np.full_like(StackSeq, ply_t)
 	# ply_thickness[1] = epsilon
-	# ply_thickness[3] = epsilon
-	# ply_type = np.full_like(StackSeq, 1)
+	# ply_type = np.full_like(StackSeq, 0)
 	# ply_type[1] = 2
-	# ply_type[3] = 5
+
+	### Double cohesive zone example
+	nb_plies = 6
+	StackSeq = [0., 0., 90., 0., 90., 0.]
+	tot_ply_thickness = Ylength + 2*epsilon
+	ply_t = Ylength/float(nb_plies-2) # nb_plies - #interlayer
+	ply_thickness = np.full_like(StackSeq, ply_t)
+	ply_thickness[1] = epsilon
+	ply_thickness[3] = epsilon
+	ply_type = np.full_like(StackSeq, 1)
+	ply_type[1] = 2
+	ply_type[3] = 2
 
 	### all behaviour example
 	# tot_ply_thickness = Ylength + epsilon
@@ -70,7 +70,7 @@ def write_parameters():
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	config['GENERAL'] = {}
 	###### Benchmark tests used so far: DCB, FRMM, COMP1CZ, COMP2CZ, NLGEOM
-	config['GENERAL']['name(s)'] = 'COMP1CZ' ### CerTest,KubernetesTest,CerTest_test...
+	config['GENERAL']['name(s)'] = 'COMP2CZ' ### CerTest,KubernetesTest,CerTest_test...
 	config['GENERAL']['Shape(i)'] = '1' # 1: Laminate type model ; 0: Cspar ; 2 Cspar with specific position of node for BC
 	config['GENERAL']['Auto_Resin_betw_plies(b)'] = '0' # add an automatic resin interlayer between plies
 	config['GENERAL']['cohezive_elements(b)'] = '0' # bool have cohesive element
@@ -106,9 +106,9 @@ def write_parameters():
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	config['MESH'] = {}
 	config['MESH']['lc(f)'] = '1' # 1 mesh caracteristic size, overwritten if any following parameter is used
-	config['MESH']['dx(i)'] = '3' # 15 # Discretization top part of the C
+	config['MESH']['dx(i)'] = '4' # 15 # Discretization top part of the C
 	config['MESH']['ddy(i)'] = '2' # 2 # ply discretization (number of DoF used so 2 = 1 element)
-	config['MESH']['dz(i)'] = '20' # 150 // 5,15,15,5 # Discretization of the part lenght. if 1 int is provided: uniform; else multiple discretization
+	config['MESH']['dz(i)'] = '160' # 150 // 5,15,15,5 # Discretization of the part lenght. if 1 int is provided: uniform; else multiple discretization
 	config['MESH']['dc(i)'] = '0' # 15 # Discretization the corner
 
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -129,6 +129,7 @@ def write_parameters():
 	# config['GEO-TRANSFORMATION']['RotateFlanges(b)'] = '0' # Allows flanges rotation
 	# config['GEO-TRANSFORMATION']['AngleRotateFlangeRi(f)'] = '20' # positive angle
 	# config['GEO-TRANSFORMATION']['AngleRotateFlangeLe(f)'] = '20' # positive angle
+	# config['GEO-TRANSFORMATION']['ThicknessVar(d)'] = '10.' # ratio thickness of the corners
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

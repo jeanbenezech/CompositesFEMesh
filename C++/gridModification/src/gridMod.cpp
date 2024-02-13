@@ -37,9 +37,9 @@ int main(int argc, const char *argv[]) {
 		globalCoorSyst(m, param);
 	}
 
-	// if (param.Dune_output){ // DUNE
-	// 	attribute_weight(m, param);
-	// }
+	if (param.Dune_output){ // DUNE
+		attribute_weight(m, param);
+	}
 
 	// if (param.rotateRVE && param.Abaqus_output) {
 	// 	// m.extract_AbaqusSets(); // To be done before rotation of the RVE to keep the numbering of master nodes consistent
@@ -73,15 +73,15 @@ int main(int argc, const char *argv[]) {
 	if (param.Dune_output){ // DUNE
 		// fs::create_directories("DUNE"); // TODO:: No working with ARM os
 		if (param.add_wrinkles>=1){
-			m.write_ori_txt("DUNE/"+param.WID+"_"+mesh_name);
+			m.write_ori_txt("DUNE/"+param.WID+"_"+mesh_name, param);
 			m.write_msh("DUNE/"+param.WID+"_"+mesh_name);
 		} else {
-			m.write_ori_txt("DUNE/"+mesh_name);
+			m.write_ori_txt("DUNE/"+mesh_name, param);
 			m.write_msh("DUNE/"+mesh_name);
 		}
 	}
 
-	m.write_vtk(mesh_name);
+	m.write_vtk(mesh_name, param);
 	// m.write_vtk(mesh_name+"_"+std::to_string(i));
 	// }
 

@@ -13,7 +13,8 @@ def write_parameters(cnt=-1, p1=0, p2=0, p3=0, p4=0):
 	# Ylength = nb_plies*t_ply  # laminate thickness
 	Ylength = 6.  # laminate thickness
 	# Zlength = 420.0  # effective length of the spar (between end blocks)
-	Zlength = 620.0  # effective length of the spar (between end blocks)
+	Zlength = 740.0  # effective length of the spar (between end blocks)
+	# Zlength = 620.0  # effective length of the spar (between end blocks)
 	epsilon = 0.01
 
 	# assumes the end blocks have been placed such that the feature is exactly central
@@ -22,7 +23,6 @@ def write_parameters(cnt=-1, p1=0, p2=0, p3=0, p4=0):
 	height = 61.0 - Ylength - r_int  # flange length
 	is_coh = 0
 	is_GaussianThickness = 0
-	is_CornerThickness = 0
 
 	## Full stack L2C
 	# StackSeq = [ 45.0,  45.0,   0.0,   0.0,
@@ -63,35 +63,35 @@ def write_parameters(cnt=-1, p1=0, p2=0, p3=0, p4=0):
 	# ply_type[2] = 2
 
 	### –––––––––– CerTest example 1 ––––––––––
-	# ## Double plies stack L2C
-	# nb_plies = 28
-	# nb_plies_virtual = 24
-	# ########## INNER SURFACE
-	# StackSeq = [ 45.0, -45.0,
-	#      		 90.0,  0.0, 0.0, 0.0,
-	# 			 45.0, -45.0,
-	#      		 90.0,   0.0, 
-	# 			 45.0, -45.0,
-	#      		 90.0,   0.0, 
-	# 			  0.0,  90.0,
-	# 			-45.0,  45.0,
-	# 			  0.0,  90.0,
-	# 			-45.0,  45.0, 0.0,
-	# 			  0.0, 0.0, 90.0,
-	# 			-45.0, 45.0]
-	# ########### OUTTER SURFACE
-	# tot_ply_thickness = Ylength + 4*epsilon
-	# ply_t = Ylength/float(nb_plies_virtual) # nb_plies - #interlayer
-	# ply_thickness = np.full_like(StackSeq, ply_t)
-	# ply_thickness[3] = epsilon
-	# ply_thickness[5] = epsilon
-	# ply_thickness[22] = epsilon
-	# ply_thickness[24] = epsilon
-	# ply_type = np.full_like(StackSeq, 1)
-	# ply_type[3] = 2 # CZ
-	# ply_type[5] = 5 # CZ
-	# ply_type[22] = 6 # CZ
-	# ply_type[24] = 7 # CZ
+	# Double plies stack L2C
+	nb_plies = 28
+	nb_plies_virtual = 24
+	########## INNER SURFACE
+	StackSeq = [ 45.0, -45.0,
+	     		 90.0,  0.0, 0.0, 0.0,
+				 45.0, -45.0,
+	     		 90.0,   0.0, 
+				 45.0, -45.0,
+	     		 90.0,   0.0, 
+				  0.0,  90.0,
+				-45.0,  45.0,
+				  0.0,  90.0,
+				-45.0,  45.0, 0.0,
+				  0.0, 0.0, 90.0,
+				-45.0, 45.0]
+	########### OUTTER SURFACE
+	tot_ply_thickness = Ylength + 4*epsilon
+	ply_t = Ylength/float(nb_plies_virtual) # nb_plies - #interlayer
+	ply_thickness = np.full_like(StackSeq, ply_t)
+	ply_thickness[3] = epsilon
+	ply_thickness[5] = epsilon
+	ply_thickness[22] = epsilon
+	ply_thickness[24] = epsilon
+	ply_type = np.full_like(StackSeq, 1)
+	ply_type[3] = 2 # CZ
+	ply_type[5] = 5 # CZ
+	ply_type[22] = 6 # CZ
+	ply_type[24] = 7 # CZ
 
 
 	## –––––––––– CerTest example 2 ––––––––––
@@ -129,21 +129,21 @@ def write_parameters(cnt=-1, p1=0, p2=0, p3=0, p4=0):
 
 
 	### –––––––––– Test case ––––––––––
-	nb_plies = 5
-	nb_plies_virtual = 3
-	StackSeq = [ 0.0, 0.0, 0.0, 0.0,
-				 0.0]
-	tot_ply_thickness = Ylength + 4*epsilon
-	ply_t = Ylength/float(nb_plies_virtual) # nb_plies - #interlayer
-	ply_thickness = np.full_like(StackSeq, ply_t)
-	ply_thickness[1] = epsilon
-	ply_thickness[3] = epsilon
-	ply_thickness[0] = ply_t*(1.+1./3);
-	ply_thickness[2] = ply_t*(1.+1./3);
-	ply_thickness[4] = ply_t*(1.-2./3);
-	ply_type = np.full_like(StackSeq, 1)
-	ply_type[1] = 2 # CZ
-	ply_type[3] = 5 # CZ
+	# nb_plies = 5
+	# nb_plies_virtual = 3
+	# StackSeq = [ 0.0, 0.0, 0.0, 0.0,
+	# 			 0.0]
+	# tot_ply_thickness = Ylength + 4*epsilon
+	# ply_t = Ylength/float(nb_plies_virtual) # nb_plies - #interlayer
+	# ply_thickness = np.full_like(StackSeq, ply_t)
+	# ply_thickness[1] = epsilon
+	# ply_thickness[3] = epsilon
+	# ply_thickness[0] = ply_t*(1.+1./3);
+	# ply_thickness[2] = ply_t*(1.+1./3);
+	# ply_thickness[4] = ply_t*(1.-2./3);
+	# ply_type = np.full_like(StackSeq, 1)
+	# ply_type[1] = 2 # CZ
+	# ply_type[3] = 5 # CZ
 
 	config = configparser.ConfigParser()
 	config.optionxform = lambda option: option ### Preserve capital letters
@@ -151,14 +151,14 @@ def write_parameters(cnt=-1, p1=0, p2=0, p3=0, p4=0):
 	# ~~~~~~~~~~~~~~~~~~~~~GENERAL~~~~~~~~~~~~~~~~~~~~~~
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	config['GENERAL'] = {}
-	config['GENERAL']['name(s)'] = 'CerTest_test' ### CerTest,KubernetesTest,CerTest_test...
+	config['GENERAL']['name(s)'] = 'CerTest_realistic' ### CerTest, CerTest_realistic, KubernetesTest,CerTest_test,CerTest_test_realistic, CerTest_testflanges, CerTest_testCornerRadius...
 	config['GENERAL']['Shape(i)'] = '2' # 1: Laminate type model ; 0: Cspar ; 2 Cspar with specific position of node for BC
 	config['GENERAL']['Auto_Resin_betw_plies(b)'] = '0' # add an automatic resin interlayer between plies
 	config['GENERAL']['cohezive_elements(b)'] = str(is_coh) # bool have cohesive element
 	config['GENERAL']['recombine(b)'] = '1' # 1: recombine mesh: hex ;  0: no: only prisms
 	config['GENERAL']['Shell(b)'] = '0' # Modify direction, unique element in thickness
-	config['GENERAL']['GaussianThickness(b)'] = str(is_GaussianThickness) # 1: gridtrans ;  0: flat
-	config['GENERAL']['CornerThickness(b)'] = str(is_CornerThickness) # 1: variation ;  0: flat
+	config['GENERAL']['GaussianThickness(b)'] = '0' # 1: gridtrans ;  0: flat
+	config['GENERAL']['CornerThickness(b)'] = '1' # 1: variation ;  0: flat
 	config['GENERAL']['Dune_output(b)'] = '1' # write Dune inputs
 	config['GENERAL']['Abaqus_output(b)'] = '0' # write Abaqus inputs
 	config['GENERAL']['Path2result(s)'] = 'Abaqus/results/' # write Abaqus inputs
@@ -190,13 +190,13 @@ def write_parameters(cnt=-1, p1=0, p2=0, p3=0, p4=0):
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	config['MESH'] = {}
 	config['MESH']['lc(f)'] = '1' # 1 mesh caracteristic size, overwritten if any following parameter is used
-	config['MESH']['dx(i)'] = '25' # 100 # Discretization top part of the C
+	config['MESH']['dx(i)'] = '110' # 25 ;; 110 # Discretization top part of the C
 	config['MESH']['dflange(i)'] = '55' # 55 # uniform discretization of the flange for shape = 1
 	config['MESH']['ddy(i)'] = '2' # 2 # ply discretization (number of DoF used so 2 = 1 element)
-	config['MESH']['dz(i)'] = '1,9,25,9,1' # 150 // 1,9,25,9,1 # Discretization of the part lenght. if 1 int is provided: uniform; else multiple discretization
-	config['MESH']['dc(i)'] = '8' # 15 # Discretization the corner
-	config['MESH']['dflange_bot(i)'] = '6' # 12 # Discretization the flange bellow BC node
-	config['MESH']['dflange_top(i)'] = '2' # 12 # Discretization the flange above BC node
+	config['MESH']['dz(i)'] = '1,20,90,20,1' # 150 // 1,9,25,9,1 ;; 1,20,90,20,1 # Discretization of the part lenght. if 1 int is provided: uniform; else multiple discretization
+	config['MESH']['dc(i)'] = '15' # 7 ;; 15 # Discretization the corner
+	config['MESH']['dflange_bot(i)'] = '12' # 6 ;; 12 # Discretization the flange bellow BC node
+	config['MESH']['dflange_top(i)'] = '4' # 2 ;; 4 # Discretization the flange above BC node
 
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# ~~~~~~~~~~~~~~~~GEO-TRANSFORMATION~~~~~~~~~~~~~~~~
@@ -207,15 +207,17 @@ def write_parameters(cnt=-1, p1=0, p2=0, p3=0, p4=0):
 	config['GEO-TRANSFORMATION']['StartEndinZdir(f)'] = str(start) +','+str(125.0)+','+str(50.0) # Starts-stops of the ramp
 	config['GEO-TRANSFORMATION']['RigidBoundary(b)'] = '1' # Layer of a rigid boundary for simply supported BC
 	config['GEO-TRANSFORMATION']['dZIntervalsize(i)'] = '4' # How many sections with different discretization we have in length direction (linked to dz in MESH section)
-	config['GEO-TRANSFORMATION']['dZInterval(f)'] = '100,260,360,520' # Start-stop of each section
-	config['GEO-TRANSFORMATION']['dFlangeInterval(b)'] = '36.27,38.27,40.27,42.27,44.27' # How many sections with different discretization we have for flanges. Each layer created will be 1 element thick
-	config['GEO-TRANSFORMATION']['RotateFlanges(b)'] = '0' # Allows flanges rotation
+	# config['GEO-TRANSFORMATION']['dZInterval(f)'] = '100,260,360,520' # Start-stop of each section
+	config['GEO-TRANSFORMATION']['dZInterval(f)'] = '160,320,420,580' # Start-stop of each section
+	config['GEO-TRANSFORMATION']['dFlangeInterval(b)'] = '36.27,38.27,40.27,42.27,44.27,46.27' # How many sections with different discretization we have for flanges. Each layer created will be 1 element thick
+	config['GEO-TRANSFORMATION']['RotateFlanges(b)'] = '1' # Allows flanges rotation
 	config['GEO-TRANSFORMATION']['RotateRVE(b)'] = '0' # Rotation of the RVE in the RVE case
 	config['GEO-TRANSFORMATION']['Rotate_start_end(f)'] = '100,200' # Strat-stop rotation to create corner test case
 	config['GEO-TRANSFORMATION']['AngleRotateRVE(f)'] = '90' # positive angle rotation
 	config['GEO-TRANSFORMATION']['RotateAxis(s)'] = 'X' # "X" or "Z"
-	config['GEO-TRANSFORMATION']['AngleRotateFlangeRi(f)'] = '20' # positive angle
-	config['GEO-TRANSFORMATION']['AngleRotateFlangeLe(f)'] = '20' # positive angle
+	config['GEO-TRANSFORMATION']['AngleRotateFlangeRi(f)'] = '1.' # positive angle
+	config['GEO-TRANSFORMATION']['AngleRotateFlangeLe(f)'] = '0.5' # positive angle
+	config['GEO-TRANSFORMATION']['ThicknessVar(d)'] = '1.' # ratio thickness of the corners
 
 	if (is_GaussianThickness):
 		# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -224,12 +226,6 @@ def write_parameters(cnt=-1, p1=0, p2=0, p3=0, p4=0):
 		config['GAUSSIAN'] = {}
 		config['GAUSSIAN']['Sigma(d)'] = '0.1' # covariance
 		config['GAUSSIAN']['Length(d)'] = '10.0' # mean
-	if (is_CornerThickness):
-		# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		# ~~~~~~~~~~~~~~~~CORNER THICKNESS~~~~~~~~~~~~~~~~~~
-		# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		config['CORNER THICKNESS'] = {}
-		config['CORNER THICKNESS']['ThicknessVar(d)'] = '1' # ratio thickness of the corners
 
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# ~~~~~~~~~~~~~~~~~~~~~WRINKLES~~~~~~~~~~~~~~~~~~~~~

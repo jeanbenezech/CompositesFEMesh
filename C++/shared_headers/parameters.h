@@ -395,10 +395,12 @@ void Parameters::read(const std::string& filename) {
 	// std::cout << "length: " << length << std::endl;
 
 	// CORNER THICKNESS parameters
-	if (config["WRINKLES"].has("CornerThickness(b)")==true)
+	if (config["GENERAL"].has("CornerThickness(b)")==true)
 		CornerThickness = std::stoi(config["GENERAL"].get("CornerThickness(b)"));
-	if (config["WRINKLES"].has("ThicknessVar(d)")==true)
-		ThicknessVar = std::stoi(config["CORNER THICKNESS"].get("ThicknessVar(d)"));
+	if (config["GEO-TRANSFORMATION"].has("ThicknessVar(d)")==true)
+		ThicknessVar = std::stoi(config["GEO-TRANSFORMATION"].get("ThicknessVar(d)"));
+	// std::cout << "CornerThickness: " << CornerThickness << std::endl;
+	// std::cout << "ThicknessVar: " << ThicknessVar << std::endl;
 	// WRINKLES
 	if (config["WRINKLES"].has("wrinkle(i)")==true)
 		add_wrinkles = std::stoi(config["WRINKLES"].get("wrinkle(i)"));

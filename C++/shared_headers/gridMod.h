@@ -106,7 +106,7 @@ void localCoorSyst(Mesh& m, Parameters& param) {
 				}
 
 				// orientation for the wrinkles
-				if(param.add_wrinkles || param.GaussianThickness)
+				if(param.add_wrinkles || param.GaussianThickness || param.CornerThickness)
 					for(int nodeId=0; nodeId<elem.size; nodeId++)
 						m.Vertices[elem.Nodes(nodeId,l)].normal += v;
 
@@ -115,7 +115,7 @@ void localCoorSyst(Mesh& m, Parameters& param) {
 	}
 
 	// orientation for the wrinkles
-	if(param.add_wrinkles || param.GaussianThickness){
+	if(param.add_wrinkles || param.GaussianThickness || param.CornerThickness){
 		for(int nodeId=0; nodeId<m.Vertices.size(); nodeId++){
 			m.Vertices[nodeId].normal.normalize();
 		}
@@ -294,12 +294,15 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 			GT.flat_transformation(node, point, param, ramp_param); // TODO: ramp_param is null here
 		}
 		GT.AssociatedtoTopSurfaceNode(m, param);
-		GT.Gaussian_random_field_K_initialisation(param);
+		if(param.GaussianThickness){
+			GT.Gaussian_random_field_K_initialisation(param);
+		}
 	}
 
 
 	// Interpolate the random field, defined on node, on elements
-	if(param.GaussianThickness || param.CornerThickness){
+	// if(param.GaussianThickness || param.CornerThickness){
+	if(param.GaussianThickness){
 		m.exportRandomFieldOnElement=true;
 		for(auto& elem : m.Elements){
 			for(int l=0; l < elem.nb; ++l) {

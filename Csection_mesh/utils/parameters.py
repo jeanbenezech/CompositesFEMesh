@@ -1,5 +1,6 @@
 import numpy as np
 import configparser
+import copy
 
 class sub():
 	def __init__(self,
@@ -7,11 +8,37 @@ class sub():
 				 thick=None, # local thickness
 				 Ori=None, # gridMod (straight) max angle (curved)
 				 DX=None,
-				 shape=None):
+				 FlangeRotAngle=None,
+				#  FlangeBC = None,
+				 shape=None,
+				 type=None):
 		self.L = 0
+		self.Linit = 0
+		self.A = 0
 		self.thick = 0
 		self.Ori = 0
 		self.DX = 0
+		# self.FlangeBC = 0
+		self.FlangeRotAngle = 0
+		self.type = 'classic'
+
+	def local_Ix0(self, param, d):
+		local_xmax = param.Height
+		local_radius = param.R + d
+		theta = -np.pi/2. + (self.FlangeRotAngle * np.pi/180.)
+		Cx = local_xmax
+		# self.A=0
+		Ix = Cx - (( Cx + local_radius * np.cos(theta)) / np.sin(-theta))
+		return Ix
+
+	def local_Ix(self, param, d):
+		local_xmax = param.Height
+		local_radius = param.R + d
+		theta = -np.pi/2. + (self.FlangeRotAngle * np.pi/180.)
+		Cx = local_xmax
+		Ix = Cx - (( Cx + local_radius * np.cos(theta) - self.A) / np.sin(-theta))
+		return Ix
+
 
 class parameters():
 	def __init__(self,
@@ -48,6 +75,9 @@ class parameters():
 				 substr=None,
 				 StackSeq=None,
 				 ramp=None,
+				 RotateFlanges=None,
+				 AngleRotateFlangeRi=None,
+				 AngleRotateFlangeLe=None,
 				 RigidBoundary=None):
 		self.nbp = nbp
 		self.theta=0
@@ -68,26 +98,77 @@ class parameters():
 
 		##### Sub - substr of the flange for the Specific BC
 		if self.Shape==2: # Csection with specified position of node for BC
-			substr_flange_1 = sub()
-			substr_flange_1.L = self.dflange_intervals[0]
-			substr_flange_1.T = 0
-			substr_flange_1.Ori = 0 * np.pi/180.
-			substr_flange_1.DX = self.dflangeBot
-			substr_flange_1.shape='straight'
 
-			substr_flange_2 = sub()
-			substr_flange_2.L = 2
-			substr_flange_2.T = 0
-			substr_flange_2.Ori = 0 * np.pi/180.
-			substr_flange_2.DX = 2
-			substr_flange_2.shape='straight'
+			substr_flange_BC = []
 
-			substr_flange_3 = sub()
-			substr_flange_3.L = self.Height - self.dflange_intervals[-1]
-			substr_flange_3.T = 0
-			substr_flange_3.Ori = 0 * np.pi/180.
-			substr_flange_3.DX = self.dflangeTop
-			substr_flange_3.shape='straight'
+			substr_flange_BC1 = sub()
+			substr_flange_BC1.type = 'flangeRotLe'
+			substr_flange_BC1.FlangeRotAngle = self.AngleRotateFlangeLe
+			substr_flange_BC1.Linit = self.dflange_intervals[0]
+			substr_flange_BC1.A = self.dflange_intervals[0]
+			substr_flange_BC1.T = 0
+			substr_flange_BC1.Ori = 0 * np.pi/180.
+			substr_flange_BC1.DX = self.dflangeBot
+			substr_flange_BC1.shape='straight'
+			substr_flange_BC.append(substr_flange_BC1)
+
+			for iter_BC in range(1,len(self.dflange_intervals)):
+				substr_flange_BCi = sub()
+				substr_flange_BCi.type = 'flangeRotLe'
+				substr_flange_BCi.FlangeRotAngle = self.AngleRotateFlangeLe
+				substr_flange_BCi.Linit =  self.dflange_intervals[iter_BC]-self.dflange_intervals[iter_BC-1]
+				substr_flange_BCi.A = self.dflange_intervals[iter_BC]
+				substr_flange_BCi.T = 0
+				substr_flange_BCi.Ori = 0 * np.pi/180.
+				substr_flange_BCi.DX = 2
+				substr_flange_BCi.shape='straight'
+				substr_flange_BC.append(substr_flange_BCi)
+
+			substr_flange_end = sub()
+			substr_flange_end.L = self.Height - self.dflange_intervals[-1] #+ y
+			substr_flange_end.T = 0
+			substr_flange_end.Ori = 0 * np.pi/180.
+			substr_flange_end.DX = self.dflangeTop
+			substr_flange_end.shape='straight'
+
+			substr_flange_down_BC = []
+
+			substr_flange_beg = sub()
+			substr_flange_beg.type = 'flangeRotRi'
+			substr_flange_beg.FlangeRotAngle = self.AngleRotateFlangeRi
+			substr_flange_beg.Linit = self.Height - self.dflange_intervals[-1]
+			substr_flange_beg.A = self.dflange_intervals[-1]
+			substr_flange_beg.T = 0
+			substr_flange_beg.Ori = 0 * np.pi/180.
+			substr_flange_beg.DX = self.dflangeTop
+			substr_flange_beg.shape='straight'
+			substr_flange_down_BC.append(substr_flange_beg)
+
+			for iter_BC in range(1,len(self.dflange_intervals)):
+				substr_flange_BCi = sub()
+				substr_flange_BCi.type = 'flangeRotRi'
+				substr_flange_BCi.FlangeRotAngle = self.AngleRotateFlangeRi
+				substr_flange_BCi.Linit = - self.dflange_intervals[-iter_BC-1] + self.dflange_intervals[-iter_BC]
+				substr_flange_BCi.A = self.dflange_intervals[-iter_BC-1]
+				substr_flange_BCi.T = 0
+				substr_flange_BCi.Ori = 0 * np.pi/180.
+				substr_flange_BCi.DX = 2
+				substr_flange_BCi.shape='straight'
+				substr_flange_down_BC.append(substr_flange_BCi)
+
+			substr_flange_down_end = sub()
+			substr_flange_down_end.type = 'flangeRotRi'
+			substr_flange_down_end.FlangeRotAngle = self.AngleRotateFlangeRi
+			substr_flange_down_end.Linit = self.dflange_intervals[0]
+			substr_flange_down_end.A = 0.
+			substr_flange_down_end.T = 0
+			substr_flange_down_end.Ori = 0 * np.pi/180.
+			substr_flange_down_end.DX = self.dflangeBot
+			substr_flange_down_end.shape='straight'
+			# # substr_flange_down_end.L = self.dflange_intervals[0]
+			# substr_flange_down_end.T = 0
+			# substr_flange_down_end.Ori = 0 * np.pi/180.
+			# substr_flange_down_end.shape='straight'
 
 		if self.Shape==2 or self.Shape==0: # Csection with specified position of node for BC
 			substr2 = sub()
@@ -113,23 +194,32 @@ class parameters():
 			self.substr.append(substr4)
 		elif self.Shape==2: # Csection with specified position of node for BC
 			# self.substr.append(substr)
-			self.substr.append(substr_flange_1)
-			self.substr.append(substr_flange_2)
-			self.substr.append(substr_flange_2)
-			self.substr.append(substr_flange_2)
-			self.substr.append(substr_flange_2)
-			self.substr.append(substr_flange_2)
-			self.substr.append(substr_flange_3)
+			for iter_BC in range(len(substr_flange_BC)):
+				self.substr.append(substr_flange_BC[iter_BC])
+			self.substr.append(substr_flange_end)
 			self.substr.append(substr2)
 			self.substr.append(substr4)
 			self.substr.append(substr2)
-			self.substr.append(substr_flange_3)
-			self.substr.append(substr_flange_2)
-			self.substr.append(substr_flange_2)
-			self.substr.append(substr_flange_2)
-			self.substr.append(substr_flange_2)
-			self.substr.append(substr_flange_2)
-			self.substr.append(substr_flange_1)
+			for iter_BC in range(len(substr_flange_BC)):
+				self.substr.append(substr_flange_down_BC[iter_BC])
+			self.substr.append(substr_flange_down_end)
+			# self.substr.append(substr_flange_1)
+			# self.substr.append(substr_flange_2)
+			# self.substr.append(substr_flange_2)
+			# self.substr.append(substr_flange_2)
+			# self.substr.append(substr_flange_2)
+			# self.substr.append(substr_flange_2)
+			# self.substr.append(substr_flange_3)
+			# self.substr.append(substr2)
+			# self.substr.append(substr4)
+			# self.substr.append(substr2)
+			# self.substr.append(substr_flange_3)
+			# self.substr.append(substr_flange_2)
+			# self.substr.append(substr_flange_2)
+			# self.substr.append(substr_flange_2)
+			# self.substr.append(substr_flange_2)
+			# self.substr.append(substr_flange_2)
+			# self.substr.append(substr_flange_1)
 			# self.substr.append(substr)
 
 		if self.resin and self.CZ:
@@ -166,6 +256,13 @@ def read_ini_parameters(param, filename): #### deprecated
 	param.R = config['GEOMETRY'].getfloat('R(f)')
 	param.Z = config['GEOMETRY'].getfloat('Z(f)')
 	param.e = config['GEOMETRY'].getfloat('e(f)')
+
+	param.RotateFlanges = config['GEO-TRANSFORMATION'].getint('RotateFlanges(b)')
+	param.AngleRotateFlangeRi = config['GEO-TRANSFORMATION'].getfloat('AngleRotateFlangeRi(f)')
+	param.AngleRotateFlangeLe = config['GEO-TRANSFORMATION'].getfloat('AngleRotateFlangeLe(f)')
+	if(param.RotateFlanges==0):
+		param.AngleRotateFlangeRi= 0.
+		param.AngleRotateFlangeLe= 0.
 
 	param.lc = config['MESH'].getfloat('lc(f)')
 

@@ -105,6 +105,7 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 	config['GEO-TRANSFORMATION']['RotateAxis(s)'] = 'X' # "X" or "Z"
 	config['GEO-TRANSFORMATION']['AngleRotateFlangeRi(f)'] = '3' # positive angle
 	config['GEO-TRANSFORMATION']['AngleRotateFlangeLe(f)'] = '10' # positive angle
+	config['GEO-TRANSFORMATION']['ThicknessVar(d)'] = '1' # ratio thickness of the corners
 
 	if (is_GaussianThickness):
 		# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -113,12 +114,6 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0):
 		config['GAUSSIAN'] = {}
 		config['GAUSSIAN']['Sigma(d)'] = '0.1' # covariance
 		config['GAUSSIAN']['Length(d)'] = '10.0' # mean
-	if (is_CornerThickness):
-			# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-			# ~~~~~~~~~~~~~~~~CORNER THICKNESS~~~~~~~~~~~~~~~~~~
-			# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-			config['CORNER THICKNESS'] = {}
-			config['CORNER THICKNESS']['ThicknessVar(d)'] = '1' # ratio thickness of the corners
 
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# ~~~~~~~~~~~~~~~~~~~~~WRINKLES~~~~~~~~~~~~~~~~~~~~~

@@ -53,10 +53,10 @@ public:
 	bool exportAbaqusFields=false;
 	bool exportAbaqusDisplacement=false;
 	bool exportRandomFieldOnElement=false;
-	void write_vtk(const std::string& filename, int verbosity);
+	void write_vtk(const std::string& filename, Parameters& param, int verbosity);
 	void write_point_cloud_vtk(const std::string& filename, int verbosity);
 	void write_inp(const std::string& filename);
-	void write_ori_txt(const std::string& filename);
+	void write_ori_txt(const std::string& filename, Parameters& param);
 	void write_ori_inp(const std::string& filename, Parameters& param);
 	void write_abaqus_cae_input(const std::string& filename, Parameters& param);
 
@@ -586,7 +586,7 @@ void Mesh::write_msh(const std::string& filename, int verbosity=1) {
 	output << "$EndElements" << std::endl;
 }
 
-void Mesh::write_vtk(const std::string& filename, int verbosity=0) {
+void Mesh::write_vtk(const std::string& filename, Parameters& param, int verbosity=0) {
 
 	if(verbosity){
 		std::cout << nb_vertices_ << " nodes" << std::endl;
@@ -665,27 +665,60 @@ void Mesh::write_vtk(const std::string& filename, int verbosity=0) {
 	}
 
 	if (exportDir){
-		output << "SCALARS U double 3\n";
-		output << "LOOKUP_TABLE default\n";
-		for(auto& elem : Elements){
-			for (int i=0; i< elem.nb; i++) {
-				output << elem.U(0, i) << " " << elem.U(1, i) << " " << elem.U(2, i) << std::endl;
+
+
+		if(param.RotateFlanges){
+			output << "SCALARS U double 3\n";
+			output << "LOOKUP_TABLE default\n";
+			for(auto& elem : Elements){
+				for (int i=0; i< elem.nb; i++) {
+					output << -elem.V(0, i) << " " << -elem.V(1, i) << " " << -elem.V(2, i) << std::endl;
+				}
 			}
-		}
-		output << "SCALARS V double 3\n";
-		output << "LOOKUP_TABLE default\n";
-		for(auto& elem : Elements){
-			for (int i=0; i< elem.nb; i++) {
-				output << elem.V(0, i) << " " << elem.V(1, i) << " " << elem.V(2, i) << std::endl;
+			output << "SCALARS V double 3\n";
+			output << "LOOKUP_TABLE default\n";
+			for(auto& elem : Elements){
+				for (int i=0; i< elem.nb; i++) {
+					output << elem.U(0, i) << " " << elem.U(1, i) << " " << elem.U(2, i) << std::endl;
+				}
 			}
-		}
-		output << "SCALARS W double 3\n";
-		output << "LOOKUP_TABLE default\n";
-		for(auto& elem : Elements){
-			for (int i=0; i< elem.nb; i++) {
-				output << elem.W(0, i) << " " << elem.W(1, i) << " " << elem.W(2, i) << std::endl;
+			output << "SCALARS W double 3\n";
+			output << "LOOKUP_TABLE default\n";
+			for(auto& elem : Elements){
+				for (int i=0; i< elem.nb; i++) {
+					output << elem.W(0, i) << " " << elem.W(1, i) << " " << elem.W(2, i) << std::endl;
+				}
 			}
+			// output << std::setprecision(15) <<  elem.U(0, i) << ", " <<  elem.U(1, i) << ", " <<  elem.U(2, i) << ", ";
+			// output << std::setprecision(15) <<  elem.V(0, i) << ", " <<  elem.V(1, i) << ", " <<  elem.V(2, i) << std::endl;
 		}
+		else {
+			output << "SCALARS U double 3\n";
+			output << "LOOKUP_TABLE default\n";
+			for(auto& elem : Elements){
+				for (int i=0; i< elem.nb; i++) {
+					output << std::setprecision(15) << elem.U(0, i) << " " << elem.U(1, i) << " " << elem.U(2, i) << std::endl;
+				}
+			}
+			output << "SCALARS V double 3\n";
+			output << "LOOKUP_TABLE default\n";
+			for(auto& elem : Elements){
+				for (int i=0; i< elem.nb; i++) {
+					output << std::setprecision(15) << elem.V(0, i) << " " << elem.V(1, i) << " " << elem.V(2, i) << std::endl;
+				}
+			}
+			output << "SCALARS W double 3\n";
+			output << "LOOKUP_TABLE default\n";
+			for(auto& elem : Elements){
+				for (int i=0; i< elem.nb; i++) {
+					output << std::setprecision(15) << elem.W(0, i) << " " << elem.W(1, i) << " " << elem.W(2, i) << std::endl;
+				}
+			}
+
+			// output << std::setprecision(15) <<  elem.U(0, i) << ", " <<  elem.U(1, i) << ", " <<  elem.U(2, i) << ", ";
+			// output << std::setprecision(15) << -elem.W(0, i) << ", " << -elem.W(1, i) << ", " << -elem.W(2, i) << std::endl;
+		}
+
 	}
 
 	if (exportAbaqusFields){
@@ -810,7 +843,7 @@ void Mesh::write_point_cloud_vtk(const std::string& filename, int verbosity=0) {
 	output.close();
 }
 
-void Mesh::write_ori_txt(const std::string& filename) {
+void Mesh::write_ori_txt(const std::string& filename, Parameters& param) {
 	std::ofstream output;
 	output.open(filename+"_ori.txt", std::ios::out);
 	if (!output.is_open()) {
@@ -836,10 +869,17 @@ void Mesh::write_ori_txt(const std::string& filename) {
 			// else{
 			// 	output << nb_plies_-elem.Markers(0, i) << " 0 "; // "-1 0"
 			// }
-			output << std::setprecision(15) <<  elem.U(0, i) << " " <<  elem.U(1, i) << " " <<  elem.U(2, i) << " ";
-			output << std::setprecision(15) << -elem.W(0, i) << " " << -elem.W(1, i) << " " << -elem.W(2, i) << " ";
-			output << std::setprecision(15) <<  elem.V(0, i) << " " <<  elem.V(1, i) << " " <<  elem.V(2, i) << std::endl;
-			
+
+			if(param.RotateFlanges){
+				output << std::setprecision(15) << -elem.V(0, i) << " " << -elem.V(1, i) << " " << -elem.V(2, i) << " ";
+				output << std::setprecision(15) << -elem.W(0, i) << " " << -elem.W(1, i) << " " << -elem.W(2, i) << " ";
+				output << std::setprecision(15) <<  elem.U(0, i) << " " <<  elem.U(1, i) << " " <<  elem.U(2, i) << std::endl;
+			}
+			else {
+				output << std::setprecision(15) <<  elem.U(0, i) << " " <<  elem.U(1, i) << " " <<  elem.U(2, i) << " ";
+				output << std::setprecision(15) << -elem.W(0, i) << " " << -elem.W(1, i) << " " << -elem.W(2, i) << " ";
+				output << std::setprecision(15) <<  elem.V(0, i) << " " <<  elem.V(1, i) << " " <<  elem.V(2, i) << std::endl;
+			}
 			// output << "-1 0 1 0 0 -0 -0 1 0 -1 0" << std::endl;
 		}
 	}
