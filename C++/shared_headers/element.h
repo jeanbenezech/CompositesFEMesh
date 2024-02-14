@@ -42,9 +42,11 @@ public:
 	std::vector<Random_field_parameters> Random_Field;
 	std::vector<Random_field_parameters> CT_Field;
 
-	Matrix<double, Dynamic, Dynamic> U;
-	Matrix<double, Dynamic, Dynamic> V;
-	Matrix<double, Dynamic, Dynamic> W;
+	Matrix<double, Dynamic, Dynamic> U, tmp_U;
+	Matrix<double, Dynamic, Dynamic> V, tmp_V;
+	Matrix<double, Dynamic, Dynamic> W, tmp_W;
+
+	Matrix<double, Dynamic, Dynamic> normal;
 
 	// ABAQUS FIELDS
 	Matrix<double, Dynamic, Dynamic> S;
@@ -136,6 +138,11 @@ void Element::initialise(std::string key, int nb_elem, int nb_marker, bool isShe
 	U.resize(3, nb);
 	V.resize(3, nb);
 	W.resize(3, nb);
+	tmp_U.resize(3, nb);
+	tmp_V.resize(3, nb);
+	tmp_W.resize(3, nb);
+
+	normal.resize(3, nb);
 
 	S.resize(6, nb);
 	E.resize(6, nb);

@@ -63,7 +63,7 @@ def write_parameters(cnt=-1, p1=0, p2=0, p3=0, p4=0):
 	# ply_type[2] = 2
 
 	### –––––––––– CerTest example 1 ––––––––––
-	# Double plies stack L2C
+	#### Double plies stack L2C
 	nb_plies = 28
 	nb_plies_virtual = 24
 	########## INNER SURFACE
@@ -131,6 +131,8 @@ def write_parameters(cnt=-1, p1=0, p2=0, p3=0, p4=0):
 	### –––––––––– Test case ––––––––––
 	# nb_plies = 5
 	# nb_plies_virtual = 3
+	# # StackSeq = [ 90.0, 0.0, 45.0, 0.0,
+	# # 			 -45.0]
 	# StackSeq = [ 0.0, 0.0, 0.0, 0.0,
 	# 			 0.0]
 	# tot_ply_thickness = Ylength + 4*epsilon
@@ -215,7 +217,7 @@ def write_parameters(cnt=-1, p1=0, p2=0, p3=0, p4=0):
 	config['GEO-TRANSFORMATION']['Rotate_start_end(f)'] = '100,200' # Strat-stop rotation to create corner test case
 	config['GEO-TRANSFORMATION']['AngleRotateRVE(f)'] = '90' # positive angle rotation
 	config['GEO-TRANSFORMATION']['RotateAxis(s)'] = 'X' # "X" or "Z"
-	config['GEO-TRANSFORMATION']['AngleRotateFlangeRi(f)'] = '1.' # positive angle
+	config['GEO-TRANSFORMATION']['AngleRotateFlangeRi(f)'] = '1.0' # positive angle
 	config['GEO-TRANSFORMATION']['AngleRotateFlangeLe(f)'] = '0.5' # positive angle
 	config['GEO-TRANSFORMATION']['ThicknessVar(d)'] = '1.' # ratio thickness of the corners
 

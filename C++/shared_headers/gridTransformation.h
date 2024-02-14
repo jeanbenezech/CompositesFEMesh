@@ -422,7 +422,6 @@ void GridTransformation::RotateFlanges(Vector3d& point, Parameters& param, std::
 	double dist_from_bottom_surf=0.0;
 	moved = init;
 
-	
 	double local_local_xmax = local_xmax - std::get<0>(ramp_param);
 	double local_local_ymax = local_ymax - std::get<1>(ramp_param);
 	double local_local_ymin = local_ymin + std::get<2>(ramp_param);

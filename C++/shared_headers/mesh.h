@@ -667,56 +667,33 @@ void Mesh::write_vtk(const std::string& filename, Parameters& param, int verbosi
 	if (exportDir){
 
 
-		if(param.RotateFlanges){
-			output << "SCALARS U double 3\n";
-			output << "LOOKUP_TABLE default\n";
-			for(auto& elem : Elements){
-				for (int i=0; i< elem.nb; i++) {
-					output << -elem.V(0, i) << " " << -elem.V(1, i) << " " << -elem.V(2, i) << std::endl;
-				}
+		output << "SCALARS U double 3\n";
+		output << "LOOKUP_TABLE default\n";
+		for(auto& elem : Elements){
+			for (int i=0; i< elem.nb; i++) {
+				output << std::setprecision(15) << elem.U(0, i) << " " << elem.U(1, i) << " " << elem.U(2, i) << std::endl;
 			}
-			output << "SCALARS V double 3\n";
-			output << "LOOKUP_TABLE default\n";
-			for(auto& elem : Elements){
-				for (int i=0; i< elem.nb; i++) {
-					output << elem.U(0, i) << " " << elem.U(1, i) << " " << elem.U(2, i) << std::endl;
-				}
-			}
-			output << "SCALARS W double 3\n";
-			output << "LOOKUP_TABLE default\n";
-			for(auto& elem : Elements){
-				for (int i=0; i< elem.nb; i++) {
-					output << elem.W(0, i) << " " << elem.W(1, i) << " " << elem.W(2, i) << std::endl;
-				}
-			}
-			// output << std::setprecision(15) <<  elem.U(0, i) << ", " <<  elem.U(1, i) << ", " <<  elem.U(2, i) << ", ";
-			// output << std::setprecision(15) <<  elem.V(0, i) << ", " <<  elem.V(1, i) << ", " <<  elem.V(2, i) << std::endl;
 		}
-		else {
-			output << "SCALARS U double 3\n";
-			output << "LOOKUP_TABLE default\n";
-			for(auto& elem : Elements){
-				for (int i=0; i< elem.nb; i++) {
-					output << std::setprecision(15) << elem.U(0, i) << " " << elem.U(1, i) << " " << elem.U(2, i) << std::endl;
-				}
+		output << "SCALARS V double 3\n";
+		output << "LOOKUP_TABLE default\n";
+		for(auto& elem : Elements){
+			for (int i=0; i< elem.nb; i++) {
+				output << std::setprecision(15) << elem.V(0, i) << " " << elem.V(1, i) << " " << elem.V(2, i) << std::endl;
 			}
-			output << "SCALARS V double 3\n";
-			output << "LOOKUP_TABLE default\n";
-			for(auto& elem : Elements){
-				for (int i=0; i< elem.nb; i++) {
-					output << std::setprecision(15) << elem.V(0, i) << " " << elem.V(1, i) << " " << elem.V(2, i) << std::endl;
-				}
+		}
+		output << "SCALARS W double 3\n";
+		output << "LOOKUP_TABLE default\n";
+		for(auto& elem : Elements){
+			for (int i=0; i< elem.nb; i++) {
+				output << std::setprecision(15) << elem.W(0, i) << " " << elem.W(1, i) << " " << elem.W(2, i) << std::endl;
 			}
-			output << "SCALARS W double 3\n";
-			output << "LOOKUP_TABLE default\n";
-			for(auto& elem : Elements){
-				for (int i=0; i< elem.nb; i++) {
-					output << std::setprecision(15) << elem.W(0, i) << " " << elem.W(1, i) << " " << elem.W(2, i) << std::endl;
-				}
+		}
+		output << "SCALARS normal double 3\n";
+		output << "LOOKUP_TABLE default\n";
+		for(auto& elem : Elements){
+			for (int i=0; i< elem.nb; i++) {
+				output << std::setprecision(15) << elem.normal(0, i) << " " << elem.normal(1, i) << " " << elem.normal(2, i) << std::endl;
 			}
-
-			// output << std::setprecision(15) <<  elem.U(0, i) << ", " <<  elem.U(1, i) << ", " <<  elem.U(2, i) << ", ";
-			// output << std::setprecision(15) << -elem.W(0, i) << ", " << -elem.W(1, i) << ", " << -elem.W(2, i) << std::endl;
 		}
 
 	}
@@ -870,16 +847,16 @@ void Mesh::write_ori_txt(const std::string& filename, Parameters& param) {
 			// 	output << nb_plies_-elem.Markers(0, i) << " 0 "; // "-1 0"
 			// }
 
-			if(param.RotateFlanges){
-				output << std::setprecision(15) << -elem.V(0, i) << " " << -elem.V(1, i) << " " << -elem.V(2, i) << " ";
-				output << std::setprecision(15) << -elem.W(0, i) << " " << -elem.W(1, i) << " " << -elem.W(2, i) << " ";
-				output << std::setprecision(15) <<  elem.U(0, i) << " " <<  elem.U(1, i) << " " <<  elem.U(2, i) << std::endl;
-			}
-			else {
-				output << std::setprecision(15) <<  elem.U(0, i) << " " <<  elem.U(1, i) << " " <<  elem.U(2, i) << " ";
-				output << std::setprecision(15) << -elem.W(0, i) << " " << -elem.W(1, i) << " " << -elem.W(2, i) << " ";
-				output << std::setprecision(15) <<  elem.V(0, i) << " " <<  elem.V(1, i) << " " <<  elem.V(2, i) << std::endl;
-			}
+			// if(param.RotateFlanges){
+			// 	output << std::setprecision(15) << -elem.V(0, i) << " " << -elem.V(1, i) << " " << -elem.V(2, i) << " ";
+			// 	output << std::setprecision(15) << -elem.W(0, i) << " " << -elem.W(1, i) << " " << -elem.W(2, i) << " ";
+			// 	output << std::setprecision(15) <<  elem.U(0, i) << " " <<  elem.U(1, i) << " " <<  elem.U(2, i) << std::endl;
+			// }
+			// else {
+			output << std::setprecision(15) <<  elem.U(0, i) << " " <<  elem.U(1, i) << " " <<  elem.U(2, i) << " ";
+			output << std::setprecision(15) << -elem.W(0, i) << " " << -elem.W(1, i) << " " << -elem.W(2, i) << " ";
+			output << std::setprecision(15) <<  elem.V(0, i) << " " <<  elem.V(1, i) << " " <<  elem.V(2, i) << std::endl;
+			// }
 			// output << "-1 0 1 0 0 -0 -0 1 0 -1 0" << std::endl;
 		}
 	}
