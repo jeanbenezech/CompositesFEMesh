@@ -87,7 +87,6 @@ def plot_DampYZ(x, title, colors):
 
 if __name__ == '__main__':
 
-	# For Chensen
 	n_samples = 10
 	space = Space([(160., 180.), (120., 360.)])
 	lhs = Lhs(lhs_type="classic", criterion=None)

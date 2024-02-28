@@ -96,7 +96,7 @@ class GridTransformation{
 	void Transfo_CT(Mesh& CTmesh);
 	void Apply_Gaussian_random_field(Vector3d& point, Vector3d& normal, double& value);
 
-	void Corner_thickness(Vector3d& point, Vector3d& normal, Parameters& param, std::tuple<double,double,double>& ramp_param, double CTV);
+	void Corner_thickness(Vector3d& point, Vector3d& normal, Parameters& param,std::tuple<double,double,double>& ramp_param, double CTV, bool verbosity);
 
 	void wrinkles(Vector3d& point);
 
@@ -368,9 +368,7 @@ void GridTransformation::RotateRVE(Vector3d& point, Parameters& param){
 		double local_theta = (param.angleRVE * PI / 180.) * (init[2] - ref[2])/(param.rotateStartStop(1) - ref[2]);
 
 		// if(init[2]<param.rotateStartStop(0)){
-
-		// std::cout << "ici: " << moved[2] << ", " << param.rotateStartStop(0) << ", " << param.rotateStartStop(1) << std::endl;
-
+		// 	std::cout << "ici: " << moved[2] << ", " << param.rotateStartStop(0) << ", " << param.rotateStartStop(1) << std::endl;
 		// }
 		if(init[2]>=param.rotateStartStop(0) && init[2]<=param.rotateStartStop(1)){
 			moved[1] = ref[1] + (param.interior_radius_RVE+abs(init[1]-ymin)) * cos(local_theta);
@@ -386,6 +384,11 @@ void GridTransformation::RotateRVE(Vector3d& point, Parameters& param){
 							  + (init[2]-param.rotateStartStop(1)) * cos(-param.angleRVE * PI / 180.);
 		}
 
+		// std::cout << "param.centerRot: " << param.centerRot[0] << ", " << param.centerRot[1] << std::endl;
+		// std::cout << "param.angleRVE: " << param.angleRVE << std::endl;
+		// std::cout << "param.interior_radius_RVE: " << param.interior_radius_RVE << std::endl;
+		// std::cout << "init: " << init[0] << ", " << init[1] << ", " << init[2] << std::endl;
+		// std::cout << "moved: " << moved[0] << ", " << moved[1] << ", " << moved[2] << std::endl;
 
 		point = moved;
 	}
@@ -419,7 +422,6 @@ void GridTransformation::RotateFlanges(Vector3d& point, Parameters& param, std::
 	double dist_from_bottom_surf=0.0;
 	moved = init;
 
-	
 	double local_local_xmax = local_xmax - std::get<0>(ramp_param);
 	double local_local_ymax = local_ymax - std::get<1>(ramp_param);
 	double local_local_ymin = local_ymin + std::get<2>(ramp_param);
@@ -569,7 +571,7 @@ void GridTransformation::AssociatedtoTopSurfaceNode(Mesh& m, Parameters& param){
 
 	int nb_vertice_top_plan = m.Nb_vertices()/(m.Nb_plies()+1);
 	Vector3d ext;
-	if (param.Shape == 0) {
+	if (param.Shape == 0 || param.Shape == 2) {
 		ext = {1.0, 0.0, 0.0}; // For flat domain of the C-spar
 	} else if (param.Shape == 1) {
 		ext = {0.0, 1.0, 0.0}; // For flat beam
@@ -657,7 +659,9 @@ void GridTransformation::Apply_Gaussian_random_field(Vector3d& point, Vector3d& 
 	point[2] += normal[2]*value;
 }
 
-void GridTransformation::Corner_thickness(Vector3d& point, Vector3d& normal, Parameters& param, std::tuple<double,double,double>& ramp_param, double CTV){
+void GridTransformation::Corner_thickness(Vector3d& point, Vector3d& normal,
+	Parameters& param, std::tuple<double,double,double>& ramp_param, double CTV,
+	bool verbosity=0){
 
 	double local_ymid = (local_ymin+local_ymax)/2.0;
 
@@ -689,11 +693,28 @@ void GridTransformation::Corner_thickness(Vector3d& point, Vector3d& normal, Par
 
 	double delta_val = - CTV * (1 - cos(4*angle))/2;
 
-	// std::cout << "[ " << moved[0] << " ; " << moved[1] << " ]" << std::endl;
+	// std::cout << "delta_val: " << delta_val << std::endl;
+
+	if(verbosity && abs(delta_val)>0.1){
+		std::cout << "BEFORE: " << delta_val << std::endl;
+		std::cout << "point[0]: " << point[0] << std::endl;
+		std::cout << "point[1]: " << point[1] << std::endl;
+		std::cout << "point[2]: " << point[2] << std::endl;
+		std::cout << "normal[0]: " << normal[0] << std::endl;
+		std::cout << "normal[1]: " << normal[1] << std::endl;
+		std::cout << "normal[2]: " << normal[2] << std::endl;
+	}
 
 	point[0] += normal[0]*delta_val;
 	point[1] += normal[1]*delta_val;
 	point[2] += normal[2]*delta_val;
+
+	if(verbosity && abs(delta_val)>0.1){
+		std::cout << "AFTER: " << std::endl;
+		std::cout << "point[0]: " << point[0] << std::endl;
+		std::cout << "point[1]: " << point[1] << std::endl;
+		std::cout << "point[2]: " << point[2] << std::endl;
+	}
 
 	return;
 }
@@ -822,7 +843,7 @@ void GridTransformation::Csection_wrinkles(Vector3d& point, Vector3d& normal, in
 	defect_location = param.wrinklePos[number];
 	wrinkleOri = param.wrinkleOri[number];
 	defect_size = param.wrinkleSize[number];
-	if (param.Shape == 0) { // C-spar
+	if (param.Shape == 0 || param.Shape == 2) { // C-spar
 		damping = {param.wrinkleDamp[number](0)/(local_xmax-xmin), param.wrinkleDamp[number](1)/(local_ymax-local_ymin), param.wrinkleDamp[number](2)/(zmax-zmin)}; // the more damping is big the small is the wrinkle in that direction
 	} else if (param.Shape == 1) { // Flat laminate
 		damping = {param.wrinkleDamp[number](0), param.wrinkleDamp[number](1), param.wrinkleDamp[number](2)}; // the more damping is big the small is the wrinkle in that direction
@@ -843,7 +864,7 @@ void GridTransformation::Csection_wrinkles(Vector3d& point, Vector3d& normal, in
 	double dist_from_bottom_surf = 0.0;
 	moved = init;
 	// Moving in the flat coordinate system
-	if (param.Shape == 0) { // C-spar
+	if (param.Shape == 0 || param.Shape == 2) { // C-spar
 		if (init[1]>=local_ymax){
 			if(init[0]<=local_xmax){
 				dist_from_bottom_surf = (init[1] - local_ymax) - interior_radius;
@@ -942,7 +963,7 @@ void GridTransformation::Csection_wrinkles_2(Vector3d& point, Vector3d& normal, 
 	defect_location = param.wrinklePos[number];
 	wrinkleOri = param.wrinkleOri[number];
 	defect_size = param.wrinkleSize[number];
-	// if (param.Shape == 0) { // C-spar
+	// if (param.Shape == 0 || param.Shape == 2) { // C-spar
 	// 	damping = {param.wrinkleDamp[number](0)/(local_xmax-xmin), param.wrinkleDamp[number](1)/(local_ymax-local_ymin), param.wrinkleDamp[number](2)/(zmax-zmin)}; // the more damping is big the small is the wrinkle in that direction
 	// } else if (param.Shape == 1) { // Flat laminate
 	damping = {param.wrinkleDamp[number](0), param.wrinkleDamp[number](1), param.wrinkleDamp[number](2)}; // the more damping is big the small is the wrinkle in that direction
@@ -963,7 +984,7 @@ void GridTransformation::Csection_wrinkles_2(Vector3d& point, Vector3d& normal, 
 	double dist_from_bottom_surf = 0.0;
 	moved = init;
 	// Moving in the flat coordinate system
-	if (param.Shape == 0) { // C-spar
+	if (param.Shape == 0 || param.Shape == 2) { // C-spar
 		if (init[1]>=local_ymax){
 			if(init[0]<=local_xmax){
 				dist_from_bottom_surf = (init[1] - local_ymax) - interior_radius;
@@ -1082,7 +1103,7 @@ void GridTransformation::Csection_wrinkles_splined(Vector3d& point, Vector3d& no
 
 	wrinkleOri = param.wrinkleOri[number];
 	defect_size = param.wrinkleSize[number];
-	// if (param.Shape == 0) { // C-spar
+	// if (param.Shape == 0 || param.Shape == 2) { // C-spar
 	// 	damping = {param.wrinkleDamp[number](0)/(local_xmax-xmin), param.wrinkleDamp[number](1)/(local_ymax-local_ymin), param.wrinkleDamp[number](2)/(zmax-zmin)}; // the more damping is big the small is the wrinkle in that direction
 	// } else if (param.Shape == 1) { // Flat laminate
 	damping = {param.wrinkleDamp[number](0), param.wrinkleDamp[number](1), param.wrinkleDamp[number](2)}; // the more damping is big the small is the wrinkle in that direction
@@ -1103,7 +1124,7 @@ void GridTransformation::Csection_wrinkles_splined(Vector3d& point, Vector3d& no
 	double dist_from_bottom_surf = 0.0;
 	moved = init;
 	// Moving in the flat coordinate system
-	if (param.Shape == 0) { // C-spar
+	if (param.Shape == 0 || param.Shape == 2) { // C-spar
 		if (init[1]>=local_ymax){
 			if(init[0]<=local_xmax){
 				dist_from_bottom_surf = (init[1] - local_ymax) - interior_radius;

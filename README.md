@@ -14,6 +14,9 @@ The objective is to provide inputs for [Abaqus](https://www.technia.co.uk/softwa
 * **C++/gridModification** is used for material orientation attribution and potentially grid transformation (a ramp for the Csection or a wrinkle).\
 * **C++/odb2vtk** provides examples of ODB results reader (**C++/odb2vtk/Abaqus2txt_examples**) to extract Abaqus results as a list save in a *.txt* file; and a **C++** function (**C++/odb2vtk**) used to associate these extracted data to the corresponding mesh in VTK format.
 
+
+* Ini files are read with the [mINI](https://github.com/metayeti/mINI) library within C++ codes.
+
 ---
 
 Procedure to compile any C++ code in this repository:

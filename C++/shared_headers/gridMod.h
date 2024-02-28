@@ -78,15 +78,26 @@ void localCoorSyst(Mesh& m, Parameters& param) {
 				elem.U(0,l) = 1.0;
 				elem.U(1,l) = 0.0;
 				elem.U(2,l) = 0.0;
-
 				elem.V(0,l) = 0.0;
 				elem.V(1,l) = 1.0;
 				elem.V(2,l) = 0.0;
-
 				elem.W(0,l) = 0.0;
 				elem.W(1,l) = 0.0;
 				elem.W(2,l) = 1.0;
 
+				elem.tmp_U(0,l) = 1.0;
+				elem.tmp_U(1,l) = 0.0;
+				elem.tmp_U(2,l) = 0.0;
+				elem.tmp_V(0,l) = 0.0;
+				elem.tmp_V(1,l) = 1.0;
+				elem.tmp_V(2,l) = 0.0;
+				elem.tmp_W(0,l) = 0.0;
+				elem.tmp_W(1,l) = 0.0;
+				elem.tmp_W(2,l) = 1.0;
+
+				for (int i=0; i<3; i++){
+					elem.normal(i,l) = elem.V(i,l);
+				}
 			} else {
 
 				find_U(param, u, elem.Initial_barycenter.col(l));
@@ -103,10 +114,15 @@ void localCoorSyst(Mesh& m, Parameters& param) {
 					elem.U(i,l) = u(i);
 					elem.V(i,l) = v(i);
 					elem.W(i,l) = w(i);
+					elem.tmp_U(i,l) = u(i);
+					elem.tmp_V(i,l) = v(i);
+					elem.tmp_W(i,l) = w(i);
+
+					elem.normal(i,l) = v(i);
 				}
 
 				// orientation for the wrinkles
-				if(param.add_wrinkles || param.GaussianThickness)
+				if(param.add_wrinkles || param.GaussianThickness || param.CornerThickness)
 					for(int nodeId=0; nodeId<elem.size; nodeId++)
 						m.Vertices[elem.Nodes(nodeId,l)].normal += v;
 
@@ -115,7 +131,7 @@ void localCoorSyst(Mesh& m, Parameters& param) {
 	}
 
 	// orientation for the wrinkles
-	if(param.add_wrinkles || param.GaussianThickness){
+	if(param.add_wrinkles || param.GaussianThickness || param.CornerThickness){
 		for(int nodeId=0; nodeId<m.Vertices.size(); nodeId++){
 			m.Vertices[nodeId].normal.normalize();
 		}
@@ -139,6 +155,20 @@ void globalCoorSyst(Mesh& m, Parameters& param) {
 			elem.W(0,l) = 0.0;
 			elem.W(1,l) = 0.0;
 			elem.W(2,l) = 1.0;
+
+			elem.tmp_U(0,l) = 1.0;
+			elem.tmp_U(1,l) = 0.0;
+			elem.tmp_U(2,l) = 0.0;
+			elem.tmp_V(0,l) = 0.0;
+			elem.tmp_V(1,l) = 1.0;
+			elem.tmp_V(2,l) = 0.0;
+			elem.tmp_W(0,l) = 0.0;
+			elem.tmp_W(1,l) = 0.0;
+			elem.tmp_W(2,l) = 1.0;
+
+			for (int i=0; i<3; i++){
+				elem.normal(i,l) = elem.V(i,l);
+			}
 
 			// orientation for the wrinkles
 			// if(param.add_wrinkles){
@@ -294,12 +324,15 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 			GT.flat_transformation(node, point, param, ramp_param); // TODO: ramp_param is null here
 		}
 		GT.AssociatedtoTopSurfaceNode(m, param);
-		GT.Gaussian_random_field_K_initialisation(param);
+		if(param.GaussianThickness){
+			GT.Gaussian_random_field_K_initialisation(param);
+		}
 	}
 
 
 	// Interpolate the random field, defined on node, on elements
-	if(param.GaussianThickness || param.CornerThickness){
+	// if(param.GaussianThickness || param.CornerThickness){
+	if(param.GaussianThickness){
 		m.exportRandomFieldOnElement=true;
 		for(auto& elem : m.Elements){
 			for(int l=0; l < elem.nb; ++l) {
@@ -369,15 +402,15 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 		m.Vertices[node].coord(2) = point(2);
 	}
 
-	// TRANSFORMATION OF LOCAL ORIENTATIONS
+	// // TRANSFORMATION OF LOCAL ORIENTATIONS ALL BUT ROTATE FLANGES
 	for(auto& elem : m.Elements){
 		for(int l=0; l < elem.nb; ++l) {
 
 			Vector3d u, v, w, urot, vrot, wrot;
 			for(int i=0; i<3;++i) {
-				u(i)=elem.U(i,l);
-				v(i)=elem.V(i,l);
-				w(i)=elem.W(i,l);
+				u(i)=elem.tmp_U(i,l);
+				v(i)=elem.tmp_V(i,l);
+				w(i)=elem.tmp_W(i,l);
 			}
 			urot=Vector3d::Zero();
 			vrot=Vector3d::Zero();
@@ -385,7 +418,7 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 
 			double h = 0.1;
 
-			Vector3d normal = elem.V.col(l);
+			Vector3d normal = elem.normal.col(l);
 
 			double local_weight = 0.0;
 			for(int i=0; i<elem.size; i++){
@@ -403,6 +436,7 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 				ramp_param_Pu = GT.ramp(baryPu);
 				ramp_param_Mu = GT.ramp(baryMu);
 			}
+
 			if(param.add_wrinkles){
 				for(int i=0; i<param.add_wrinkles;i++){
 					// GT.Csection_wrinkles_2(baryPu, normal, i, param, ramp_param_Pu);
@@ -420,6 +454,7 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 				GT.Corner_thickness(baryPu, normal, param, ramp_param_Pu, tmp);
 				GT.Corner_thickness(baryMu, normal, param, ramp_param_Mu, tmp);
 			}
+
 			if(param.GaussianThickness){
 				double value=0;
 				double sum=0;
@@ -445,10 +480,6 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 				GT.Apply_Gaussian_random_field(baryMu, normal, value);
 			}
 
-			if(param.RotateFlanges){
-				GT.RotateFlanges(baryPu, param, ramp_param);
-				GT.RotateFlanges(baryMu, param, ramp_param);
-			}
 			if(param.rotateRVE){
 				GT.RotateRVE(baryPu, param);
 				GT.RotateRVE(baryMu, param);
@@ -464,6 +495,7 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 				ramp_param_Pv = GT.ramp(baryPv);
 				ramp_param_Mv = GT.ramp(baryMv);
 			}
+
 			if(param.add_wrinkles){
 				for(int i=0; i<param.add_wrinkles;i++){
 					// GT.Csection_wrinkles_2(baryPv, normal, i, param, ramp_param_Pv);
@@ -480,6 +512,7 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 				GT.Corner_thickness(baryPv, normal, param, ramp_param_Pv, tmp);
 				GT.Corner_thickness(baryMv, normal, param, ramp_param_Mv, tmp);
 			}
+
 			if(param.GaussianThickness){
 				double value=0;
 				double sum=0;
@@ -505,16 +538,10 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 				GT.Apply_Gaussian_random_field(baryMv, normal, value);
 			}
 
-			if(param.RotateFlanges){
-				GT.RotateFlanges(baryPv, param, ramp_param);
-				GT.RotateFlanges(baryMv, param, ramp_param);
-			}
-
 			if(param.rotateRVE){
 				GT.RotateRVE(baryPv, param);
 				GT.RotateRVE(baryMv, param);
 			}
-
 
 			//////////////////////////////////////////////////////////////////////////////////////////
 			std::tuple<double, double, double> ramp_param_Pw = std::make_tuple(no_ramp,no_ramp,no_ramp);
@@ -526,6 +553,7 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 				ramp_param_Pw = GT.ramp(baryPw);
 				ramp_param_Mw = GT.ramp(baryMw);
 			}
+
 			if(param.add_wrinkles){
 				for(int i=0; i<param.add_wrinkles;i++){
 					// GT.Csection_wrinkles_2(baryPw, normal, i, param, ramp_param_Pw);
@@ -542,6 +570,7 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 				GT.Corner_thickness(baryPw, normal, param, ramp_param_Pw, tmp);
 				GT.Corner_thickness(baryMw, normal, param, ramp_param_Mw, tmp);
 			}
+
 			if(param.GaussianThickness){
 				double value=0;
 				double sum=0;
@@ -567,11 +596,6 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 				GT.Apply_Gaussian_random_field(baryMw, normal, value);
 			}
 
-			if(param.RotateFlanges){
-				GT.RotateFlanges(baryPw, param, ramp_param);
-				GT.RotateFlanges(baryPw, param, ramp_param);
-			}
-
 			if(param.rotateRVE){
 				GT.RotateRVE(baryPw, param);
 				GT.RotateRVE(baryMw, param);
@@ -579,55 +603,14 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 
 			double angle0=0.0, angle1=0.0, angle2=0.0;
 
-			// No shift in the V direction which is the normal to the ply
-			// if(dim==1){
+			Vector3d local_dir_use_U = baryPu-baryMu;
+			angle1 = -atan2(local_dir_use_U.dot(u)/h,local_dir_use_U.dot(w)/h)*180.0/PI+90.0; // atan(dir0/dir2) --> adjacent dir is 2
 
-
-			if(param.RotateFlanges){
-				Vector3d local_dir_use_U = baryPu-baryMu;
-				angle1 = -atan2(local_dir_use_U.dot(u)/h,local_dir_use_U.dot(w)/h)*180.0/PI+90.0; // atan(dir0/dir2) --> adjacent dir is 2
-
-				// Vector3d local_dir_use_V = baryPv-baryMv;
-				
-				angle2 = -atan2(local_dir_use_U.dot(v)/h,local_dir_use_U.dot(u)/h)*180.0/PI;
-
-
-				Vector3d local_dir_use_V = baryPv-baryMv;
-				// Vector3d local_dir_use_W = baryPw-baryMw;
-				angle0 = -atan2(local_dir_use_V.dot(w)/h,local_dir_use_V.dot(v)/h)*180.0/PI+90.; // atan(dir2/dir1) --> adjacent dir is 1
-
-			}
-			else {
-				Vector3d local_dir_use_U = baryPu-baryMu;
-				angle1 = -atan2(local_dir_use_U.dot(u)/h,local_dir_use_U.dot(w)/h)*180.0/PI+90.0; // atan(dir0/dir2) --> adjacent dir is 2
-
-				// Vector3d local_dir_use_V = baryPv-baryMv;
-				angle2 = -atan2(local_dir_use_U.dot(v)/h,local_dir_use_U.dot(u)/h)*180.0/PI;
-
-				Vector3d local_dir_use_W = baryPw-baryMw;
-				angle0 = -atan2(local_dir_use_W.dot(w)/h,local_dir_use_W.dot(v)/h)*180.0/PI+90.0; // atan(dir2/dir1) --> adjacent dir is 1
-			}
-
-
-			// ///
-			// Vector3d local_dir_use_U = baryPu-baryMu;
-			// angle1 = -atan2(local_dir_use_U.dot(u)/h,local_dir_use_U.dot(w)/h)*180.0/PI+90.0; // atan(dir0/dir2) --> adjacent dir is 2
-
-			// ///
 			// Vector3d local_dir_use_V = baryPv-baryMv;
-			// angle2 = -atan2(local_dir_use_V.dot(v)/h,local_dir_use_V.dot(u)/h)*180.0/PI+90.0; // atan(dir1/dir0) --> adjacent dir is 0
+			angle2 = -atan2(local_dir_use_U.dot(v)/h,local_dir_use_U.dot(u)/h)*180.0/PI;
 
-			// ///
-			// Vector3d local_dir_use_W = baryPw-baryMw;
-			// angle0 = -atan2(local_dir_use_W.dot(w)/h,local_dir_use_W.dot(v)/h)*180.0/PI+90.0; // atan(dir2/dir1) --> adjacent dir is 1
-
-			// if (angle1 > 0.2)
-			// std::cout << "Element : " << l << std::endl;
-			// std::cout << "Baryce : " << elem.Initial_barycenter.col(l)[0] << ", " << \
-			// 							elem.Initial_barycenter.col(l)[1] << ", " << \
-			// 							elem.Initial_barycenter.col(l)[2] << std::endl;
-			// std::cout << "angle0 : " << angle0 << ", angle1 : " << angle1 << ", angle2 : " << angle2 << std::endl;
-			// std::cout << std::endl;
+			Vector3d local_dir_use_W = baryPw-baryMw;
+			angle0 = -atan2(local_dir_use_W.dot(w)/h,local_dir_use_W.dot(v)/h)*180.0/PI+90.0; // atan(dir2/dir1) --> adjacent dir is 1
 
 			urot = rotate_hors_axes(v, angle1, u);
 			urot = rotate_hors_axes(w, angle2, urot);
@@ -639,13 +622,119 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 			wrot = rotate_hors_axes(v, angle1, wrot);
 
 			for(int i=0; i<3;++i) {
-				elem.U(i,l) = urot(i);
-				elem.V(i,l) = vrot(i);
-				elem.W(i,l) = wrot(i);
+				elem.tmp_U(i,l) = urot(i);
+				elem.tmp_V(i,l) = vrot(i);
+				elem.tmp_W(i,l) = wrot(i);
+			}
+
+		}
+	}
+
+	if(param.RotateFlanges){
+		// TRANSFORMATION OF LOCAL ORIENTATIONS ROTATE FLANGES
+		for(auto& elem : m.Elements){
+			for(int l=0; l < elem.nb; ++l) {
+
+				Vector3d u, v, w, urot, vrot, wrot;
+				for(int i=0; i<3;++i) {
+					u(i)=elem.tmp_U(i,l);
+					v(i)=elem.tmp_V(i,l);
+					w(i)=elem.tmp_W(i,l);
+				}
+				urot=Vector3d::Zero();
+				vrot=Vector3d::Zero();
+				wrot=Vector3d::Zero();
+
+				double h = 0.1;
+
+				double local_weight = 0.0;
+				for(int i=0; i<elem.size; i++){
+					local_weight += GT.weight[elem.Nodes(i,l)];
+				}
+				local_weight/=(elem.size+0.0);
+
+				//////////////////////////////////////////////////////////////////////////////////////////
+				std::tuple<double, double, double> ramp_param_Pu = std::make_tuple(no_ramp,no_ramp,no_ramp);
+				std::tuple<double, double, double> ramp_param_Mu = std::make_tuple(no_ramp,no_ramp,no_ramp);
+
+				Vector3d baryPu = elem.Initial_barycenter.col(l) + h * u;
+				Vector3d baryMu = elem.Initial_barycenter.col(l) - h * u;
+				if(param.add_ramp){
+					ramp_param_Pu = GT.ramp(baryPu);
+					ramp_param_Mu = GT.ramp(baryMu);
+				}
+
+				GT.RotateFlanges(baryPu, param, ramp_param_Pu);
+				GT.RotateFlanges(baryMu, param, ramp_param_Mu);
+
+				//////////////////////////////////////////////////////////////////////////////////////////
+				std::tuple<double, double, double> ramp_param_Pv = std::make_tuple(no_ramp,no_ramp,no_ramp);
+				std::tuple<double, double, double> ramp_param_Mv = std::make_tuple(no_ramp,no_ramp,no_ramp);
+
+				Vector3d baryPv = elem.Initial_barycenter.col(l) + h * v;
+				Vector3d baryMv = elem.Initial_barycenter.col(l) - h * v;
+				if(param.add_ramp){
+					ramp_param_Pv = GT.ramp(baryPv);
+					ramp_param_Mv = GT.ramp(baryMv);
+				}
+
+				GT.RotateFlanges(baryPv, param, ramp_param_Pv);
+				GT.RotateFlanges(baryMv, param, ramp_param_Mv);
+
+				//////////////////////////////////////////////////////////////////////////////////////////
+				std::tuple<double, double, double> ramp_param_Pw = std::make_tuple(no_ramp,no_ramp,no_ramp);
+				std::tuple<double, double, double> ramp_param_Mw = std::make_tuple(no_ramp,no_ramp,no_ramp);
+
+				Vector3d baryPw = elem.Initial_barycenter.col(l) + h * w;
+				Vector3d baryMw = elem.Initial_barycenter.col(l) - h * w;
+				if(param.add_ramp){
+					ramp_param_Pw = GT.ramp(baryPw);
+					ramp_param_Mw = GT.ramp(baryMw);
+				}
+
+
+				GT.RotateFlanges(baryPw, param, ramp_param_Pw);
+				GT.RotateFlanges(baryPw, param, ramp_param_Mw);
+
+				double angle0=0.0, angle1=0.0, angle2=0.0;
+
+				Vector3d local_dir_use_V = baryPv-baryMv;
+				// Vector3d local_dir_use_W = baryPw-baryMw;
+				angle0 = -atan2(local_dir_use_V.dot(w)/h,local_dir_use_V.dot(v)/h)*180.0/PI; // atan(dir2/dir1) --> adjacent dir is 1
+
+				Vector3d local_dir_use_U = baryPu-baryMu;
+				angle1 = -atan2(local_dir_use_U.dot(u)/h,local_dir_use_U.dot(w)/h)*180.0/PI + 90.0; // atan(dir0/dir2) --> adjacent dir is 2
+				// Vector3d local_dir_use_V = baryPv-baryMv;
+				angle2 = -atan2(local_dir_use_U.dot(v)/h,local_dir_use_U.dot(u)/h)*180.0/PI;
+
+
+				urot = rotate_hors_axes(v, angle1, u);
+				urot = rotate_hors_axes(w, angle2, urot);
+
+				vrot = rotate_hors_axes(u, angle0, v);
+				vrot = rotate_hors_axes(w, angle2, vrot);
+
+				wrot = rotate_hors_axes(u, angle0, w);
+				wrot = rotate_hors_axes(v, angle1, wrot);
+
+				for(int i=0; i<3;++i) {
+					// elem.U(i,l) = urot(i);
+					// elem.V(i,l) = wrot(i);
+					// elem.W(i,l) = -vrot(i);
+					elem.tmp_U(i,l) = urot(i);
+					elem.tmp_V(i,l) = vrot(i);
+					elem.tmp_W(i,l) = wrot(i);
+				}
+
 			}
 		}
 	}
 
+	for(auto& elem : m.Elements){
+		elem.U= elem.tmp_U;
+		elem.V= elem.tmp_V;
+		elem.W= elem.tmp_W;
+	}
 
 	GT.finalise(m, param);
 	return;
@@ -944,6 +1033,43 @@ void StackingSequence(Mesh& m, Parameters& param) {
 					elem.W(i,l) = wrot(i);
 				}
 			}
+		}
+	}
+}
+
+void Rigid_Boundary(Mesh& m, Parameters& param) {
+
+
+	int beg, end;
+	if (param.SizeIntervaldZ==2){
+		beg = param.intervaldZ[0];
+		end = param.intervaldZ[1];
+	} else if (param.SizeIntervaldZ==4){
+		beg = param.intervaldZ[0];
+		end = param.intervaldZ[3];
+	}
+
+	// std::cout << "Steel behaviour from z=0 to z=" << beg << " and z=" << end << " to z=zmax" << std::endl;
+
+	for(auto& elem : m.Elements){
+		for(int l=0; l < elem.nb; ++l) {
+
+			if (elem.Initial_barycenter.col(l)(2) < beg || 
+				elem.Initial_barycenter.col(l)(2) > end){
+
+				elem.Markers(1,l) = 4; // Marker for rigid boundary element
+				elem.U(0,l) = 1.0;
+				elem.U(1,l) = 0.0;
+				elem.U(2,l) = 0.0;
+				elem.V(0,l) = 0.0;
+				elem.V(1,l) = 1.0;
+				elem.V(2,l) = 0.0;
+				elem.W(0,l) = 0.0;
+				elem.W(1,l) = 0.0;
+				elem.W(2,l) = 1.0;
+
+			}
+
 		}
 	}
 }
