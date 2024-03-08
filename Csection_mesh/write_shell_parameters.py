@@ -10,7 +10,7 @@ import configparser
 
 # geometry in millimeters
 
-def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0, height = 55.0, LFlange_theta = 0.0, RFlange_theta = 0.0, n_plies = 24, rotate_flanges = True, model_name = 'CSpar'):
+def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, rad_thin=0.0, Zlength = 420.0, height = 55.0, LFlange_theta = 0.0, RFlange_theta = 0.0, n_plies = 24, rotate_flanges = True, thin_corners = True, model_name = 'CSpar'):
 	
 	nb_plies = 1 #fixed (not the same as input n_plies)
 	nb_wrinkles = 0 # let it to 0
@@ -23,7 +23,10 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0
 	start = Zlength/2.0 - 150 # assumes the end blocks have been placed such that the feature is exactly central
 
 	is_GaussianThickness = 0
-	is_CornerThickness = 0
+	if thin_corners:
+		is_CornerThickness = 1
+	else:
+		is_CornerThickness = 0
 
 	# ply_thickness = Ylenght/(nb_plies+0.0)
 	StackSeq = [0.0]
@@ -106,7 +109,7 @@ def write_parameters(cnt=-1,p1=0, p2=0, p3=0, p4=0, t_ply=0.196, Zlength = 420.0
 	config['GEO-TRANSFORMATION']['RotateAxis(s)'] = 'X' # "X" or "Z"
 	config['GEO-TRANSFORMATION']['AngleRotateFlangeRi(f)'] = str(RFlange_theta) # positive angle
 	config['GEO-TRANSFORMATION']['AngleRotateFlangeLe(f)'] = str(LFlange_theta) # positive angle
-	config['GEO-TRANSFORMATION']['ThicknessVar(d)'] = '1' # ratio thickness of the corners
+	config['GEO-TRANSFORMATION']['ThicknessVar(d)'] = str(rad_thin) # Thinning of the corners in mm (can also be negative, i.e. thickening)
 
 	if (is_GaussianThickness):
 		# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
