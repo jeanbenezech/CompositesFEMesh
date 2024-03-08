@@ -5,7 +5,7 @@ from utils.parameters import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Modified to be called as a library, with optional inputs
-def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, t_ply = 0.196, K = 1.0e10, x_spring = 27.5, x_spring_fix = [], x_spring_load = [], load = -10.0313, rotation_offset = 0.0, StackSeq = [], init_inc = 1.0, min_inc = 1.0e-5, max_inc = 1.0):
+def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, t_ply = 0.196, K = 1.0e10, x_spring = 27.5, x_spring_fix = [], x_spring_load = [], load = -200.0, displacement=-4.0, rotation_offset = 0.0, StackSeq = [], init_inc = 1.0, min_inc = 1.0e-5, max_inc = 1.0, apply_load = True):
 
 	param = parameters()
 	param.init('parameters')
@@ -159,10 +159,16 @@ def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, 
 	# Csection
 	#f.write('m.MasterNode5, 3, 3, -1\n')
 
-	f.write('*CLOAD \n')
-	# Units in kN consistent with above modulus definintion in kN/mm^2 (GPa)
-	f.write('Load_RP, 3, {}\n'.format(load))
-
+	if apply_load:
+		# Apply as point load?
+		f.write('*CLOAD \n')
+		# Units in kN consistent with above modulus definintion in kN/mm^2 (GPa)
+		f.write('Load_RP, 3, {}\n'.format(load))
+	else:
+		# Otherwise apply as displacement
+		f.write('*BOUNDARY, TYPE=DISPLACEMENT\n')
+		f.write('Load_RP, 3, 3, {}\n'.format(displacement))
+		
 	# ~~~~~~~~~~~~~ OUTPUT ~~~~~~~~~~~~~
 	f.write('**\n')
 	f.write('**---------- OUTPUT ---------- \n')
