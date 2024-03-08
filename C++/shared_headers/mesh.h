@@ -29,7 +29,7 @@ public:
 	bool isShell=false;
 
 	std::vector<double> stacking_sequence;
-	std::vector<double> ply_type;
+	std::vector<int> ply_type;
 	int nb_corner, type;
 	std::vector<Vector2f> P;
 
@@ -53,10 +53,10 @@ public:
 	bool exportAbaqusFields=false;
 	bool exportAbaqusDisplacement=false;
 	bool exportRandomFieldOnElement=false;
-	void write_vtk(const std::string& filename, int verbosity);
+	void write_vtk(const std::string& filename, Parameters& param, int verbosity);
 	void write_point_cloud_vtk(const std::string& filename, int verbosity);
 	void write_inp(const std::string& filename);
-	void write_ori_txt(const std::string& filename);
+	void write_ori_txt(const std::string& filename, Parameters& param);
 	void write_ori_inp(const std::string& filename, Parameters& param);
 	void write_abaqus_cae_input(const std::string& filename, Parameters& param);
 
@@ -89,11 +89,17 @@ void Mesh::initialise(Parameters& param) {
 	nb_plies_=param.nb_plies;
 
 	stacking_sequence.resize(nb_plies_);
-	if (!isShell)
-		for(int i=0; i<nb_plies_; i++)
+	ply_type.resize(nb_plies_);
+	if (!isShell){
+		for(int i=0; i<nb_plies_; i++){
 			stacking_sequence[i] = param.StackSeq[i](0);
-	else
+			ply_type[i] = std::floor(param.StackSeq[i](2));
+			// std::cout << "ply " << i << " PG: " << stacking_sequence[i] << " and ply type: " << ply_type[i] << std::endl;
+		}
+	} else {
 		stacking_sequence[0]=0.;
+		ply_type[0]=0;
+	}
 
 }
 
@@ -326,39 +332,39 @@ void Mesh::read_msh(const std::string& filename, bool only_3D, int cz_id) {
 	if (only_3D==false) {
 		if(istri){
 			Elements[incr_elem].initialise("Triangle", ltri.size(), ltri[0][2]-1);
-			Elements[incr_elem].fill(ltri, nb_nset);
+			Elements[incr_elem].fill(ltri, nb_nset, ply_type);
 			incr_elem += 1;
 		}
 		if(isquad){
 			Elements[incr_elem].initialise("Quadrilateral", lquad.size(), lquad[0][2]-1);
-			Elements[incr_elem].fill(lquad, nb_nset);
+			Elements[incr_elem].fill(lquad, nb_nset, ply_type);
 			incr_elem += 1;
 		}
 	}
 
 	if(istet){
-		Elements[incr_elem].initialise("Tetrahedron", ltet.size(), 1);//ltet[0][2]-1);
-		Elements[incr_elem].fill(ltet, nb_elset);
+		Elements[incr_elem].initialise("Tetrahedron", ltet.size(), ltet[0][2]-1);
+		Elements[incr_elem].fill(ltet, nb_elset, ply_type);
 		incr_elem += 1;
 	}
 	if(ishex){
-		Elements[incr_elem].initialise("Hexahedron", lhex.size(), 1, isShell);//lhex[0][2]-1);
-		Elements[incr_elem].fill(lhex, nb_elset);
+		Elements[incr_elem].initialise("Hexahedron", lhex.size(), lhex[0][2]-1, isShell);
+		Elements[incr_elem].fill(lhex, nb_elset, ply_type);
 		incr_elem += 1;
 	}
 	if(iscoh){
-		Elements[incr_elem].initialise("Cohesive", lcoh.size(), 1);//lcoh[0][2]-1);
-		Elements[incr_elem].fill(lcoh, nb_elset);
+		Elements[incr_elem].initialise("Cohesive", lcoh.size(), lcoh[0][2]-1);
+		Elements[incr_elem].fill(lcoh, nb_elset, ply_type);
 		incr_elem += 1;
 	}
 	if(iswed){
-		Elements[incr_elem].initialise("Prism", lwed.size(), 1);//lwed[0][2]-1);
-		Elements[incr_elem].fill(lwed, nb_elset);
+		Elements[incr_elem].initialise("Prism", lwed.size(), lwed[0][2]-1);
+		Elements[incr_elem].fill(lwed, nb_elset, ply_type);
 		incr_elem += 1;
 	}
 	if(ispyr){
-		Elements[incr_elem].initialise("Pyramid", lpyr.size(), 1);//lpyr[0][2]-1);
-		Elements[incr_elem].fill(lpyr, nb_elset);
+		Elements[incr_elem].initialise("Pyramid", lpyr.size(), lpyr[0][2]-1);
+		Elements[incr_elem].fill(lpyr, nb_elset, ply_type);
 		incr_elem += 1;
 	}
 
@@ -580,7 +586,7 @@ void Mesh::write_msh(const std::string& filename, int verbosity=1) {
 	output << "$EndElements" << std::endl;
 }
 
-void Mesh::write_vtk(const std::string& filename, int verbosity=0) {
+void Mesh::write_vtk(const std::string& filename, Parameters& param, int verbosity=0) {
 
 	if(verbosity){
 		std::cout << nb_vertices_ << " nodes" << std::endl;
@@ -612,13 +618,13 @@ void Mesh::write_vtk(const std::string& filename, int verbosity=0) {
 	for(auto& elem : Elements){
 		for (int i=0; i< elem.nb; i++) {
 			output << elem.size << " ";
-			for (int j =0; j < elem.Nodes.rows()-1; j++)
+ 			for (int j =0; j < elem.Nodes.rows()-1; j++)
 				output << elem.Nodes(j,i) << " ";
 			output << elem.Nodes(elem.Nodes.rows()-1,i) << std::endl;
 		}
 	}
-
-	output << "CELL_TYPES " << Tot_cells_ << std::endl;
+ 
+ 	output << "CELL_TYPES " << Tot_cells_ << std::endl;
 	for(auto& elem : Elements){
 		for (int i=0; i< elem.nb; i++) {
 			output << elem.vtk_type << std::endl;
@@ -626,7 +632,7 @@ void Mesh::write_vtk(const std::string& filename, int verbosity=0) {
 	}
 
 	output << "CELL_DATA " << Tot_cells_ << std::endl;
-	output << "SCALARS marker int 1"<< std::endl;
+	output << "SCALARS marker int " << Elements[0].Markers.rows() << std::endl;
 	output << "LOOKUP_TABLE default"<< std::endl;
 
 	for(auto& elem : Elements){
@@ -657,29 +663,39 @@ void Mesh::write_vtk(const std::string& filename, int verbosity=0) {
 			}
 		}
 	}
-
+ 
 	if (exportDir){
+
+
 		output << "SCALARS U double 3\n";
 		output << "LOOKUP_TABLE default\n";
 		for(auto& elem : Elements){
 			for (int i=0; i< elem.nb; i++) {
-				output << elem.U(0, i) << " " << elem.U(1, i) << " " << elem.U(2, i) << std::endl;
+				output << std::setprecision(15) << elem.U(0, i) << " " << elem.U(1, i) << " " << elem.U(2, i) << std::endl;
 			}
 		}
 		output << "SCALARS V double 3\n";
 		output << "LOOKUP_TABLE default\n";
 		for(auto& elem : Elements){
 			for (int i=0; i< elem.nb; i++) {
-				output << elem.V(0, i) << " " << elem.V(1, i) << " " << elem.V(2, i) << std::endl;
+				output << std::setprecision(15) << elem.V(0, i) << " " << elem.V(1, i) << " " << elem.V(2, i) << std::endl;
 			}
 		}
 		output << "SCALARS W double 3\n";
 		output << "LOOKUP_TABLE default\n";
 		for(auto& elem : Elements){
 			for (int i=0; i< elem.nb; i++) {
-				output << elem.W(0, i) << " " << elem.W(1, i) << " " << elem.W(2, i) << std::endl;
+				output << std::setprecision(15) << elem.W(0, i) << " " << elem.W(1, i) << " " << elem.W(2, i) << std::endl;
 			}
 		}
+		output << "SCALARS normal double 3\n";
+		output << "LOOKUP_TABLE default\n";
+		for(auto& elem : Elements){
+			for (int i=0; i< elem.nb; i++) {
+				output << std::setprecision(15) << elem.normal(0, i) << " " << elem.normal(1, i) << " " << elem.normal(2, i) << std::endl;
+			}
+		}
+
 	}
 
 	if (exportAbaqusFields){
@@ -804,7 +820,7 @@ void Mesh::write_point_cloud_vtk(const std::string& filename, int verbosity=0) {
 	output.close();
 }
 
-void Mesh::write_ori_txt(const std::string& filename) {
+void Mesh::write_ori_txt(const std::string& filename, Parameters& param) {
 	std::ofstream output;
 	output.open(filename+"_ori.txt", std::ios::out);
 	if (!output.is_open()) {
@@ -823,16 +839,24 @@ void Mesh::write_ori_txt(const std::string& filename) {
 			// output << elem.DD_weight(0, i) << " ";
 			
 			if (elem.Markers(0, i) <= nb_plies_){
-				output << elem.Markers(0, i) << " ";
-				output << stacking_sequence[elem.Markers(0, i) - 1] << " ";
+				output << elem.Markers(0, i) << " "; // plies in incremental order from inner surface to top surface
+				output << elem.Markers(1, i) << " "; // material group
+				output << stacking_sequence[elem.Markers(0, i) - 1] << " "; // Orientation
 			}
-			else{
-				output << nb_plies_-elem.Markers(0, i) << " 0 "; // "-1 0"
-			}
+			// else{
+			// 	output << nb_plies_-elem.Markers(0, i) << " 0 "; // "-1 0"
+			// }
+
+			// if(param.RotateFlanges){
+			// 	output << std::setprecision(15) << -elem.V(0, i) << " " << -elem.V(1, i) << " " << -elem.V(2, i) << " ";
+			// 	output << std::setprecision(15) << -elem.W(0, i) << " " << -elem.W(1, i) << " " << -elem.W(2, i) << " ";
+			// 	output << std::setprecision(15) <<  elem.U(0, i) << " " <<  elem.U(1, i) << " " <<  elem.U(2, i) << std::endl;
+			// }
+			// else {
 			output << std::setprecision(15) <<  elem.U(0, i) << " " <<  elem.U(1, i) << " " <<  elem.U(2, i) << " ";
 			output << std::setprecision(15) << -elem.W(0, i) << " " << -elem.W(1, i) << " " << -elem.W(2, i) << " ";
 			output << std::setprecision(15) <<  elem.V(0, i) << " " <<  elem.V(1, i) << " " <<  elem.V(2, i) << std::endl;
-			
+			// }
 			// output << "-1 0 1 0 0 -0 -0 1 0 -1 0" << std::endl;
 		}
 	}
