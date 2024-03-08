@@ -618,13 +618,13 @@ void Mesh::write_vtk(const std::string& filename, Parameters& param, int verbosi
 	for(auto& elem : Elements){
 		for (int i=0; i< elem.nb; i++) {
 			output << elem.size << " ";
-			for (int j =0; j < elem.Nodes.rows()-1; j++)
+ 			for (int j =0; j < elem.Nodes.rows()-1; j++)
 				output << elem.Nodes(j,i) << " ";
 			output << elem.Nodes(elem.Nodes.rows()-1,i) << std::endl;
 		}
 	}
-
-	output << "CELL_TYPES " << Tot_cells_ << std::endl;
+ 
+ 	output << "CELL_TYPES " << Tot_cells_ << std::endl;
 	for(auto& elem : Elements){
 		for (int i=0; i< elem.nb; i++) {
 			output << elem.vtk_type << std::endl;
@@ -663,7 +663,7 @@ void Mesh::write_vtk(const std::string& filename, Parameters& param, int verbosi
 			}
 		}
 	}
-
+ 
 	if (exportDir){
 
 
