@@ -194,11 +194,15 @@ def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, 
 	f.write('{}, 1.0, {}, {}\n'.format(init_inc, min_inc, max_inc))
 	#f.write('*BOUNDARY, TYPE=DISPLACEMENT\n')
 	# Csection
-	#f.write('m.MasterNode5, 3, 3, -1\n')
-
-	f.write('*CLOAD \n')
-	# Units in kN consistent with above modulus definintion in kN/mm^2 (GPa)
-	f.write('Load_RP, 3, {}\n'.format(load))
+	if apply_load:
+		# Apply as point load?
+		f.write('*CLOAD \n')
+		# Units in kN consistent with above modulus definintion in kN/mm^2 (GPa)
+		f.write('Load_RP, 3, {}\n'.format(load))
+	else:
+		# Otherwise apply as displacement
+		f.write('*BOUNDARY, TYPE=DISPLACEMENT\n')
+		f.write('Load_RP, 3, 3, {}\n'.format(displacement))
 
 	# ~~~~~~~~~~~~~ OUTPUT ~~~~~~~~~~~~~
 	f.write('**\n')
