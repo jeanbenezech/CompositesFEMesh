@@ -3,9 +3,11 @@ import glob
 
 from utils.parameters import *
 
+# USES BEAM RATHER THAN TRUSS
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Modified to be called as a library, with optional inputs
-def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, t_ply = 0.196, K = 1.0e10, E_beam = 1000000000.0, x_spring = 27.5, x_spring_fix = [], x_spring_load = [], load = -10.0313, displacement = -4.0, rotation_offset = 0.0, StackSeq = [], init_inc = 1.0, min_inc = 1.0e-5, max_inc = 1.0, apply_load = True):
+def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, t_ply = 0.196, K = 1.0e10, E_beam = 1000.0, x_spring = 27.5, x_spring_fix = [], x_spring_load = [], load = -10.0313, displacement = -4.0, rotation_offset = 0.0, StackSeq = [], init_inc = 1.0, min_inc = 1.0e-5, max_inc = 1.0, apply_load = True):
 
 	param = parameters()
 	param.init('parameters')
@@ -65,7 +67,7 @@ def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, 
 	f.write('100003,\n')
 	f.write('*NSET, nset=Load_Sup_RP\n')
 	f.write('100004,\n')
-	f.write('*ELEMENT, type=T3D2, ELSET=Bars\n')
+	f.write('*ELEMENT, type=B31, ELSET=Beams\n')
 	for i, node in enumerate(fixed_end_nodes):
 		f.write('{}, 100003, {}\n'.format(i+100001, node))
 	for i, node in enumerate(load_end_nodes):
@@ -105,9 +107,12 @@ def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, 
 		# Subtract 90 for consistency with non-shell version
 		f.write('{}, 3, AS4-8552, {}, Ply{}\n'.format(t_ply, ply+90.0, i))
 
-	# Write shell section parameter
-	f.write('*SOLID SECTION, ELSET=Bars, MATERIAL=Steel\n')
-	f.write('{}\n'.format(1.0))#format(29400.0/len(fixed_end_nodes))) # Cross-sectional area (use CSA of end blocks in mm^2 divided by number of bars)
+	# Write shell section parameter - HERE!!!!
+	f.write('*BEAM GENERAL SECTION, ELSET=Beams, SECTION=GENERAL\n')
+	# Intertial of 1e9 consistent with 500mm wide beam, to all intents and purposes infinite
+	f.write('1.0, 1.0E9, 0.0, 1.0E9, 1.0E9\n') # Area, Moment of inertial about the 1 axis I11, cross-bending I12, bending about 2 axis I22, Torsional rigity J
+	f.write('\n') #necessary blank line
+	f.write('{}, 1.0E9\n'.format(E_beam)) # Young's modulus, Shear modulus
 	f.write('**\n')
 	f.write('*end part\n')
 
@@ -124,9 +129,9 @@ def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, 
 	G23 = E22/(2*(1+nu23))
 	f.write('{}, {}, {}, {}, {}, {}, {}, {}\n'.format(E11, E22, E33, nu12, nu13, nu23, G12, G13))
 	f.write('{}\n'.format(G23))
-	f.write('*MATERIAL, NAME=Steel \n')
-	f.write('*ELASTIC, TYPE=ISOTROPIC \n')
-	f.write('{}, 0.3\n'.format(E_beam)) # Modulus, Poisson's ratio
+	#f.write('*MATERIAL, NAME=Steel \n')
+	#f.write('*ELASTIC, TYPE=ISOTROPIC \n')
+	#f.write('{}, 0.3\n'.format(E_steel)) # Modulus, Poisson's ratio
 
 	# ~~~~~~~~~~~~~ ASSEMBLY ~~~~~~~~~~~~~
 	f.write('**\n')
@@ -160,10 +165,10 @@ def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, 
 	f.write('m.Load_Sup_RP, 4, 4\n')
 	f.write('m.Load_Sup_RP, 6, 6\n')
 	# Extra ones to turn on/off to restrict twist at the ends
-	f.write('m.Fixed_RP, 4, 4\n') # We might want to allow rotation about the x axis to account for misalignment in the y direction though...
-	f.write('m.Fixed_RP, 6, 6\n')
-	f.write('m.load_RP, 4, 4\n') # We might want to allow rotation about the x axis to account for misalignment in the y direction though...
-	f.write('m.load_RP, 6, 6\n')
+	#f.write('m.Fixed_RP, 4, 4\n') # We might want to allow rotation about the x axis to account for misalignment in the y direction though...
+	#f.write('m.Fixed_RP, 6, 6\n')
+	#f.write('m.load_RP, 4, 4\n') # We might want to allow rotation about the x axis to account for misalignment in the y direction though...
+	#f.write('m.load_RP, 6, 6\n')
 	# Laminate
 
 	# ~~~~~~~~~~~~~ STEP ~~~~~~~~~~~~~
