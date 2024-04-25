@@ -5,7 +5,7 @@ from utils.parameters import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Modified to be called as a library, with optional inputs
-def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, t_ply = 0.196, K = 1.0e10, E_beam = 1000000000.0, x_spring = 27.5, x_spring_fix = [], x_spring_load = [], load = -10.0313, displacement = -4.0, rotation_offset = 0.0, StackSeq = [], init_inc = 1.0, min_inc = 1.0e-5, max_inc = 1.0, apply_load = True):
+def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, t_ply = 0.196, K = 1.0e10, E_beam = 1000000000.0, x_spring = 27.5, x_spring_fix = [], x_spring_load = [], K_ground = [], load = -10.0313, displacement = -4.0, rotation_offset = 0.0, StackSeq = [], init_inc = 1.0, min_inc = 1.0e-5, max_inc = 1.0, apply_load = True, fix_to_ground = True):
 
 	param = parameters()
 	param.init('parameters')
@@ -52,11 +52,14 @@ def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, 
 		x_spring_fix = x_spring
 		x_spring_load = x_spring
 	# Reference points at spar ends
+	f.write('100000, {}, 75.0, {}\n'.format(x_spring_fix, -rotation_offset)) # Ground node (need for reaction force)
 	f.write('100001, {}, 75.0, 0.0\n'.format(x_spring_fix))
 	f.write('100002, {}, 75.0, 420.0\n'.format(x_spring_load))
 	# Reference points at support
 	f.write('100003, {}, 75.0, {}\n'.format(x_spring_fix, -rotation_offset))
 	f.write('100004, {}, 75.0, {}\n'.format(x_spring_load, 420.0+rotation_offset))
+	f.write('*NSET, nset=Ground\n')
+	f.write('100000\n')
 	f.write('*NSET, nset=Fixed_RP\n')
 	f.write('100001,\n')
 	f.write('*NSET, nset=Load_RP\n')
@@ -82,6 +85,13 @@ def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, 
 	f.write('*SPRING, elset=Load_Spring-spring\n')
 	f.write('5\n')
 	f.write('{}\n'.format(K))
+	# Spring for tying base to ground
+	if not fix_to_ground:
+		f.write('*ELEMENT, type=Spring2, ELSET=Ground_spring\n')
+		f.write('300003, 100000, 100003\n')
+		f.write('*SPRING, elset=Ground_spring\n')
+		f.write('3, 3\n')
+		f.write('{}\n'.format(K_ground))
 	f.write('**\n')
 
 		# ~~~~~~ MATERIAL ASSIGNEMENT ~~~~~~
@@ -103,7 +113,7 @@ def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, 
 	f.write('*SHELL SECTION, ELSET=Hexahedron, COMPOSITE, ORIENTATION=ori_loc, OFFSET=0, LAYUP="Inner Skin", SYMMETRIC\n')
 	for i, ply in enumerate(StackSeq):
 		# Subtract 90 for consistency with non-shell version
-		f.write('{}, 3, AS4-8552, {}, Ply{}\n'.format(t_ply, ply+90.0, i))
+		f.write('{}, 3, IM7-8552, {}, Ply{}\n'.format(t_ply, ply+90.0, i))
 
 	# Write shell section parameter
 	f.write('*SOLID SECTION, ELSET=Bars, MATERIAL=Steel\n')
@@ -115,7 +125,7 @@ def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, 
 	# Csection
 	f.write('**\n')
 	f.write('**---------- MATERIALS ---------- \n')
-	f.write('*MATERIAL, NAME=AS4-8552 \n')
+	f.write('*MATERIAL, NAME=IM7-8552 \n')
 	f.write('*ELASTIC, TYPE=ENGINEERING CONSTANTS \n')
 	# Give units in GPa for equivalence with kN and mm (for N and mm would be in MPa)
 	E33 = E22
@@ -152,7 +162,10 @@ def write_inp(E11 = 115.6, E22 = 9.24, nu12 = 0.335, nu23 = 0.487, G12 = 4.826, 
 	f.write('*BOUNDARY, TYPE=DISPLACEMENT\n')
 	f.write('m.Fixed_Sup_RP, 1, 1\n')
 	f.write('m.Fixed_Sup_RP, 2, 2\n')
-	f.write('m.Fixed_Sup_RP, 3, 3\n')
+	if fix_to_ground:
+		f.write('m.Fixed_Sup_RP, 3, 3\n')
+	else:
+		f.write('m.Ground, 3, 3\n')
 	f.write('m.Fixed_Sup_RP, 4, 4\n')
 	f.write('m.Fixed_Sup_RP, 6, 6\n')
 	f.write('m.Load_Sup_RP, 1, 1\n')
