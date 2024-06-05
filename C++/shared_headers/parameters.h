@@ -219,12 +219,12 @@ void Parameters::read(const std::string& filename) {
 	// 		WID = extract(line);
 
 	// 	if (line.find("Wsize")!=std::string::npos){
-	// 		double tmp = std::stof(extract(line));
+	// 		double tmp = std::stod(extract(line));
 	// 		wrinkleSize.push_back(tmp);
 	// 	}
 
 	// 	if (line.find("Wori")!=std::string::npos){
-	// 		double tmp = std::stof(extract(line));
+	// 		double tmp = std::stod(extract(line));
 	// 		wrinkleOri.push_back(tmp);
 	// 	}
 
@@ -257,7 +257,7 @@ void Parameters::read(const std::string& filename) {
 	// 		rotateRVE = std::stoi(extract(line));
 	// 	}
 	// 	if (line.find("AngleRotateRVE(f)")!=std::string::npos){
-	// 		angleRVE = std::stof(extract(line));
+	// 		angleRVE = std::stod(extract(line));
 	// 	}
 
 	// 	if (line.find("RotateAxis(f)")!=std::string::npos)
@@ -274,10 +274,10 @@ void Parameters::read(const std::string& filename) {
 	// 		// std::cout << "RotateFlanges: " << RotateFlanges << std::endl;
 	// 	}
 	// 	if (line.find("AngleRotateFlangeRi(f)")!=std::string::npos){
-	// 		AngleRotateFlangeR = std::stof(extract(line));
+	// 		AngleRotateFlangeR = std::stod(extract(line));
 	// 	}
 	// 	if (line.find("AngleRotateFlangeLe(f)")!=std::string::npos){
-	// 		AngleRotateFlangeL = std::stof(extract(line));
+	// 		AngleRotateFlangeL = std::stod(extract(line));
 	// 	}
 
 	// 	if (line.find("RigidBoundary(b)")!=std::string::npos){
@@ -328,15 +328,15 @@ void Parameters::read(const std::string& filename) {
 	if (config["GEOMETRY"].has("np(i)")==true)
 		nb_plies = std::stoi(config["GEOMETRY"].get("np(i)"));
 	if (config["GEOMETRY"].has("X(f)")==true)
-		X = std::stoi(config["GEOMETRY"].get("X(f)"));
+		X = std::stod(config["GEOMETRY"].get("X(f)"));
 	if (config["GEOMETRY"].has("Y(f)")==true)
-		Y = std::stoi(config["GEOMETRY"].get("Y(f)"));
+		Y = std::stod(config["GEOMETRY"].get("Y(f)"));
 	if (config["GEOMETRY"].has("Z(f)")==true)
-		Z = std::stoi(config["GEOMETRY"].get("Z(f)"));
+		Z = std::stod(config["GEOMETRY"].get("Z(f)"));
 	if (config["GEOMETRY"].has("Height(f)")==true)
-		Height = std::stoi(config["GEOMETRY"].get("Height(f)"));
+		Height = std::stod(config["GEOMETRY"].get("Height(f)"));
 	if (config["GEOMETRY"].has("R(f)")==true)
-		R = std::stoi(config["GEOMETRY"].get("R(f)"));
+		R = std::stod(config["GEOMETRY"].get("R(f)"));
 
 	// StaqSeq
 	StackSeq.resize(nb_plies);
@@ -355,9 +355,9 @@ void Parameters::read(const std::string& filename) {
 	if (config["GEO-TRANSFORMATION"].has("RotateRVE(b)")==true)
 		rotateRVE = std::stoi(config["GEO-TRANSFORMATION"].get("RotateRVE(b)"));
 	if (config["GEO-TRANSFORMATION"].has("AngleRotateRVE(f)")==true)
-		angleRVE = std::stof(config["GEO-TRANSFORMATION"].get("AngleRotateRVE(f)"));
+		angleRVE = std::stod(config["GEO-TRANSFORMATION"].get("AngleRotateRVE(f)"));
 	// if (config["GEO-TRANSFORMATION"].has("InteriorRadiusRVE(f)")==true)
-	// 	interior_radius_RVE = std::stof(config["GEO-TRANSFORMATION"].get("InteriorRadiusRVE(f)"));
+	// 	interior_radius_RVE = std::stod(config["GEO-TRANSFORMATION"].get("InteriorRadiusRVE(f)"));
 	rotateAxis = config["GEO-TRANSFORMATION"].get("RotateAxis(s)");
 
 	bool need_default_rotate_start_stop=true;
@@ -371,9 +371,9 @@ void Parameters::read(const std::string& filename) {
 	if (config["GEO-TRANSFORMATION"].has("RotateFlanges(b)")==true)
 		RotateFlanges = std::stoi(config["GEO-TRANSFORMATION"].get("RotateFlanges(b)"));
 	if (config["GEO-TRANSFORMATION"].has("AngleRotateFlangeRi(f)")==true)
-		AngleRotateFlangeR = std::stof(config["GEO-TRANSFORMATION"].get("AngleRotateFlangeRi(f)"));
+		AngleRotateFlangeR = std::stod(config["GEO-TRANSFORMATION"].get("AngleRotateFlangeRi(f)"));
 	if (config["GEO-TRANSFORMATION"].has("AngleRotateFlangeLe(f)")==true)
-		AngleRotateFlangeL = std::stof(config["GEO-TRANSFORMATION"].get("AngleRotateFlangeLe(f)"));
+		AngleRotateFlangeL = std::stod(config["GEO-TRANSFORMATION"].get("AngleRotateFlangeLe(f)"));
 
 	if (config["GEO-TRANSFORMATION"].has("RigidBoundary(b)")==true)
 		RigidBoundary = std::stoi(config["GEO-TRANSFORMATION"].get("RigidBoundary(b)"));
@@ -412,9 +412,9 @@ void Parameters::read(const std::string& filename) {
 	wrinkleDamp.resize(add_wrinkles);
 	for(int iter_w = 0; iter_w<add_wrinkles; iter_w++){
 		if (config["WRINKLES"].has("Wsize"+std::to_string(iter_w)+"(f)")==true)
-			wrinkleSize[iter_w] = std::stof(config["WRINKLES"].get("Wsize"+std::to_string(iter_w)+"(f)"));
+			wrinkleSize[iter_w] = std::stod(config["WRINKLES"].get("Wsize"+std::to_string(iter_w)+"(f)"));
 		if (config["WRINKLES"].has("Wori"+std::to_string(iter_w)+"(f)")==true)
-			wrinkleOri[iter_w] = std::stof(config["WRINKLES"].get("Wori"+std::to_string(iter_w)+"(f)"));
+			wrinkleOri[iter_w] = std::stod(config["WRINKLES"].get("Wori"+std::to_string(iter_w)+"(f)"));
 		if (config["WRINKLES"].has("Wpos"+std::to_string(iter_w)+"(f)")==true)
 			wrinklePos[iter_w] = vectorExtract(config["WRINKLES"].get("Wpos"+std::to_string(iter_w)+"(f)"), true);
 		if (config["WRINKLES"].has("Wdamp"+std::to_string(iter_w)+"(f)")==true)
