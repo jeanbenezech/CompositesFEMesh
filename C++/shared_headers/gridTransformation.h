@@ -100,6 +100,9 @@ class GridTransformation{
 
 	void wrinkles(Vector3d& point);
 
+    Vector3d TESTtoFlatCoordinateSys(Vector3d & point, Parameters& param, bool do_shrink_along_X, bool do_shrink_along_Y);
+    Vector4d TESTinverse_ramp_gridTransformation(Vector3d & point);
+
 	private:
 	// double epsilon = 0.1;
 };
@@ -518,7 +521,7 @@ void GridTransformation::RotateFlanges(Vector3d& point, Parameters& param, std::
 		// point = moved+ramp;
 		point = moved;
 		// return;
-	} 
+	}
 
 }
 
@@ -1228,4 +1231,283 @@ void GridTransformation::wrinkles(Vector3d& point){
 
 
 	return;
+}
+
+
+
+
+
+Vector3d GridTransformation::TESTtoFlatCoordinateSys(Vector3d & point, Parameters& param, bool do_shrink_along_X=true, bool do_shrink_along_Y=true){ // CSPAR
+
+    double Cspar_width=param.X;
+    double big_radius=param.R+param.Y;
+
+    /* If ramp=0 return a 0 vector */
+    Vector4d ramp_param = TESTinverse_ramp_gridTransformation(point);
+    double local_ymid = (local_ymin+local_ymax)/2.0;
+    Vector3d ramp;
+    ramp[2] = 0.0;
+    if (do_shrink_along_X){
+        ramp[0] = -ramp_param[0];
+    }
+    if (do_shrink_along_Y){
+        if(point[1]>=local_ymid){
+            ramp[1] = -ramp_param[1];
+        } else {
+            ramp[1] = ramp_param[2];
+        }
+    }
+    double local_delta = ramp_param[3];
+
+
+    Vector3d init = point; // Get rid of the ramp first
+    // Vector3d init = point-ramp; // Get rid of the ramp first
+
+    Vector3d ref, moved; // To go back to the flat coordinate system
+    moved = init;
+
+    double dist_from_bottom_surf;
+    double theta;
+    double local_radius;
+    double d;
+
+    dist_from_bottom_surf=0.0;
+
+    bool do_fix_angle = true;
+    double myAngle = 90.;
+
+
+	double local_local_xmax = local_xmax - ramp_param[0];
+	double local_local_ymax = local_ymax - ramp_param[1];
+	double local_local_ymin = local_ymin + ramp_param[2];
+
+	if (init[1]>=local_local_ymax){
+		double local_int_rad = interior_radius - sqrt(pow(ramp_param[0],2)+pow(ramp_param[1],2));
+
+		if(do_fix_angle)
+			myAngle -= ((atan(ramp_param[1]/param.Height))*180/PI) *\
+						 sin(myAngle * PI/180.);
+
+		if(init[0]<=local_local_xmax){
+			dist_from_bottom_surf = (init[1] - local_local_ymax) - local_int_rad;
+		} else {
+			dist_from_bottom_surf = sqrt((init[1]-local_local_ymax)*(init[1]-local_local_ymax)\
+										+(init[0]-local_local_xmax)*(init[0]-local_local_xmax))-local_int_rad;
+		}
+		ref[0] = local_xmax- ramp_param[0];
+		ref[1] = local_ymax- ramp_param[1];
+		// ref[1] = local_ymax;
+
+		double local_radius = local_int_rad + dist_from_bottom_surf;
+
+		if(init[0]<=local_local_xmax){
+			double theta = PI/2. - myAngle * PI / 180.0;
+
+			// double u side
+			moved[1] = ref[1] - (local_delta-ramp_param[0]) + big_radius*(myAngle * PI / 180.0) + (local_radius) * sin(theta) + (local_local_xmax-init[0]) * cos(-theta);
+			// Flatten 
+			// moved[1] = ref[1] +  (local_delta-ramp_param[0]) + big_radius*(myAngle * PI / 180.0) + (local_radius) * sin(theta) + (local_local_xmax-init[0]) * cos(-theta);
+			// u side
+			// moved[1] = ref[1] + big_radius*(myAngle * PI / 180.0) + (local_radius) * sin(theta) + (local_local_xmax-init[0]) * cos(-theta);
+			moved[0] = ref[0] + (local_radius) * cos(theta) + (local_local_xmax-init[0]) * sin(-theta);
+
+		} else {
+			double o = init[1]-local_local_ymax;
+			double a = init[0]-local_local_xmax;
+			double local_theta = atan(o/a);
+
+			double theta = local_theta - (myAngle * PI / 180.0) * (local_theta/(PI/2.0));
+
+			// moved[1] = ref[1] + (ramp_param[1])+ big_radius*local_theta + (local_radius) * sin(theta);
+
+			// double u side
+			moved[1] = ref[1] - (local_delta-ramp_param[0]) 
+							  + big_radius*local_theta 
+							  + (local_radius) * sin(theta);
+			// Flatten
+			// moved[1] = ref[1] + (local_delta-ramp_param[0]) 
+			// 				  + big_radius*local_theta 
+			// 				  + (local_radius) * sin(theta);
+			// u side
+			// moved[1] = ref[1] + big_radius*local_theta 
+			// 				  + (local_radius) * sin(theta);
+			moved[0] = ref[0] + (local_radius) * cos(theta);
+		}
+
+		// point = moved;
+		// point = moved+ramp;
+		// return;
+	} else if (init[1]<=local_local_ymin){
+
+		double local_int_rad = interior_radius - sqrt(pow(ramp_param[0],2)+pow(ramp_param[2],2));
+
+		if(do_fix_angle)
+			myAngle -= ((atan(ramp_param[2]/param.Height))*180/PI) *\
+						sin(myAngle * PI/180.);
+			// myAngle -= (atan(ramp_param[2]/param.Height))*180/PI *\
+			// 			(myAngle / 90.);
+
+
+		if(init[0]<=local_local_xmax){
+			dist_from_bottom_surf = - init[1] + local_local_ymin - local_int_rad;
+		} else {
+			dist_from_bottom_surf = sqrt((init[1]-local_local_ymin)*(init[1]-local_local_ymin)\
+										+(init[0]-local_local_xmax)*(init[0]-local_local_xmax))\
+										-local_int_rad;
+		}
+
+		ref[0] = local_local_xmax;
+		ref[1] = local_local_ymin;
+		// ref[0] = local_local_xmax;
+		// ref[1] = local_local_ymin;
+		double local_radius = local_int_rad + dist_from_bottom_surf;
+
+		if(init[0]<=local_local_xmax){
+			double theta = - PI/2. + myAngle * PI / 180.0;
+
+
+			// double u side
+			moved[1] = ref[1] + (local_delta-ramp_param[0]) 
+							  - big_radius * (myAngle * PI / 180.0) 
+							  + (local_radius) * sin(theta) 
+							  - (local_local_xmax-init[0]) * cos(-theta);
+			// Flatten
+			// moved[1] = ref[1] -  (local_delta-ramp_param[0]) - big_radius*(myAngle * PI / 180.0) + (local_radius) * sin(theta) - (local_local_xmax-init[0]) * cos(-theta);
+			// u side
+			// moved[1] = ref[1] - big_radius*(myAngle * PI / 180.0) + (local_radius) * sin(theta) - (local_local_xmax-init[0]) * cos(-theta);
+			moved[0] = ref[0] + (local_radius) * cos(theta) - (local_local_xmax-init[0]) * sin(-theta);
+
+		} else {
+
+			double o = local_local_ymin - init[1];
+			double a = init[0]-local_local_xmax;
+			double local_theta = atan(o/a);
+
+			double theta = - local_theta + (myAngle * PI / 180.0) * (local_theta/(PI/2.0));
+
+			// moved[1] = ref[1]-(local_delta-ramp_param[1])- big_radius*local_theta + (local_radius) * sin(theta);
+			
+			// double u
+			moved[1] = ref[1] + (local_delta-ramp_param[0]) 
+							  - big_radius*local_theta 
+							  + (local_radius) * sin(theta);
+			// flat
+			// moved[1] = ref[1] - (local_delta-ramp_param[0]) 
+			// 				  - big_radius*local_theta 
+			// 				  + (local_radius) * sin(theta);
+			// u
+			// moved[1] = ref[1] - big_radius*local_theta 
+			// 				  + (local_radius) * sin(theta);
+			moved[0] = ref[0] + (local_radius) * cos(theta);
+
+		}
+
+
+		// point = moved+ramp;
+		// point = moved;
+		// return;
+	}
+
+    // std::cout << "local_ymax : [" << local_ymax << "]" << std::endl;
+    // std::cout << "local_ymin : [" << local_ymin << "]" << std::endl;
+    // std::cout << "local_radius : [" << local_radius << "]" << std::endl;
+    // std::cout << "d : [" << d << "]" << std::endl;
+    // std::cout << "theta : [" << theta << "]" << std::endl;
+    // std::cout << "Ramp : [" << ramp[0] << ", " << ramp[1] << ", " << ramp[2] << "]" << std::endl;
+    // std::cout << "ramp_param : [" << ramp_param[0] << ", " << ramp_param[1] << ", " << ramp_param[2] << "]" << std::endl;
+    // std::cout << "Point : [" << point[0] << ", " << point[1] << ", " << point[2] << "]" << std::endl;
+    // std::cout << "Ref : [" << ref[0] << ", " << ref[1] << ", " << ref[2] << "]" << std::endl;
+    // std::cout << "Init : [" << init[0] << ", " << init[1] << ", " << init[2] << "]" << std::endl;
+    // std::cout << "Moved : [" << moved[0] << ", " << moved[1] << ", " << moved[2] << "]" << std::endl;
+    // std::cout << "dist_from_bottom_surf : [" << dist_from_bottom_surf << "]" << std::endl;
+
+    return moved;
+}
+
+Vector4d GridTransformation::TESTinverse_ramp_gridTransformation(Vector3d & point){
+    double ymid = (ymax+ymin)/2.0;
+    double decrease_0=0.0; double decrease_1=0.0; double increase_1=0.0;
+
+    double threshold_avoiding_deformation_through_thickness=threshold_avoiding_deformation_of_corners;
+
+    double local_delta;
+
+    if (point[2]>z1 && point[2]<z4){ // section 1, 2, 3
+
+        if (point[2]>=z2 && point[2]<=z3){ // section 2
+
+            local_delta=delta_max;
+
+            double initial_0 = point[0];
+            if (initial_0 > (xmax - threshold_avoiding_deformation_through_thickness))
+                decrease_0 = delta_max; // cnst
+            else
+                decrease_0 = initial_0 * delta_max / (xmax-threshold_avoiding_deformation_through_thickness); // Linear
+
+            double initial_1 = point[1];
+            if(initial_1 > ymid) {
+                if (initial_1 > (ymax - threshold_avoiding_deformation_through_thickness))
+                decrease_1 = delta_max;
+                else
+                decrease_1 = (delta_max/(ymax-threshold_avoiding_deformation_through_thickness-ymid)) * (initial_1 - ymid); // Linear
+            } else {
+                if (initial_1 < threshold_avoiding_deformation_through_thickness)
+                increase_1 = delta_max;
+                else
+                increase_1 = (delta_max/(ymid-(ymin+threshold_avoiding_deformation_through_thickness))) * (ymid - initial_1); // Linear
+            }
+
+        } else if (point[2]<z2){ // section 1
+
+            local_delta = (delta_max / (z2-z1)) * point[2] + ((z1*delta_max)/(z1-z2));
+            double initial_0 = point[0];
+            if (initial_0 > (xmax - threshold_avoiding_deformation_through_thickness))
+                decrease_0 = local_delta; // cnst
+            else
+                decrease_0 = initial_0 * local_delta / (xmax-threshold_avoiding_deformation_through_thickness); // Linear
+
+            double initial_1 = point[1];
+            if(initial_1 > ymid) {
+                if (initial_1 > (ymax - threshold_avoiding_deformation_through_thickness))
+                decrease_1 = local_delta;
+                else
+                decrease_1 = (local_delta/(ymax-threshold_avoiding_deformation_through_thickness-ymid)) * (initial_1 - ymid); // Linear
+            } else {
+                if (initial_1 < ymin + threshold_avoiding_deformation_through_thickness)
+                increase_1 = local_delta;
+                else
+                increase_1 = (local_delta/(ymid-(ymin+threshold_avoiding_deformation_through_thickness))) * (ymid - initial_1); // Linear
+            }
+
+
+        } else if (point[2]>z3){ // section 3
+
+            local_delta = (delta_max / (z3-z4)) * point[2] + ((z4*delta_max)/(z4-z3));
+            double initial_0 = point[0];
+            if (initial_0 > (xmax - threshold_avoiding_deformation_through_thickness))
+                decrease_0 = local_delta; // cnst
+            else
+                decrease_0 = initial_0 * local_delta / (xmax-threshold_avoiding_deformation_through_thickness); // Linear
+
+            double initial_1 = point[1];
+            if(initial_1 > ymid) {
+                if (initial_1 > (ymax - threshold_avoiding_deformation_through_thickness))
+                decrease_1 = local_delta;
+                else
+                decrease_1 = (local_delta/(ymax-threshold_avoiding_deformation_through_thickness-ymid)) * (initial_1 - ymid); // Linear
+
+            } else {
+                if (initial_1 < ymin + threshold_avoiding_deformation_through_thickness)
+                increase_1 = local_delta;
+                else
+                increase_1 = (local_delta/(ymid-(ymin+threshold_avoiding_deformation_through_thickness))) * (ymid - initial_1); // Linear
+            }
+        }
+    }
+    Vector4d ramp_param;
+    ramp_param[0] = decrease_0;
+    ramp_param[1] = decrease_1;
+    ramp_param[2] = increase_1;
+    ramp_param[3] = local_delta;
+    return ramp_param;
 }

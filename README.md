@@ -81,3 +81,37 @@ Output:
 * A result in .vtk format.
 * .inp files in **Abaqus/** for Abaqus
 * .msh and *_ori.txt files in **DUNE/** for Dune-composites
+
+
+
+
+---
+**Precedure to test the delam in ramp/corners**
+
+``` cd /path/to/Csection_mesh```
+``` python write_parameters_for_test_delam_function.py```
+* in write_parameters_for_test_delam_function.py:
+    * See l28 for geometry changes
+    * l29: the interlayer where the delam should be (in real part) is selected default: 20
+    * l96: The discretization of the Z dir is set to only disretize the central zone (where the ramp is)
+
+
+``` python main.py```
+
+
+
+```(cd ../C++/gridModification/build && make)```
+* in gridTransformation.h:
+    * The functions ```TESTtoFlatCoordinateSys``` (l1240) and ```TESTinverse_ramp_gridTransformation``` (l1427) replicate the ones available in DUNE composites DefectParamaters.hh
+* in gridMod.h:
+    * The function ```TESTinitialiseDamage``` (l1080) does the loop over elements to test if the element belong or not to the delam area
+    * At the end of this function (l1148) an extra loop is operated to transform (flatten) the mesh, if the booleen ```config['GENERAL']['flatten(b)']``` is true in the ini file.
+
+
+```../C++/gridModification/build/gridMod```
+
+
+* The ```Cspar_test_delam.vtk``` will be written.
+    * In paraview:
+        * Do threshold on scalar:**marker**, selected component:**X** with the value ```lower threshold = upper threshold = 2``` (corresponding to the interlayer)
+        * Plot the variable **delam**

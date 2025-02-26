@@ -61,6 +61,28 @@ std::vector<double> Extractvector(std::string line, int size, bool isIni=false){
 	return out;
 }
 
+std::vector<int> ExtractvectorINT(std::string line, int size, bool isIni=false){
+	std::vector<int> out(size);
+	size_t begin = line.find_last_of(":")+1U;
+	if (isIni == true)
+		begin = 0U;
+	std::string myvector_init = line.substr(begin, line.size());
+	std::string myvector = line.substr(begin, line.size());
+	auto init_string = 0U;
+	for (int i=0; i<size; i++){
+		// std::cout << "line= " << myvector << std::endl;
+		size_t coma = myvector.find_first_of(",");
+		// std::cout << "coma= " << coma << std::endl;
+		auto extracted = myvector.substr(0U, coma);
+		// std::cout << "extracted= " << extracted << std::endl;
+		out[i] = std::stoi(extracted);
+		// std::cout << "out["<<i<<"]= " << out[i] << std::endl;
+		myvector = myvector_init.substr(coma + 1U, myvector_init.size());
+		myvector_init = myvector;
+	}
+	return out;
+}
+
 class Parameters {
 public:
 
@@ -73,6 +95,7 @@ public:
 	int nb_plies;
 
 	int cz_id, resin_id;
+	std::vector<int> cz_ids;
 	bool isResin, isCZ, isShell, writeTransformedMSH;
 
 	bool GaussianThickness, CornerThickness;
@@ -110,6 +133,12 @@ public:
 	// Path to results
 	std::string path_to_abaqus_result;
 	std::string AbaqusOdbName;
+
+	bool do_test_delam = false;
+	bool do_flatten = false;
+	int SizeCentersZ, SizeCentersX;
+	std::vector<double> centersZ;
+	std::vector<double> centersX;
 	
 
 	// Rigid boundary element
@@ -131,171 +160,6 @@ void Parameters::read(const std::string& filename) {
 	wrinklePos.resize(0);
 	wrinkleDamp.resize(0);
 	wrinkleOri.resize(0);
-
-
-	// Deprecated
-	// std::ifstream input;
-	// input.open(filename, std::ios::in);
-	// if (!input.is_open()) {
-	// 	std::cout << "Error: Cannot open file" << filename << std::endl;
-	// } else {
-	// 	std::cout << "Reading " << filename << std::endl;
-	// }
-	// std::string line {};
-	// std::getline(input, line);
-	// while(!line.empty()){ //// Deprecated
-
-	// 	if (line.find("Shell")!=std::string::npos)
-	// 		isShell = std::stoi(extract(line));
-
-	// 	if (line.find("GaussianThickness")!=std::string::npos){
-	// 		GaussianThickness = std::stoi(extract(line));
-	// 	}
-	// 	if (line.find("CornerThickness")!=std::string::npos){
-	// 		CornerThickness = std::stoi(extract(line));
-	// 	}
-
-	// 	if (line.find("Sigma(d)")!=std::string::npos)
-	// 		sigma = std::stod(extract(line));
-	// 	if (line.find("Length(d)")!=std::string::npos)
-	// 		length = std::stod(extract(line));
-
-	// 	if (line.find("ThicknessVar(d)")!=std::string::npos)
-	// 		ThicknessVar = std::stod(extract(line));
-
-	// 	if (line.find("Shape")!=std::string::npos)
-	// 		Shape = std::stoi(extract(line));
-
-	// 	if (line.find("Auto_Resin_betw_plies")!=std::string::npos)
-	// 		isResin = std::stoi(extract(line));
-
-	// 	if (line.find("cohezive_elements")!=std::string::npos)
-	// 		isCZ = std::stoi(extract(line));
-
-	// 	if (line.find("np(i)")!=std::string::npos)
-	// 		nb_plies = std::stoi(extract(line));
-
-	// 	if (line.find("name(s)")!=std::string::npos)
-	// 		meshname = extract(line)+".msh";
-
-	// 	if (line.find("wrinkle")!=std::string::npos)
-	// 		add_wrinkles = std::stoi(extract(line));
-
-	// 	if (line.find("Ramp(b)")!=std::string::npos)
-	// 		add_ramp = std::stoi(extract(line));
-
-	// 	if (line.find("R(f)")!=std::string::npos){
-	// 		R = std::stod(extract(line));
-	// 	}
-
-	// 	if (line.find("X(f)")!=std::string::npos)
-	// 		X = std::stod(extract(line));
-
-	// 	if (line.find("Y(f)")!=std::string::npos)
-	// 		Y = std::stod(extract(line));
-		
-	// 	if (line.find("Z(f)")!=std::string::npos)
-	// 		Z = std::stod(extract(line));
-
-	// 	if (line.find("Height(f)")!=std::string::npos)
-	// 		Height = std::stod(extract(line));
-
-	// 	if (line.find("StartEndinZdir(f)")!=std::string::npos)
-	// 		StartEndinZdir = vectorExtract(line);
-
-	// 	if (line.find("Abaqus_output")!=std::string::npos)
-	// 		Abaqus_output = std::stoi(extract(line));
-
-	// 	if (line.find("Dune_output")!=std::string::npos)
-	// 		Dune_output = std::stoi(extract(line));
-
-	// 	if (line.find("writeTransformedMSH(b)")!=std::string::npos)
-	// 		writeTransformedMSH = std::stoi(extract(line));
-
-	// 	if (line.find("Rsize(f)")!=std::string::npos)
-	// 		rampSize = std::stod(extract(line));
-
-	// 	if (line.find("WID(s)")!=std::string::npos)
-	// 		WID = extract(line);
-
-	// 	if (line.find("Wsize")!=std::string::npos){
-	// 		double tmp = std::stod(extract(line));
-	// 		wrinkleSize.push_back(tmp);
-	// 	}
-
-	// 	if (line.find("Wori")!=std::string::npos){
-	// 		double tmp = std::stod(extract(line));
-	// 		wrinkleOri.push_back(tmp);
-	// 	}
-
-	// 	if (line.find("Wpos")!=std::string::npos){
-	// 		Vector3d tmp = vectorExtract(line);
-	// 		wrinklePos.push_back(tmp);
-	// 	}
-
-	// 	if (line.find("Wdamp")!=std::string::npos){
-	// 		Vector3d tmp = vectorExtract(line);
-	// 		wrinkleDamp.push_back(tmp);
-	// 	}
-
-	// 	if (line.find("Path2result(s)")!=std::string::npos)
-	// 		path_to_abaqus_result = extract(line);
-
-	// 	if (line.find("AbaqusOdbName(s)")!=std::string::npos)
-	// 		AbaqusOdbName = extract(line);
-
-	// 	if (line.find("f,f,b")!=std::string::npos){
-	// 		Vector3d tmp = vectorExtract(line);
-	// 		StackSeq.push_back(tmp);
-	// 	}
-	// 	// if (line.find("f,f,b")!=std::sf,f,btring::npos){
-	// 	// 	Vector2d tmp = ExtractV2d(line);
-	// 	// 	StackSeq.push_back(tmp);
-	// 	// }
-
-	// 	if (line.find("RotateRVE(b)")!=std::string::npos){
-	// 		rotateRVE = std::stoi(extract(line));
-	// 	}
-	// 	if (line.find("AngleRotateRVE(f)")!=std::string::npos){
-	// 		angleRVE = std::stod(extract(line));
-	// 	}
-
-	// 	if (line.find("RotateAxis(f)")!=std::string::npos)
-	// 		rotateAxis = extract(line);
-
-	// 	if (line.find("Rotate_start_end(f)")!=std::string::npos){
-	// 		rotateStartStop = ExtractV2d(line);
-	// 		need_default_rotate_start_stop=false;
-	// 	}
-
-
-	// 	if (line.find("RotateFlanges(b)")!=std::string::npos){
-	// 		RotateFlanges = std::stoi(extract(line));
-	// 		// std::cout << "RotateFlanges: " << RotateFlanges << std::endl;
-	// 	}
-	// 	if (line.find("AngleRotateFlangeRi(f)")!=std::string::npos){
-	// 		AngleRotateFlangeR = std::stod(extract(line));
-	// 	}
-	// 	if (line.find("AngleRotateFlangeLe(f)")!=std::string::npos){
-	// 		AngleRotateFlangeL = std::stod(extract(line));
-	// 	}
-
-	// 	if (line.find("RigidBoundary(b)")!=std::string::npos){
-	// 		RigidBoundary = std::stoi(extract(line));
-	// 		// std::cout << "Is RigidBoundary? " << RigidBoundary << std::endl;
-	// 	}
-	
-	// 	if (line.find("dZIntervalsize(i)")!=std::string::npos){
-	// 		SizeIntervaldZ = std::stoi(extract(line));
-	// 	}
-
-	// 	if (line.find("dZInterval(f)")!=std::string::npos){
-	// 		intervaldZ = Extractvector(line,SizeIntervaldZ);
-	// 	}
-
-
-	// 	std::getline(input, line);
-	// }
 
 	// INI reading
 	mINI::INIFile file(filename+".ini");
@@ -322,6 +186,28 @@ void Parameters::read(const std::string& filename) {
 		writeTransformedMSH = std::stoi(config["GENERAL"].get("writeTransformedMSH(b)"));
 	if (config["GENERAL"].has("Dune_output(b)")==true)
 		Dune_output = std::stoi(config["GENERAL"].get("Dune_output(b)"));
+
+
+
+
+	// TESTDELAM
+	if (config["TESTDELAM"].has("test_delam(b)")==true)
+		do_test_delam = std::stoi(config["TESTDELAM"].get("test_delam(b)"));
+	if (config["TESTDELAM"].has("flatten(b)")==true)
+		do_flatten = std::stoi(config["TESTDELAM"].get("flatten(b)"));
+	if (config["TESTDELAM"].has("sizeCentersZ(i)")==true)
+		SizeCentersZ = std::stoi(config["TESTDELAM"].get("sizeCentersZ(i)"));
+	if (config["TESTDELAM"].has("sizeCentersX(i)")==true)
+		SizeCentersX = std::stoi(config["TESTDELAM"].get("sizeCentersX(i)"));
+	if (do_test_delam==true){
+		if (config["TESTDELAM"].has("centersZ(f)")==true){
+			centersZ = Extractvector(config["TESTDELAM"].get("centersZ(f)"), SizeCentersZ, true);
+		}
+		if (config["TESTDELAM"].has("centersX(f)")==true){
+			centersX = Extractvector(config["TESTDELAM"].get("centersX(f)"), SizeCentersX, true);
+		}
+	}
+
 
 
 	// General Geometry
@@ -379,11 +265,13 @@ void Parameters::read(const std::string& filename) {
 		RigidBoundary = std::stoi(config["GEO-TRANSFORMATION"].get("RigidBoundary(b)"));
 	if (config["GEO-TRANSFORMATION"].has("dZIntervalsize(i)")==true)
 		SizeIntervaldZ = std::stoi(config["GEO-TRANSFORMATION"].get("dZIntervalsize(i)"));
-	if (RigidBoundary==true)
-		if (config["GEO-TRANSFORMATION"].has("dZInterval(f)")==true)
+	if (RigidBoundary==true){
+		if (config["GEO-TRANSFORMATION"].has("dZInterval(f)")==true){
 			intervaldZ = Extractvector(config["GEO-TRANSFORMATION"].get("dZInterval(f)"), SizeIntervaldZ, true);
-
-
+			// for (auto value : intervaldZ)
+			// 	std::cout << value << std::endl;
+		}
+	}
 	// GAUSSIAN parameters
 	if (config["GENERAL"].has("GaussianThickness(b)")==true)
 		GaussianThickness = std::stoi(config["GENERAL"].get("GaussianThickness(b)"));
@@ -430,6 +318,20 @@ void Parameters::read(const std::string& filename) {
 			exit( 0 );
 		}
 	}
+
+
+	// Abaqus CZ ids
+	int cz_ids_size;
+	if (config["GENERAL"].has("Abaqus_cohezive_ids_size(i)")==true){
+		cz_ids_size = std::stoi(config["GENERAL"].get("Abaqus_cohezive_ids_size(i)"));
+		// std::cout << "cz_ids_size: " << cz_ids_size << std::endl;
+		cz_ids.resize(cz_ids_size);
+		cz_ids= ExtractvectorINT(config["GENERAL"].get("Abaqus_cohezive_ids(i)"), cz_ids_size);
+		// for (auto value : cz_ids)
+		// 	std::cout << value << std::endl;
+	}
+
+
 
 	cz_id = -1;
 	resin_id = -1;

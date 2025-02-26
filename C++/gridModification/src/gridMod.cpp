@@ -26,7 +26,7 @@ int main(int argc, const char *argv[]) {
 	std::string mesh_name = param.meshname.substr(0, lastindex);
 	m.isShell = param.isShell;
 	m.initialise(param);
-	m.read_msh(mesh_name+".msh", true, param.cz_id);
+	m.read_msh(mesh_name+".msh", true, param);
 
 	m.read_points("input.txt");
 	m.exportDir = true;
@@ -63,7 +63,7 @@ int main(int argc, const char *argv[]) {
 		// fs::create_directories("Abaqus"); // TODO:: No working with ARM os
 		// m.write_msh("Abaqus/results/"+mesh_name); // for visualisation: mesh with in it wrinkle
 		m.write_ori_inp("Abaqus/"+mesh_name, param);
-		m.write_inp("Abaqus/"+mesh_name);
+		m.write_inp("Abaqus/"+mesh_name, param);
 		// m.write_abaqus_cae_input("Abaqus/"+mesh_name, param);
 
 		if (param.writeTransformedMSH)
@@ -79,6 +79,10 @@ int main(int argc, const char *argv[]) {
 			m.write_ori_txt("DUNE/"+mesh_name, param);
 			m.write_msh("DUNE/"+mesh_name);
 		}
+	}
+
+	if (param.do_test_delam){
+		TESTinitialiseDamage(m, param);
 	}
 
 	m.write_vtk(mesh_name, param);

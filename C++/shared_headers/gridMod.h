@@ -315,6 +315,7 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 	GT.N.resize(0);
 	if(param.GaussianThickness || param.CornerThickness){
 
+		// #pragma omp parallel for schedule(guided)
 		for(int node=0; node < m.Nb_vertices(); ++node) {
 			Vector3d point;
 			point(0) = m.Vertices[node].coord(0);
@@ -356,6 +357,7 @@ void GeometricTransformation(Mesh& m, Parameters& param) {
 	}
 
 	// TRANSFORMATION OF NODES
+	// #pragma omp parallel for schedule(guided)
 	for(int node=0; node < m.Nb_vertices(); ++node) {
 
 		Vector3d point;
@@ -1073,3 +1075,80 @@ void Rigid_Boundary(Mesh& m, Parameters& param) {
 		}
 	}
 }
+
+
+void TESTinitialiseDamage(Mesh& m, Parameters& param){ 
+                // double locX = 100., double locZ = 370.,
+                // double radius = 20., double radius_offset_small_axis = 0.,
+                // double radius_offset_big_axis = 0.) {
+
+    // Localisation initial delamination
+    double radius = 20.;
+    // radius_offset_small_axis = 0.;
+    // radius_offset_big_axis = 0.;
+    // locX = 100.;
+    // double locZ = 370.;
+
+    std::vector<double> locZ = param.centersZ;
+    std::vector<double> locX = param.centersX;
+
+    GridTransformation GT;
+    GT.initialise(m,param);
+    // double no_ramp=0.0;
+    // std::tuple<double, double, double> ramp_param = std::make_tuple(no_ramp,no_ramp,no_ramp);
+
+
+    // for(int node=0; node < m.Nb_vertices(); ++node) {
+    //     Vector3d point;
+    //     point(0) = m.Vertices[node].coord(0);
+    //     point(1) = m.Vertices[node].coord(1);
+    //     point(2) = m.Vertices[node].coord(2);
+    //     GT.prepare_GT_for_Flat_model(node, point, param, ramp_param); // TODO: ramp_param is null here
+    // }
+
+
+
+    for(auto& elem : m.Elements){
+        for(int l=0; l < elem.nb; ++l) {
+
+            Vector3d c = elem.center(m.Vertices,l);
+
+            // Vector3d point = GT.TESTtoFlatCoordinateSys(c, param,0,0); // unShrink along X and Y = true
+            Vector3d point = GT.TESTtoFlatCoordinateSys(c, param,1,1); // unShrink along X and Y = true
+            // std::cout << point[0] << std::endl;
+            // std::cout << point[1] << std::endl;
+            // std::cout << point[2] << std::endl;
+
+            int plan_width_coord = 1;
+            for (int iter_locZ=0;  iter_locZ<locZ.size();iter_locZ++ ){
+                for (int iter_locX=0;  iter_locX<locX.size();iter_locX++ ){
+                    /* Circular initial delam */
+                    double dist=  pow(locX[iter_locX]-point[plan_width_coord],2) / pow(radius,2)
+                                + pow(locZ[iter_locZ]-point[2],2)  / pow(radius,2);
+                    // double dist=  pow(locX[iter_locX+6*iter_locZ]-point[plan_width_coord],2) / pow(radius,2)
+                    //             + pow(locZ[iter_locZ]-point[2],2)  / pow(radius,2);
+                    // std::cout << dist << std::endl;
+
+
+                    if (dist <= 1 ){
+                        elem.preDamage(0, l) = 1;
+                        // std::cout << "ici" << std::endl;
+                    } else {
+                        // elem.preDamage(0, l) = 0;
+                    }
+                }
+            }
+        } // endfor
+    } // endfor
+
+	if (param.do_flatten){
+		for(int node=0; node < m.Nb_vertices(); ++node) {
+			Vector3d point;
+			point(0) = m.Vertices[node].coord(0);
+			point(1) = m.Vertices[node].coord(1);
+			point(2) = m.Vertices[node].coord(2);
+			m.Vertices[node].coord = GT.TESTtoFlatCoordinateSys(point, param,1,1);
+		}
+	}
+} //end initialiseDamage
+

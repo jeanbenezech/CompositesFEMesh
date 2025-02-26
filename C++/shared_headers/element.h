@@ -35,6 +35,7 @@ public:
 	std::vector<int> global_indices;
 	Matrix<int, Dynamic, Dynamic> Nodes;
 	Matrix<int, Dynamic, Dynamic> Markers;
+	Matrix<int, Dynamic, Dynamic> preDamage;
 	Matrix<int, Dynamic, Dynamic> DD_weight;
 
 	Matrix<double, Dynamic, Dynamic> Initial_barycenter;
@@ -129,6 +130,9 @@ void Element::initialise(std::string key, int nb_elem, int nb_marker, bool isShe
 	Markers.resize(nb_marker + 1, nb); // nb_marker=1 for the physical group +1 for the material type
 	DD_weight.resize(1, nb);
 	global_indices.resize(nb);
+
+
+	preDamage.resize(1, nb);
 
 	Initial_barycenter.resize(3, nb);
 

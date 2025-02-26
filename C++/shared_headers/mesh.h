@@ -34,14 +34,14 @@ public:
 	std::vector<Vector2f> P;
 
 	// Abaqus specific
-	std::vector<std::vector<int>> nsets, elsets, Coh_elsets;
+	std::vector<std::vector<int>> nsets, elsets_mat, elsets_ply, Coh_elsets;
 	std::vector<Vector3d> masterNodes;
 	bool isNsetDone=false;
 
 
 	// FUNCTION
 	void read_mesh(const std::string& filename);
-	void read_msh(const std::string& filename, bool only_3D, int cz_id);
+	void read_msh(const std::string& filename, bool only_3D, Parameters& param);
 	void read_points(const std::string& filename);
 	void read_elem_fields(const std::string& filename);
 	void read_elem_fields_stresses_strains_only(const std::string& filename);
@@ -55,7 +55,7 @@ public:
 	bool exportRandomFieldOnElement=false;
 	void write_vtk(const std::string& filename, Parameters& param, int verbosity);
 	void write_point_cloud_vtk(const std::string& filename, int verbosity);
-	void write_inp(const std::string& filename);
+	void write_inp(const std::string& filename, Parameters& param);
 	void write_ori_txt(const std::string& filename, Parameters& param);
 	void write_ori_inp(const std::string& filename, Parameters& param);
 	void write_abaqus_cae_input(const std::string& filename, Parameters& param);
@@ -222,7 +222,7 @@ void Mesh::read_mesh(const std::string& filename) {
 
 }
 
-void Mesh::read_msh(const std::string& filename, bool only_3D, int cz_id) {
+void Mesh::read_msh(const std::string& filename, bool only_3D, Parameters& param) {
 	std::ifstream input;
 	input.open(filename, std::ios::in);
 	if (!input.is_open()) {
@@ -297,7 +297,11 @@ void Mesh::read_msh(const std::string& filename, bool only_3D, int cz_id) {
 			if(!istet){istet = true; nb_diff_type+=1;}
 		}
 		if (line[1]==5) {
-			if (line[3]==cz_id && cz_id>=0) {
+			auto isIn = std::find(begin(param.cz_ids), end(param.cz_ids), line[3]);
+			// if (isIn != std::end(param.cz_ids) && line[4]!=4) { /// Problem specific for the extra layer of element for the rig
+			if (isIn != std::end(param.cz_ids)) {
+			// if (line[3]==param.cz_id && param.cz_id>=0) {
+				// std::cout << line[0] << ", " << line[1] << ", " << line[2] << ", " << line[3] << ", " << line[4] << std::endl;
 				lcoh.push_back(line);
 				if(!iscoh){iscoh = true; nb_diff_type+=1;}
 			} else {
@@ -413,31 +417,54 @@ void Mesh::read_elem_fields(const std::string& filename) {
 	std::ifstream input;
 	input.open(filename, std::ios::in);
 	if (!input.is_open()) {
-	std::cout << "Error: Cannot open file " << filename << std::endl;
+		std::cout << "Error: Cannot open file " << filename << std::endl;
 	}
 	std::cout << "Reading " << filename << std::endl;
 
 	std::string ligne {};
 	std::getline(input, ligne);
 
-	Matrix<double, Dynamic, Dynamic> tmp;
-	tmp.resize(14,Tot_cells_);
+	// Matrix<double, Dynamic, Dynamic> tmp;
+	// tmp.resize(13,Tot_cells_);
+
+	std::vector<std::vector<double>> tmp;
+	tmp.resize(Tot_cells_);
 
 	for(int i = 0; i < Tot_cells_; i++) {
+		tmp[i].resize(13);
 		int num;
-		input >> num >> tmp(0, i) >> tmp(1, i) >> tmp(2, i) >> tmp(3, i) >> tmp(4, i) >> tmp(5, i)\
-		>> tmp(6, i) >> tmp(7, i) >> tmp(8, i) >> tmp(9, i) >> tmp(10, i) >> tmp(11, i) >> tmp(12,i)\
-		>> tmp(13,i);
+		input >> num >> tmp[i][0] >> tmp[i][1] >> tmp[i][2] >> tmp[i][3] >> tmp[i][4] >> tmp[i][5]\
+		>> tmp[i][6] >> tmp[i][7] >> tmp[i][8] >> tmp[i][9] >> tmp[i][10] >> tmp[i][11] >> tmp[i][12];
+
+		// int num;
+		// input >> num >> tmp(0, i) >> tmp(1, i) >> tmp(2, i) >> tmp(3, i) >> tmp(4, i) >> tmp(5, i)\
+		// >> tmp(6, i) >> tmp(7, i) >> tmp(8, i) >> tmp(9, i) >> tmp(10, i) >> tmp(11, i) >> tmp(12,i);
+
+		// input >> num >> tmp(0, i) >> tmp(1, i) >> tmp(2, i) >> tmp(3, i) >> tmp(4, i) >> tmp(5, i)\
+		// >> tmp(6, i) >> tmp(7, i) >> tmp(8, i) >> tmp(9, i) >> tmp(10, i) >> tmp(11, i) >> tmp(12,i)\
+		// >> tmp(13,i);
 	}
 
+
 	for(auto& elem : Elements){
+		// std::cout << elem.global_indices.size() << std::endl;
 		for (int i=0; i< elem.nb; i++) {
+			// if(elem.type=="Cohesive"){
+			// 	std::cout << elem.global_indices[i] << " : " << i << std::endl;
+			// }
+
+			// std::cout << Tot_cells_ << std::endl;
 			for(int j=0; j<6; j++){
-				elem.S(j,i) = tmp(j,elem.global_indices[i]);
-				elem.E(j,i) = tmp(j+6,elem.global_indices[i]);
+				elem.S(j,i) = tmp[elem.global_indices[i]-1][j];
+				elem.E(j,i) = tmp[elem.global_indices[i]-1][j+6];
+			// 	elem.S(j,i) = tmp(j,elem.global_indices[i]-1);
+			// 	elem.E(j,i) = tmp(j+6,elem.global_indices[i]-1);
 			}
-			elem.SDEG(0,i) = tmp(12,elem.global_indices[i]);
-			elem.QUADSCRT(0,i) = tmp(13,elem.global_indices[i]);
+			if(elem.type=="Cohesive"){
+				elem.SDEG(0,i) = tmp[elem.global_indices[i]-1][12];// tmp(12,i);
+			}
+			// elem.SDEG(0,i) = tmp(12,elem.global_indices[i]-1);
+			// elem.QUADSCRT(0,i) = tmp(13,elem.global_indices[i]);
 		}
 	}
 
@@ -643,6 +670,17 @@ void Mesh::write_vtk(const std::string& filename, Parameters& param, int verbosi
 		}
 	}
 
+
+	if (param.do_test_delam){
+		output << "SCALARS delam int 1\n";
+		output << "LOOKUP_TABLE default\n";
+		for(auto& elem : Elements){
+			for (int i=0; i< elem.nb; i++) {
+				output << elem.preDamage(0, i) << std::endl;
+			}
+		}
+	}
+
 	// output << "SCALARS DD_weight int 1"<< std::endl;
 	// output << "LOOKUP_TABLE default"<< std::endl;
 
@@ -715,13 +753,29 @@ void Mesh::write_vtk(const std::string& filename, Parameters& param, int verbosi
 			}
 		}
 
-		// output << "SCALARS SDEG double 1\n";
-		// output << "LOOKUP_TABLE default\n";
-		// for(auto& elem : Elements){
-		// 	for (int i=0; i< elem.nb; i++) {
-		// 		output << elem.SDEG(0, i) << std::endl;
-		// 	}
-		// }
+		output << "SCALARS SDEG double 1\n";
+		output << "LOOKUP_TABLE default\n";
+		for(auto& elem : Elements){
+			for (int i=0; i< elem.nb; i++) {
+				if(elem.type=="Cohesive"){
+					output << elem.SDEG(0, i) << std::endl;
+				} else {
+					output << 0 << std::endl;
+				}
+			}
+		}
+
+		output << "SCALARS COHEZIVE double 1\n";
+		output << "LOOKUP_TABLE default\n";
+		for(auto& elem : Elements){
+			for (int i=0; i< elem.nb; i++) {
+				if(elem.type=="Cohesive"){
+					output << 1 << std::endl;
+				} else {
+					output << 0 << std::endl;
+				}
+			}
+		}
 		// output << "SCALARS QUADSCRT double 1\n";
 		// output << "LOOKUP_TABLE default\n";
 		// for(auto& elem : Elements){
@@ -882,14 +936,14 @@ void Mesh::write_ori_inp(const std::string& filename, Parameters& param) {
 		for (int i=0; i< elem.nb; i++) {
 			output << elem.global_indices[i] << ", ";
 			if(!isShell){
-				if(param.RotateFlanges){
-					output << std::setprecision(15) <<  elem.U(0, i) << ", " <<  elem.U(1, i) << ", " <<  elem.U(2, i) << ", ";
-					output << std::setprecision(15) <<  elem.V(0, i) << ", " <<  elem.V(1, i) << ", " <<  elem.V(2, i) << std::endl;
-				}
-				else {
-					output << std::setprecision(15) <<  elem.U(0, i) << ", " <<  elem.U(1, i) << ", " <<  elem.U(2, i) << ", ";
-					output << std::setprecision(15) << -elem.W(0, i) << ", " << -elem.W(1, i) << ", " << -elem.W(2, i) << std::endl;
-				}
+				// if(param.RotateFlanges){
+					// output << std::setprecision(15) <<  elem.U(0, i) << ", " << elem.U(1, i) << ", " <<  elem.U(2, i) << ", ";
+					// output << std::setprecision(15) <<  elem.V(0, i) << ", " << elem.V(1, i) << ", " <<  elem.V(2, i) << std::endl;
+				// }
+				// else {
+				output << std::setprecision(15) <<  elem.U(0, i) << ", " <<  elem.U(1, i) << ", " <<  elem.U(2, i) << ", ";
+				output << std::setprecision(15) << -elem.W(0, i) << ", " << -elem.W(1, i) << ", " << -elem.W(2, i) << std::endl;
+				// }
 			} else {
 				output << std::setprecision(15) <<  elem.V(0, i) << ", " <<  elem.V(1, i) << ", " <<  elem.V(2, i) << ", ";
 				output << std::setprecision(15) <<  elem.W(0, i) << ", " <<  elem.W(1, i) << ", " <<  elem.W(2, i) << std::endl;
@@ -1028,7 +1082,7 @@ void Mesh::elSets_delam(double locX=40., double locZ=160., double radius=10., do
 	return;
 }
 
-void Mesh::write_inp(const std::string& filename) {
+void Mesh::write_inp(const std::string& filename, Parameters& param) {
 	std::ofstream output;
 	output.open(filename+"_mesh.inp", std::ios::out);
 	if (!output.is_open()) {
@@ -1058,6 +1112,16 @@ void Mesh::write_inp(const std::string& filename) {
 
 	output << "******* E L E M E N T S *************" << std::endl;
 
+	// std::vector<std::vector<int>> COH3D8, C3D8;
+	// for(auto& elem : Elements){
+	// if(elem.type != "Triangle" || elem.type != "Quadrilateral"){ // We would ony use 3D elements in Abaqus (that could change later)
+	// 	for (int i=0; i< elem.nb; i++) {
+	// 		if(elem.type == "Cohesive" && elem.Markers(1,i)!=4){ // Cohesive and not in RIG
+				
+	// 		}
+	// 	}
+	// }
+	// }
 	std::vector<int> cno = {2, 1, 5, 6, 3, 0, 4, 7};
 	for(auto& elem : Elements){
 	if(elem.type != "Triangle" || elem.type != "Quadrilateral"){ // We would ony use 3D elements in Abaqus (that could change later)
@@ -1096,11 +1160,23 @@ void Mesh::write_inp(const std::string& filename) {
 	// }
 
 	//ELSET
-	elsets.resize(nb_elset);
+	elsets_ply.resize(nb_elset);
+	int nb_mat = 1;
+	elsets_mat.resize(nb_mat);
+
 	for(auto& elem : Elements){
 		if(elem.type != "Triangle" || elem.type != "Quadrilateral"){ // We would ony use 3D elements in Abaqus (that could change later)
 			for (int i=0; i< elem.nb; i++)
-				elsets[elem.Markers(0,i)-1].push_back(elem.global_indices[i]);
+				elsets_ply[elem.Markers(0,i)-1].push_back(elem.global_indices[i]);
+		}
+
+		if(elem.type != "Triangle" || elem.type != "Quadrilateral"){ // We would ony use 3D elements in Abaqus (that could change later)
+			for (int i=0; i< elem.nb; i++){
+				if(elem.Markers(1,i)==1) // Composite
+					elsets_mat[0].push_back(elem.global_indices[i]);
+				// if(elem.Markers(1,i)==4) // Rig
+				// 	elsets_mat[1].push_back(elem.global_indices[i]);
+			}
 		}
 	}
 
@@ -1112,20 +1188,36 @@ void Mesh::write_inp(const std::string& filename) {
 			is_coh=true;
 
 	if (is_coh){
-		Coh_elsets.resize(nb_elset-2); // -1 because {nb_ply-1 = nb_coh} and -1 because {nb_elset = nb_ply +1} to be adjust if some resin elements are in the model
+		Coh_elsets.resize(param.cz_ids.size()); // -1 because {nb_ply-1 = nb_coh} and -1 because {nb_elset = nb_ply +1} to be adjust if some resin elements are in the model
+		// Coh_elsets.resize(nb_elset-2); // -1 because {nb_ply-1 = nb_coh} and -1 because {nb_elset = nb_ply +1} to be adjust if some resin elements are in the model
 		for(auto& elem : Elements){
 			if(elem.type == "Cohesive"){
-				int cnt = 0;
-				Coh_elsets[cnt].push_back(elem.global_indices[0]);
-				for (int i=1; i< elem.nb; i++){
-					if(elem.global_indices[i]-elem.global_indices[i-1]>1){
-						cnt+=1;
+				for (int i=1; i< elem.nb; i++){ ////// TODO:: PROBLEM SPECIFIC NEED TO BE GENERALISED
+					if(elem.Markers(1,i)==2){
+						Coh_elsets[0].push_back(elem.global_indices[i]);
+					} else if(elem.Markers(1,i)==5){
+						Coh_elsets[1].push_back(elem.global_indices[i]);
 					}
-					Coh_elsets[cnt].push_back(elem.global_indices[i]);
 				}
 			}
 		}
 	}
+	// if (is_coh){
+	// 	Coh_elsets.resize(param.cz_ids.size()); // -1 because {nb_ply-1 = nb_coh} and -1 because {nb_elset = nb_ply +1} to be adjust if some resin elements are in the model
+	// 	// Coh_elsets.resize(nb_elset-2); // -1 because {nb_ply-1 = nb_coh} and -1 because {nb_elset = nb_ply +1} to be adjust if some resin elements are in the model
+	// 	for(auto& elem : Elements){
+	// 		if(elem.type == "Cohesive"){
+	// 			int cnt = 0;
+	// 			Coh_elsets[cnt].push_back(elem.global_indices[0]);
+	// 			for (int i=1; i< elem.nb; i++){
+	// 				if(elem.global_indices[i]-elem.global_indices[i-1]>1){
+	// 					cnt+=1;
+	// 				}
+	// 				Coh_elsets[cnt].push_back(elem.global_indices[i]);
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 
 	// ~~~~~~~~~ E L S E T S ~~~~~~~~~
@@ -1141,11 +1233,22 @@ void Mesh::write_inp(const std::string& filename) {
 		}
 	}
 	output << std::endl;
-	for(int j=0; j< nb_elset;j++) {
-		output << "*ELSET,ELSET=elset" << j+1 << std::endl;
-		for(int i=0; i< elsets[j].size(); ++i) {
-			output << elsets[j][i];
-			if (i==elsets[j].size()-1) { output << "," << std::endl; }
+
+	for(int j=0; j< nb_elset; j++) {
+		output << "*ELSET,ELSET=elset_ply" << j+1 << std::endl;
+		for(int i=0; i< elsets_ply[j].size(); ++i) {
+			output << elsets_ply[j][i];
+			if (i==elsets_ply[j].size()-1) { output << "," << std::endl; }
+			else if ((i+1)%10 == 0) { output << "," << std::endl; }
+			else { output << ", "; }
+		}
+	}
+
+	for(int j=0; j< nb_mat; j++) {
+		output << "*ELSET,ELSET=elset_mat" << j+1 << std::endl;
+		for(int i=0; i< elsets_mat[j].size(); ++i) {
+			output << elsets_mat[j][i];
+			if (i==elsets_mat[j].size()-1) { output << "," << std::endl; }
 			else if ((i+1)%10 == 0) { output << "," << std::endl; }
 			else { output << ", "; }
 		}
