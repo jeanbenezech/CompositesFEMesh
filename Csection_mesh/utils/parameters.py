@@ -49,6 +49,7 @@ class parameters():
 				 CZ=None,
 				 recombine=None,
 				 nbp=None,
+				 nbpreal=None,
 				 name=None,
 				 dx=None,
 				 dy=None,
@@ -250,6 +251,7 @@ def read_ini_parameters(param, filename): #### deprecated
 	# 	param.CZ = 0
 
 	param.nbp = config['GEOMETRY'].getint('np(i)')
+	param.nbpreal = config['GEOMETRY'].getint('npreal(i)')
 	param.X = config['GEOMETRY'].getfloat('X(f)')
 	param.Height = config['GEOMETRY'].getfloat('Height(f)')
 	param.Y = config['GEOMETRY'].getfloat('Y(f)')
@@ -285,6 +287,9 @@ def read_ini_parameters(param, filename): #### deprecated
 		for string_value in string_dz.strip().split(','):
 			param.dz.append(int(string_value))
 
+
+	print (param.dz)
+
 	param.ramp = config['GEO-TRANSFORMATION'].getint('Ramp(b)')
 	if param.ramp:
 		string_StartEndinZdir = config['GEO-TRANSFORMATION']['StartEndinZdir(f)']
@@ -302,6 +307,8 @@ def read_ini_parameters(param, filename): #### deprecated
 			interval = val/float(param.Z) # start of the ramp in term of percentage of the full length
 			param.dz_intervals.append(interval)
 		param.dz_intervals.append(1.)
+
+	# print (param.dz_intervals)
 
 	string_dFlangeInterval = config['GEO-TRANSFORMATION'].get('dFlangeInterval(b)')
 	if param.Shape == 2:
