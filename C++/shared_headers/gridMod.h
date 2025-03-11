@@ -1114,7 +1114,8 @@ void TESTinitialiseDamage(Mesh& m, Parameters& param){
             Vector3d c = elem.center(m.Vertices,l);
 
             // Vector3d point = GT.TESTtoFlatCoordinateSys(c, param,0,0); // unShrink along X and Y = true
-            Vector3d point = GT.TESTtoFlatCoordinateSys(c, param,1,1); // unShrink along X and Y = true
+            // Vector3d point = GT.TESTtoFlatCoordinateSys(c, param,1,1); // unShrink along X and Y = true
+            Vector3d point = GT.toFlatCoordinateSys_VCarl(c, param,1,1); // unShrink along X and Y = true
             // std::cout << point[0] << std::endl;
             // std::cout << point[1] << std::endl;
             // std::cout << point[2] << std::endl;
@@ -1147,7 +1148,8 @@ void TESTinitialiseDamage(Mesh& m, Parameters& param){
 			point(0) = m.Vertices[node].coord(0);
 			point(1) = m.Vertices[node].coord(1);
 			point(2) = m.Vertices[node].coord(2);
-			m.Vertices[node].coord = GT.TESTtoFlatCoordinateSys(point, param,1,1);
+			// m.Vertices[node].coord = GT.TESTtoFlatCoordinateSys(point, param,1,1);
+			m.Vertices[node].coord = GT.toFlatCoordinateSys_VCarl(point, param,1,1);
 		}
 	}
 } //end initialiseDamage

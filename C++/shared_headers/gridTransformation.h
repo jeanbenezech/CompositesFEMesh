@@ -101,6 +101,7 @@ class GridTransformation{
 	void wrinkles(Vector3d& point);
 
     Vector3d TESTtoFlatCoordinateSys(Vector3d & point, Parameters& param, bool do_shrink_along_X, bool do_shrink_along_Y);
+    Vector3d toFlatCoordinateSys_VCarl(Vector3d & point, Parameters& param, bool do_shrink_along_X, bool do_shrink_along_Y);
     Vector4d TESTinverse_ramp_gridTransformation(Vector3d & point);
 
 	private:
@@ -1236,6 +1237,199 @@ void GridTransformation::wrinkles(Vector3d& point){
 
 
 
+Vector3d GridTransformation::toFlatCoordinateSys_VCarl(Vector3d & point, Parameters& param, bool do_shrink_along_X=true, bool do_shrink_along_Y=true) { // CSPAR
+	// Carl's modification
+	// Note that moved[0] doesn't matter for delam generation and so is set to the same value
+
+
+	// Define a window within which shifts in the z coordinate are interpolated to ensure
+	// continuity at the ends of the ramp
+	// I used 40 as this is the delam diamter - any less results in stretching in z at bottom of ramps
+		// The side effect is that there is now some shear in these regions as a result
+	double interp_window =  40.0; 
+
+	// Get ramp parameters
+	// ramp_param[0] = decrease_0; // Transformation parameter for x-coordinate (decrease) (reduces vertical x coordinate based on position within ramp)
+	// ramp_param[1] = decrease_1; // Transformation parameter for y-coordinate (decrease) (decresases transverse y coordiante based on position within ramp (if past centreline))
+	// ramp_param[2] = increase_1; // Transformation parameter for y-coordinate (increase) (increases transverse y coordiante based on position within ramp (if before centreline))
+	// ramp_param[3] = local_delta; // Local delta for z-coordinate transformation (local change in x and y coordinates based on position within ramp)
+	Vector4d ramp_param = TESTinverse_ramp_gridTransformation(point);
+	double local_delta = ramp_param[3];
+	double dy, dz;
+	double local_ymid = (local_ymin+local_ymax)/2.0; // Centreline
+
+	Vector3d init = point;
+	Vector3d moved; // To go back to the flat coordinate system
+	moved = init; // Initialise moved with the original point.
+
+	// Through-thickness distance of point from bottom surface
+	double dist_from_bottom_surf = 0.0;
+
+	// Angle between web and flange in ramp if unfolded
+	double theta_max = 2.0*atan(delta_max/(z2-z1)); 
+
+	// Ends of corner radii given the local ramp deformation
+	double local_local_xmax = local_xmax - local_delta; // Top of flange
+	double local_local_ymax = local_ymax - local_delta; // "Lower" end of web
+	double local_local_ymin = local_ymin + local_delta; // "Upper" end of web
+
+	// Calculate moved coordinates, with transformation depending upon the initial position within the spar
+	// If point is in the flange or radius beyond the y midpoint
+	if (init[1]>=local_local_ymax){
+		// Get the distance of the point from the bottom surface
+		if(init[0]<=local_local_xmax){
+		// If point is in the flange
+		dist_from_bottom_surf = init[1] - local_local_ymax - interior_radius;
+		} else {
+		// If point is in the corner
+		dist_from_bottom_surf = sqrt(pow((init[1]-local_local_ymax),2)+pow((init[0]-local_local_xmax),2))-interior_radius;
+		}
+
+		// Calculate radius at through-thickness location of point
+		double local_radius = interior_radius + dist_from_bottom_surf;
+		// Calculate the radius of curvature of transformed curve caused by flattening the corner
+		double R = local_radius*M_PI/(2.0*theta_max); 
+		// Is point in the ramps?
+		if (((init[2] > z1) && (init[2] < z2)) || ((init[2] > z3) && (init[2] < z4))){
+		// Is point in the flange
+		if (init[0] <= local_local_xmax){
+			// Maximum shift in z and y due to unfolding of corner radii (at phi = pi/2)
+			double max_shift_z = R*(1.0 - cos(theta_max));
+			double max_shift_y = R*sin(theta_max);
+			// How far beneath xmax is the point?
+			double dx = local_local_xmax-init[0];
+			// How much in y and z do we need to move to account for rotating dx
+			dy = max_shift_y + dx*cos(theta_max);
+			dz = max_shift_z + dx*sin(theta_max);
+		// Otherwise, if the point is in the corner
+		} else {
+			// How far around the radius is the point?
+			double o = init[1] - local_local_ymax;
+			double a = init[0] - local_local_xmax;
+			double phi = atan(o/a);
+			// How much of the total angle theta (flattened on plane) do we rotate for the current point
+			double local_theta = 2*theta_max*phi/M_PI;
+			dy = R*sin(local_theta);
+			dz = R*(1 - cos(local_theta));
+		}
+		// Update coordinates
+		moved[0] = local_local_xmax + local_radius; // The value of this doesn't matter
+		moved[1] = local_local_ymax + dy; // Updated y coordinate
+		// In what direction is the necessary rotation? (depends on which ramp)
+		if ((init[2] > z1) && (init[2] < z2)){ // Ramp 1
+			// // Linearly interpolate shift in z for points near ends of ramp to avoid overlap                
+			if ((init[2] + interp_window) > z2){
+			dz = dz*(z2 - init[2])/interp_window;
+			}
+			if ((init[2] - interp_window) < z1) {
+			dz = dz*(init[2] - z1)/interp_window;
+			}
+			moved[2] = init[2] + dz;
+		} else {
+			// Linearly interpolate shift in z for points near ends of ramp to avoid overlap                
+				if ((init[2] - interp_window) < z3) {
+			dz = dz*(init[2] - z3)/interp_window;
+			}
+			if ((init[2] + interp_window) > z4) {
+			dz = dz*(z4 - init[2])/interp_window;
+			}
+			moved[2] = init[2] - dz;
+		}
+		} else {
+		// Otherwise the point is in a flat region
+		moved[0] = local_local_xmax + local_radius;
+		if(init[0]<=local_local_xmax){
+			// Is point in flange - add extra length onto y
+			moved[1] = local_local_ymax + local_radius*M_PI/2.0 + (local_local_xmax-init[0]);
+		} else {
+			// Is point in corner - add extra length onto y
+			double o = init[1]-local_local_ymax;
+			double a = init[0]-local_local_xmax;
+			double phi = atan(o/a);
+			moved[1] = local_local_ymax + local_radius*phi;
+		} 
+		}
+
+	// If point is in the flange or radius below the y midpoint
+	} else if (init[1]<=local_local_ymin){
+		// Get the distance of the point from the bottom surface a through-thickness position
+		if(init[0]<=local_local_xmax){
+		// If point is in the flange
+		dist_from_bottom_surf = local_local_ymin - interior_radius - init[1];
+		} else {
+		// If point is in the corner
+		dist_from_bottom_surf = sqrt(pow((init[1]-local_local_ymin),2)+pow((init[0]-local_local_xmax),2)) - interior_radius;
+		}
+		// Calculate the corner radius at the local through-thickness position
+		double local_radius = interior_radius + dist_from_bottom_surf;
+		// Radius of curvature of transformed curve caused by flattening corner
+		double R = local_radius*M_PI/(2.0*theta_max);
+		// Is point in the ramps?
+		if (((init[2] > z1) && (init[2] < z2)) || ((init[2] > z3) && (init[2] < z4))){  
+		// Is point in the flange?
+		if(init[0]<=local_local_xmax){
+			// Maximum shift in z and y due to unfolding of corner radii (at phi = pi/2)
+			double max_shift_z = R*(1.0 - cos(theta_max));
+			double max_shift_y = R*sin(theta_max);
+			// How far beneath xmax is the point?
+			double dx = local_local_xmax-init[0];
+			// How much in y and z do we need to move to account for rotating dx
+			dy = max_shift_y + dx*cos(theta_max);
+			dz = max_shift_z + dx*sin(theta_max);
+		// Otherwise, if the point is in the corner
+		} else {
+			// How far around the radius is the point?
+			double o = local_local_ymin - init[1];
+			double a = init[0]-local_local_xmax;
+			double phi = atan(o/a);
+			// How much of the total angle theta (flattened on plane) do we rotate for the current point
+			double local_theta = 2*theta_max*phi/M_PI;
+			dy = R*sin(local_theta);
+			dz = R*(1 - cos(local_theta));
+		}
+		// Update coordinates
+		moved[0] = local_local_xmax + local_radius; // The value of this doesn't matter
+		// moved[1] = init[1] - dy; // Updated y coordiante
+		moved[1] = local_local_ymin - dy; // Updated y coordiante
+		// In what direction is the necessary rotation? (depends on which ramp)
+		if ((init[2] > z1) && (init[2] < z2)){ // Ramp 1
+			// Linearly interpolate shift in z for points near ends of ramp to avoid overlap
+				if ((init[2] + interp_window) > z2) {
+				dz = dz*(z2 - init[2])/interp_window;
+				}
+				if ((init[2] - interp_window) < z1) {
+					dz = dz*(init[2] - z1)/interp_window;
+				}
+			moved[2] = init[2] + dz;
+		} else {
+			// Linearly interpolate shift in z for points near ends of ramp to avoid overlap                
+			if ((init[2] - interp_window) < z3) {
+			dz = dz*(init[2] - z3)/interp_window;
+				}
+			if ((init[2] + interp_window) > z4) {
+			dz = dz*(z4 - init[2])/interp_window;
+				}
+			moved[2] = init[2] - dz;
+		}
+
+		// Otherwise point is in a flat region and no rotation is required (just translation)
+		} else {
+		moved[0] = local_local_xmax + local_radius; // The value of this doesn't matter
+		if (init[0] <= local_local_xmax){
+			// Is point in the flange
+			moved[1] = local_local_ymin - local_radius*M_PI/2.0 - (local_local_xmax-init[0]);
+		} else {
+			// Is point in the corner?
+			double o = local_local_ymin - init[1];
+			double a = init[0] - local_local_xmax;
+			double phi = atan(o/a);
+			moved[1] = local_local_ymin - local_radius*phi;
+		}
+		}
+	}
+
+	return moved;
+}
 
 Vector3d GridTransformation::TESTtoFlatCoordinateSys(Vector3d & point, Parameters& param, bool do_shrink_along_X=true, bool do_shrink_along_Y=true){ // CSPAR
 
